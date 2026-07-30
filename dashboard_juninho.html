@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Juninho Brum · VNOVE HUB</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0d0d0d;color:#e0e0e0;min-height:100vh}
+
+/* Layout */
+.app{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#111;border-right:0.5px solid #222;padding:20px 0;flex-shrink:0;position:fixed;height:100vh;overflow-y:auto}
+.main{margin-left:220px;padding:28px;flex:1;max-width:calc(100vw - 220px)}
+
+/* Sidebar */
+.logo{padding:0 20px 20px;border-bottom:0.5px solid #222;margin-bottom:16px}
+.logo-title{font-size:14px;font-weight:600;color:#B8962E;letter-spacing:0.04em}
+.logo-sub{font-size:11px;color:#444;margin-top:2px}
+.nav-section{padding:0 12px;margin-bottom:8px}
+.nav-label{font-size:10px;font-weight:500;color:#444;letter-spacing:0.1em;text-transform:uppercase;padding:0 8px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:#888;transition:all 0.15s}
+.nav-item:hover{background:#1a1a1a;color:#ccc}
+.nav-item.active{background:#1a1a1a;color:#B8962E}
+.nav-icon{font-size:15px;width:18px;text-align:center}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title{font-size:20px;font-weight:500;color:#fff}
+.page-sub{font-size:13px;color:#555;margin-top:2px}
+.badge-live{background:#1a2a1a;border:0.5px solid #2a4a2a;color:#4a9a4a;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px}
+.badge-v2{background:#0d1525;border:0.5px solid #1a2535;color:#4a7aaa;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;margin-left:8px}
+.header-badges{display:flex;align-items:center}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:#111;border:0.5px solid #222;border-radius:8px;padding:4px;margin-bottom:20px}
+.tab{padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;color:#555;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.tab:hover{color:#999}
+.tab.active{background:#1a1a1a;color:#B8962E;border:0.5px solid #2a2a2a}
+
+/* Cards grid */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* Card base */
+.card{background:#111;border:0.5px solid #222;border-radius:10px;padding:16px}
+.card-title{font-size:11px;font-weight:500;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title span{font-size:14px}
+
+/* Metric cards */
+.metric{background:#111;border:0.5px solid #1a1a1a;border-radius:8px;padding:14px}
+.metric-num{font-size:26px;font-weight:500;color:#B8962E}
+.metric-label{font-size:12px;color:#555;margin-top:3px}
+
+/* Items */
+.item{padding:10px 12px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;margin-bottom:7px;cursor:pointer;transition:all 0.15s}
+.item:last-child{margin-bottom:0}
+.item:hover{border-color:#B8962E;background:#111}
+.item-title{font-size:13px;font-weight:500;color:#ddd;line-height:1.4;margin-bottom:3px}
+.item-desc{font-size:11px;color:#555;line-height:1.5}
+.item-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+
+/* Tags */
+.tag{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px}
+.tag-red{background:#2a1010;color:#c06060;border:0.5px solid #3a1a1a}
+.tag-gold{background:#1a1500;color:#B8962E;border:0.5px solid #2a2000}
+.tag-green{background:#0d1a0d;color:#4a8a4a;border:0.5px solid #1a2a1a}
+.tag-blue{background:#0d1525;color:#4a7aaa;border:0.5px solid #1a2535}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid #222;background:#1a1a1a;color:#888;transition:all 0.15s}
+.btn:hover{border-color:#B8962E;color:#B8962E}
+.btn-primary{background:#B8962E;color:#0d0d0d;border-color:#B8962E}
+.btn-primary:hover{background:#caa030;color:#000}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-danger:hover{border-color:#c06060;color:#c06060}
+
+/* Roteiro output */
+.roteiro-box{background:#0a0a0a;border:0.5px solid #1a1a1a;border-radius:8px;padding:16px;margin-top:12px;display:none}
+.roteiro-box.show{display:block}
+.roteiro-section{margin-bottom:14px}
+.roteiro-label{font-size:10px;font-weight:500;color:#B8962E;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.roteiro-text{font-size:13px;color:#ccc;line-height:1.8;white-space:pre-line}
+.roteiro-hook{font-size:15px;font-weight:500;color:#fff;line-height:1.5;border-left:3px solid #B8962E;padding-left:12px;font-style:italic}
+
+/* Flipchart */
+.flip-item{padding:12px 14px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:flex-start;gap:10px}
+.flip-item:hover{border-color:#B8962E}
+.flip-num{width:28px;height:28px;border-radius:50%;background:#1a1500;border:0.5px solid #2a2000;color:#B8962E;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.flip-content .flip-title{font-size:13px;font-weight:500;color:#ddd;margin-bottom:3px}
+.flip-content .flip-sub{font-size:11px;color:#555}
+
+/* Semana */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.day{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.15s}
+.day:hover{border-color:#B8962E}
+.day-name{font-size:10px;color:#444;font-weight:500;margin-bottom:6px}
+.day-icon{font-size:16px;margin-bottom:5px}
+.day-tipo{font-size:10px;color:#B8962E;font-weight:500;line-height:1.3}
+
+/* Dores */
+.dor-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dor{padding:12px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;cursor:pointer;transition:all 0.15s}
+.dor:hover{border-color:#B8962E}
+.dor-emoji{font-size:18px;margin-bottom:6px}
+.dor-title{font-size:13px;font-weight:500;color:#ddd;margin-bottom:3px}
+.dor-desc{font-size:11px;color:#555;line-height:1.4}
+
+/* Noticias */
+.noticia{padding:10px 12px;background:#0d0d0d;border-left:3px solid #B8962E;border-radius:0 7px 7px 0;margin-bottom:8px;cursor:pointer;transition:all 0.15s}
+.noticia:hover{background:#111}
+.noticia.hot{border-left-color:#c06060}
+.noticia.warm{border-left-color:#B8962E}
+.noticia-title{font-size:13px;font-weight:500;color:#ddd;margin-bottom:3px}
+.noticia-fonte{font-size:11px;color:#444}
+.noticia-badge{font-size:10px;font-weight:500;display:inline-block;padding:2px 7px;border-radius:20px;margin-top:4px}
+.badge-hot{background:#2a1010;color:#c06060}
+.badge-warm{background:#1a1500;color:#B8962E}
+.badge-novo{background:#0d1525;color:#4a7aaa}
+
+/* Commercial */
+.funil-step{display:flex;gap:12px;padding:12px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;margin-bottom:8px;cursor:pointer;transition:all 0.15s}
+.funil-step:hover{border-color:#B8962E}
+.funil-num{width:28px;height:28px;background:#1a1500;border:0.5px solid #2a2000;border-radius:50%;color:#B8962E;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.funil-title{font-size:13px;font-weight:500;color:#ddd;margin-bottom:2px}
+.funil-desc{font-size:11px;color:#555}
+
+/* Modal de roteiro */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#111;border:0.5px solid #2a2a2a;border-radius:12px;width:680px;max-height:85vh;overflow-y:auto;padding:24px}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:16px;font-weight:500;color:#fff}
+.modal-close{width:28px;height:28px;border:0.5px solid #333;border-radius:50%;background:#1a1a1a;color:#666;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{color:#fff;border-color:#555}
+.modal-section{margin-bottom:18px}
+.modal-label{font-size:10px;font-weight:500;color:#B8962E;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
+.modal-hook{font-size:16px;font-weight:500;color:#fff;line-height:1.5;border-left:3px solid #B8962E;padding-left:14px;font-style:italic;margin-bottom:16px}
+.modal-body{font-size:14px;color:#ccc;line-height:1.9;white-space:pre-line}
+.modal-cta{font-size:14px;font-weight:500;color:#B8962E;border-left:3px solid #B8962E;padding-left:14px;line-height:1.6}
+.divider-modal{height:0.5px;background:#1a1a1a;margin:14px 0}
+.copy-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid #2a2a2a;background:#1a1a1a;color:#666;transition:all 0.15s;margin-top:16px}
+.copy-btn:hover{border-color:#B8962E;color:#B8962E}
+.section-gap{margin-bottom:20px}
+.modal-badge{font-size:10px;font-weight:500;color:#4a7aaa;background:#0d1525;border:0.5px solid #1a2535;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#0d0d0d}
+::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+
+/* ===== V2 additions ===== */
+.section-title{font-size:13px;font-weight:500;color:#888;margin:24px 0 12px}
+.quicklink{background:#111;border:0.5px solid #222;border-radius:10px;padding:14px;cursor:pointer;transition:all .15s}
+.quicklink:hover{border-color:#B8962E}
+.quicklink-icon{font-size:20px;margin-bottom:8px}
+.quicklink-title{font-size:13px;font-weight:500;color:#ddd;margin-bottom:4px}
+.quicklink-desc{font-size:11px;color:#555;line-height:1.5}
+
+.planner-layout{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+.browse-filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-chip{font-size:11px;padding:5px 10px;border-radius:20px;border:0.5px solid #222;color:#666;cursor:pointer;background:#0d0d0d}
+.filter-chip.active{border-color:#B8962E;color:#B8962E;background:#1a1500}
+.browse-list{max-height:640px;overflow-y:auto;padding-right:4px}
+.browse-item{display:flex;align-items:flex-start;gap:10px;padding:10px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;margin-bottom:6px;cursor:pointer}
+.browse-item:hover{border-color:#B8962E}
+.browse-item.selected{border-color:#B8962E;background:#1a1500}
+.browse-check{width:16px;height:16px;border-radius:4px;border:1px solid #444;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#B8962E}
+.plan-slot{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#0d0d0d;border:1px dashed #222;border-radius:7px;margin-bottom:8px;min-height:44px}
+.plan-slot.filled{border-style:solid;border-color:#1a1a1a}
+.plan-num{width:24px;height:24px;border-radius:50%;background:#1a1500;color:#B8962E;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.plan-empty{font-size:12px;color:#333;font-style:italic}
+.plan-actions{display:flex;gap:4px;margin-left:auto}
+.icon-btn{width:22px;height:22px;border-radius:5px;border:0.5px solid #222;background:#1a1a1a;color:#666;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.icon-btn:hover{border-color:#B8962E;color:#B8962E}
+.toolbar{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+.edit-textarea{width:100%;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:6px;padding:10px;color:#ddd;font-family:inherit;font-size:13px;line-height:1.7;resize:vertical}
+.edit-input{width:100%;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:6px;padding:8px 10px;color:#ddd;font-family:inherit;font-size:13px}
+.edit-label{font-size:10px;color:#666;margin:10px 0 4px;text-transform:uppercase;letter-spacing:.08em}
+
+.idea-card{padding:12px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:8px;margin-bottom:8px;cursor:pointer}
+.idea-card:hover{border-color:#B8962E}
+.idea-title{font-size:13px;font-weight:500;color:#ddd;margin-bottom:4px}
+.idea-sub{font-size:11px;color:#555}
+
+.search-row{display:flex;gap:8px;margin-bottom:16px}
+.search-input{flex:1;background:#0d0d0d;border:0.5px solid #222;border-radius:6px;padding:10px 12px;color:#eee;font-size:13px;font-family:inherit}
+.ext-links{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.ext-link{display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:500;background:#1a1a1a;border:0.5px solid #222;color:#888;cursor:pointer;text-decoration:none}
+.ext-link:hover{border-color:#B8962E;color:#B8962E}
+.note-box{font-size:11px;color:#555;line-height:1.6;background:#0a0a0a;border:0.5px solid #1a1a1a;border-radius:8px;padding:12px;margin-top:10px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.form-field{display:flex;flex-direction:column;gap:4px}
+.form-field label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.06em}
+.form-field input,.form-field select,.form-field textarea{background:#0d0d0d;border:0.5px solid #222;border-radius:6px;padding:8px 10px;color:#eee;font-size:13px;font-family:inherit}
+
+table.perf-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}
+table.perf-table th{text-align:left;color:#555;font-weight:500;padding:8px 6px;border-bottom:0.5px solid #222;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+table.perf-table td{padding:8px 6px;border-bottom:0.5px solid #161616;color:#ccc}
+table.perf-table tr:hover td{background:#111}
+
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{width:150px;font-size:11px;color:#888;flex-shrink:0}
+.bar-track{flex:1;height:16px;background:#0a0a0a;border-radius:4px;overflow:hidden;border:0.5px solid #1a1a1a}
+.bar-fill{height:100%;background:linear-gradient(90deg,#B8962E,#caa030)}
+.bar-value{width:60px;text-align:right;font-size:11px;color:#B8962E;font-weight:500}
+
+.course-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.course-card{background:#111;border:0.5px solid #222;border-radius:10px;padding:16px;display:flex;flex-direction:column}
+.course-num{width:26px;height:26px;border-radius:6px;background:#1a1500;color:#B8962E;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.course-title{font-size:14px;font-weight:500;color:#fff;margin-bottom:6px}
+.course-desc{font-size:12px;color:#666;line-height:1.6;flex:1;margin-bottom:10px}
+.course-price{margin-bottom:10px}
+.course-price input{background:#0a0a0a;border:0.5px solid #222;border-radius:6px;padding:6px 8px;color:#B8962E;font-size:12px;font-weight:500;width:100%}
+.course-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+.toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;border:0.5px solid #B8962E;color:#eee;padding:10px 16px;border-radius:8px;font-size:12px;z-index:2000;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+.pilar-tag{font-size:9px;color:#B8962E;background:#1a1500;border:0.5px solid #2a2000;padding:2px 7px;border-radius:20px;display:inline-block;margin-top:6px}
+
+/* Agenda */
+.agenda-day{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:8px;padding:10px;margin-bottom:10px}
+.agenda-day-header{font-size:11px;font-weight:600;color:#B8962E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.agenda-evento{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#111;border:0.5px solid #1a1a1a;border-radius:6px;margin-bottom:6px}
+.agenda-hora{font-size:12px;font-weight:600;color:#B8962E;width:48px;flex-shrink:0}
+.agenda-titulo{font-size:12px;color:#ddd;flex:1}
+.agenda-tipo{font-size:9px;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.agenda-vazio{font-size:11px;color:#333;font-style:italic;padding:6px 0}
+
+/* Tarefas */
+.tarefa-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;margin-bottom:6px}
+.tarefa-item.feita .tarefa-titulo{color:#444;text-decoration:line-through}
+.tarefa-check{width:18px;height:18px;border-radius:5px;border:1px solid #444;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:#B8962E}
+.tarefa-titulo{font-size:13px;color:#ddd;flex:1}
+.tarefa-meta{font-size:10px;color:#555;display:flex;gap:6px;align-items:center;flex-shrink:0}
+.prioridade-alta{color:#c06060}
+.prioridade-media{color:#B8962E}
+.prioridade-baixa{color:#4a8a4a}
+.kanban-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-title">VNOVE HUB</div>
+    <div class="logo-sub">Dashboard · Juninho Brum</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Conteúdo</div>
+    <div class="nav-item active" onclick="showPage('home')"><span class="nav-icon">⚡</span>Visão geral</div>
+    <div class="nav-item" onclick="showPage('planejador')"><span class="nav-icon">🗓️</span>Planejador diário</div>
+    <div class="nav-item" onclick="showPage('topo')"><span class="nav-icon">🎯</span>Topo de funil</div>
+    <div class="nav-item" onclick="showPage('dores')"><span class="nav-icon">🔥</span>Dores do cliente</div>
+    <div class="nav-item" onclick="showPage('flipchart')"><span class="nav-icon">📋</span>Quadro · Flipchart</div>
+    <div class="nav-item" onclick="showPage('react')"><span class="nav-icon">📰</span>React · Notícias</div>
+    <div class="nav-item" onclick="showPage('buscar')"><span class="nav-icon">🔎</span>Buscar temas novos</div>
+    <div class="nav-item" onclick="showPage('semana')"><span class="nav-icon">📅</span>Rotina semanal</div>
+  </div>
+
+  <div class="nav-section" style="margin-top:8px">
+    <div class="nav-label">Comercial</div>
+    <div class="nav-item" onclick="showPage('imersal')"><span class="nav-icon">🏆</span>Imersão PBE</div>
+    <div class="nav-item" onclick="showPage('urgencia')"><span class="nav-icon">⏱️</span>Urgência · Fechamento</div>
+    <div class="nav-item" onclick="showPage('stories')"><span class="nav-icon">📱</span>Stories · Enquetes</div>
+  </div>
+
+  <div class="nav-section" style="margin-top:8px">
+    <div class="nav-label">Gestão</div>
+    <div class="nav-item" onclick="showPage('agenda')"><span class="nav-icon">📆</span>Agenda</div>
+    <div class="nav-item" onclick="showPage('tarefas')"><span class="nav-icon">✅</span>Tarefas</div>
+    <div class="nav-item" onclick="showPage('performance')"><span class="nav-icon">📈</span>Registro de performance</div>
+    <div class="nav-item" onclick="showPage('historico')"><span class="nav-icon">📊</span>Histórico comparativo</div>
+  </div>
+
+  <div class="nav-section" style="margin-top:8px">
+    <div class="nav-label">Cursos</div>
+    <div class="nav-item" onclick="showPage('cursos')"><span class="nav-icon">🎓</span>Cursos & Produtos</div>
+  </div>
+
+  <div class="nav-section" style="margin-top:8px">
+    <div class="nav-label">Sistema</div>
+    <div class="nav-item" onclick="showPage('dados')"><span class="nav-icon">💾</span>Dados & Backup</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- PAGE: HOME -->
+<div id="page-home">
+  <div class="header">
+    <div>
+      <div class="page-title">Dashboard de Conteúdo</div>
+      <div class="page-sub">Escolha o tema · gera o roteiro · publica</div>
+    </div>
+    <div class="header-badges"><div class="badge-live">✦ Julho 2026</div><div class="badge-v2">Dashboard v2</div></div>
+  </div>
+
+  <div class="grid4 section-gap">
+    <div class="metric"><div class="metric-num">6</div><div class="metric-label">Formatos ativos</div></div>
+    <div class="metric"><div class="metric-num">12</div><div class="metric-label">Dores mapeadas</div></div>
+    <div class="metric"><div class="metric-num">80+</div><div class="metric-label">Roteiros prontos</div></div>
+    <div class="metric"><div class="metric-num">8</div><div class="metric-label">Notícias quentes</div></div>
+  </div>
+
+  <div class="grid3 section-gap">
+    <div class="card" style="cursor:pointer" onclick="showPage('topo')">
+      <div class="card-title"><span>🎯</span> Topo de funil</div>
+      <div class="item-desc" style="color:#555;font-size:13px;line-height:1.7">Reels, carrosséis e roteiros que atraem empresário que ainda não te conhece. Tema: negócio, marketing, crescimento.</div>
+      <div style="margin-top:12px"><span class="btn btn-sm">Ver roteiros →</span></div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="showPage('dores')">
+      <div class="card-title"><span>🔥</span> Dores do cliente</div>
+      <div class="item-desc" style="color:#555;font-size:13px;line-height:1.7">Conteúdo que faz o empresário parar e pensar: "esse cara tá falando de mim". Direto na ferida. Sem generalizar.</div>
+      <div style="margin-top:12px"><span class="btn btn-sm">Ver roteiros →</span></div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="showPage('imersal')">
+      <div class="card-title"><span>🏆</span> Comercial · Imersão</div>
+      <div class="item-desc" style="color:#555;font-size:13px;line-height:1.7">Roteiros de venda da imersão PBE. Cada dor conectada ao produto. CTA claro. Sem ser chato.</div>
+      <div style="margin-top:12px"><span class="btn btn-sm">Ver roteiros →</span></div>
+    </div>
+  </div>
+
+  <div class="section-title">Novidades da v2</div>
+  <div class="grid4 section-gap">
+    <div class="quicklink" onclick="showPage('planejador')"><div class="quicklink-icon">🗓️</div><div class="quicklink-title">Planejador diário</div><div class="quicklink-desc">Escolha até 6 posts do dia e defina a ordem de gravação.</div></div>
+    <div class="quicklink" onclick="showPage('buscar')"><div class="quicklink-icon">🔎</div><div class="quicklink-title">Buscar temas novos</div><div class="quicklink-desc">Pesquise tendência fresca no Google, TikTok e X/Grok.</div></div>
+    <div class="quicklink" onclick="showPage('agenda')"><div class="quicklink-icon">📆</div><div class="quicklink-title">Agenda</div><div class="quicklink-desc">Compromissos, gravações e reuniões da semana.</div></div>
+    <div class="quicklink" onclick="showPage('tarefas')"><div class="quicklink-icon">✅</div><div class="quicklink-title">Tarefas</div><div class="quicklink-desc">O que precisa ser feito antes de gravar e publicar.</div></div>
+  </div>
+  <div class="grid4 section-gap">
+    <div class="quicklink" onclick="showPage('performance')"><div class="quicklink-icon">📈</div><div class="quicklink-title">Performance</div><div class="quicklink-desc">Registre resultado de cada post do Instagram.</div></div>
+    <div class="quicklink" onclick="showPage('historico')"><div class="quicklink-icon">📊</div><div class="quicklink-title">Histórico comparativo</div><div class="quicklink-desc">Compare formatos e semanas lado a lado.</div></div>
+    <div class="quicklink" onclick="showPage('cursos')"><div class="quicklink-icon">🎓</div><div class="quicklink-title">Cursos & Produtos</div><div class="quicklink-desc">Os 6 produtos + espaço pra adicionar mais.</div></div>
+    <div class="quicklink" onclick="showPage('dados')"><div class="quicklink-icon">💾</div><div class="quicklink-title">Dados & Backup</div><div class="quicklink-desc">Tudo salvo no navegador. Exporte em CSV.</div></div>
+  </div>
+
+  <div class="grid2 section-gap">
+    <div class="card">
+      <div class="card-title"><span>📰</span> Notícias quentes — reagir agora</div>
+      <div class="noticia hot" onclick="openModal('mangos')">
+        <div class="noticia-title">Apple virou cliente da empresa que tentou copiar</div>
+        <div class="noticia-fonte">MANGOS substituiu FAANG · TechCrunch · junho 2026</div>
+        <span class="noticia-badge badge-hot">🔴 Quente</span>
+      </div>
+      <div class="noticia hot" onclick="openModal('kitkat')">
+        <div class="noticia-title">KitKat transformou roubo de 12 toneladas em campanha</div>
+        <div class="noticia-fonte">Case verificado · Páscoa 2026</div>
+        <span class="noticia-badge badge-hot">🔴 Quente</span>
+      </div>
+      <div class="noticia warm" onclick="openModal('adidas')">
+        <div class="noticia-title">Adidas lançou tênis de R$4.999 — esgotou em horas</div>
+        <div class="noticia-fonte">Adizero Pro Evo 3 · Maratona de Londres 2026</div>
+        <span class="noticia-badge badge-warm">🟡 Relevante</span>
+      </div>
+      <div class="noticia warm" onclick="openModal('stanley')">
+        <div class="noticia-title">Stanley quase cancelou o produto mais vendido da história</div>
+        <div class="noticia-fonte">US$70mi → US$750mi em 4 anos</div>
+        <span class="noticia-badge badge-warm">🟡 Relevante</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>⚡</span> Roteiros rápidos — gera agora</div>
+      <div class="item" onclick="openModal('escavo')">
+        <div class="item-title">"Você construiu empresa ou construiu prisão?"</div>
+        <div class="item-desc">Reels · selfie · 60s · dor do dono</div>
+      </div>
+      <div class="item" onclick="openModal('marketing')">
+        <div class="item-title">"Você acha que seu problema é marketing. Não é."</div>
+        <div class="item-desc">Reels · câmera direta · 45s · posicionamento</div>
+      </div>
+      <div class="item" onclick="openModal('vendas')">
+        <div class="item-title">"Seu time não vende. Ele espera o cliente fácil."</div>
+        <div class="item-desc">Reels · câmera direta · 60s · vendas</div>
+      </div>
+      <div class="item" onclick="openModal('socio')">
+        <div class="item-title">"Tem alguém levando 40% do que você fatura"</div>
+        <div class="item-desc">Reels · câmera direta · 45s · finanças</div>
+      </div>
+      <div class="item" onclick="openModal('cobrar')">
+        <div class="item-title">"Você não consegue cobrar mais. A culpa é sua."</div>
+        <div class="item-desc">Stories · sequência com enquete · conversão</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: TOPO -->
+<div id="page-topo" style="display:none">
+  <div class="header">
+    <div><div class="page-title">Topo de funil</div><div class="page-sub">Conteúdo que atrai quem ainda não te conhece</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchSubTab(this,'topo-reels')">Reels</div>
+    <div class="tab" onclick="switchSubTab(this,'topo-carrossel')">Carrossel</div>
+    <div class="tab" onclick="switchSubTab(this,'topo-react')">React · Notícia</div>
+  </div>
+
+  <div id="topo-reels">
+    <div class="grid2">
+      <div>
+        <div class="card-title" style="margin-bottom:10px"><span>🎬</span> Escolhe o tema do Reels</div>
+        <div class="item" onclick="openModal('semanal')"><div class="item-title">Em menos de 1 minuto — grade de conteúdo da semana</div><div class="item-desc">Empresário que não sabe o que postar. Direto e dinâmico.</div><div class="item-tags"><span class="tag tag-gold">Educacional</span><span class="tag tag-blue">Alto alcance</span></div></div>
+        <div class="item" onclick="openModal('aviao')"><div class="item-title">Empresa é um avião trocando motor no ar</div><div class="item-desc">Metáfora poderosa sobre crescer em caos. Viral.</div><div class="item-tags"><span class="tag tag-blue">Storytelling</span></div></div>
+        <div class="item" onclick="openModal('mangos')"><div class="item-title">Apple virou cliente — MANGOS vs FAANG</div><div class="item-desc">Notícia quente de junho 2026. Ângulo de negócio.</div><div class="item-tags"><span class="tag tag-red">Quente 2026</span></div></div>
+        <div class="item" onclick="openModal('segundo')"><div class="item-title">A maldição do segundo funcionário</div><div class="item-desc">Como o segundo contratado define a cultura da empresa.</div><div class="item-tags"><span class="tag tag-gold">Negócio</span></div></div>
+        <div class="item" onclick="openModal('marketing')"><div class="item-title">Seu problema não é marketing</div><div class="item-desc">Marketing acelera problema. Não resolve.</div><div class="item-tags"><span class="tag tag-gold">Posicionamento</span></div></div>
+        <div class="item" onclick="openModal('gargalo')"><div class="item-title">O dono é o maior gargalo da empresa</div><div class="item-desc">Centralização disfarçada de eficiência.</div><div class="item-tags"><span class="tag tag-red">Dor do dono</span></div></div>
+      </div>
+      <div>
+        <div class="card-title" style="margin-bottom:10px"><span>📊</span> Mais temas</div>
+        <div class="item" onclick="openModal('decisao')"><div class="item-title">O custo invisível das decisões adiadas</div><div class="item-desc">Prejuízo que não aparece no extrato mas é o maior.</div><div class="item-tags"><span class="tag tag-gold">Gestão</span></div></div>
+        <div class="item" onclick="openModal('cliente')"><div class="item-title">Você não precisa de mais cliente</div><div class="item-desc">Precisa parar de perder os que já tem.</div><div class="item-tags"><span class="tag tag-blue">Alto alcance</span></div></div>
+        <div class="item" onclick="openModal('vendas')"><div class="item-title">Seu time não vende — ele espera</div><div class="item-desc">Diferença entre time de vendas e tomador de pedido.</div><div class="item-tags"><span class="tag tag-gold">Vendas</span></div></div>
+        <div class="item" onclick="openModal('escavo')"><div class="item-title">Você construiu empresa ou prisão?</div><div class="item-desc">Empresa que depende do dono não é negócio.</div><div class="item-tags"><span class="tag tag-red">Provocação</span></div></div>
+        <div class="item" onclick="openModal('socio')"><div class="item-title">O sócio silencioso que leva 40%</div><div class="item-desc">Estrutura tributária errada come a margem.</div><div class="item-tags"><span class="tag tag-gold">Finanças</span></div></div>
+        <div class="item" onclick="openModal('concentrado')"><div class="item-title">O cliente que você não consegue falar não</div><div class="item-desc">Dependência de um cliente = risco disfarçado.</div><div class="item-tags"><span class="tag tag-red">Risco</span></div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('topo-reels')">💡 Mais ideias de reels de topo</span></div>
+  </div>
+
+  <div id="topo-carrossel" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="card-title" style="margin-bottom:10px"><span>🃏</span> Carrosséis de análise de marca</div>
+        <div class="item" onclick="openModal('stanley-car')"><div class="item-title">Stanley — quase cancelou o produto mais vendido</div><div class="item-desc">De US$70mi pra US$750mi em 4 anos. Lição de posicionamento.</div><div class="item-tags"><span class="tag tag-blue">Case verificado</span></div></div>
+        <div class="item" onclick="openModal('cataflamcar')"><div class="item-title">CataflamPRO — patrocinou rebaixamento e ganhou</div><div class="item-desc">Entrou onde todo mundo fugiu. Mídia espontânea.</div><div class="item-tags"><span class="tag tag-red">Quente</span></div></div>
+        <div class="item" onclick="openModal('vw-car')"><div class="item-title">Volkswagen — voltou após 12 anos com timing perfeito</div><div class="item-desc">Copa 2026. Ancelotti. Samba de 1978. Posicionamento cirúrgico.</div><div class="item-tags"><span class="tag tag-gold">Copa 2026</span></div></div>
+        <div class="item" onclick="openModal('cocacar')"><div class="item-title">Coca-Cola — não fez campanha. Virou parte da Copa.</div><div class="item-desc">Diferença entre aparecer e pertencer ao momento.</div><div class="item-tags"><span class="tag tag-gold">Copa 2026</span></div></div>
+        <div class="item" onclick="openModal('mcdonaldscar')"><div class="item-title">McDonald's — transformou o M em gol com Ronaldinho</div><div class="item-desc">Primeiro viral publicitário da Copa. Ativo de marca.</div><div class="item-tags"><span class="tag tag-red">Viral</span></div></div>
+      </div>
+      <div>
+        <div class="card-title" style="margin-bottom:10px"><span>📚</span> Carrosséis educacionais</div>
+        <div class="item" onclick="openModal('grade-car')"><div class="item-title">Como montar grade de conteúdo da semana</div><div class="item-desc">5 linhas editoriais + escada semanal. Alto salvamento.</div><div class="item-tags"><span class="tag tag-blue">Educacional</span></div></div>
+        <div class="item" onclick="openModal('funil-car')"><div class="item-title">O funil que ninguém usa direito</div><div class="item-desc">Topo, meio e fundo. Por que vender no topo não funciona.</div><div class="item-tags"><span class="tag tag-blue">Marketing</span></div></div>
+        <div class="item" onclick="openModal('pos-car')"><div class="item-title">Por que você não consegue cobrar mais</div><div class="item-desc">Posicionamento vs preço. O que o mercado realmente compra.</div><div class="item-tags"><span class="tag tag-gold">Posicionamento</span></div></div>
+        <div class="item" onclick="openModal('ia-car')"><div class="item-title">IA não vai substituir você — vai substituir quem não usa</div><div class="item-desc">MANGOS, dados de 2026, ângulo de negócio.</div><div class="item-tags"><span class="tag tag-red">Quente 2026</span></div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('topo-carrossel')">💡 Mais ideias de carrossel</span></div>
+  </div>
+
+  <div id="topo-react" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="card-title" style="margin-bottom:10px"><span>🔴</span> Notícias quentes — gera react</div>
+        <div class="noticia hot" onclick="openModal('mangos')"><div class="noticia-title">MANGOS substituiu FAANG — Apple virou cliente</div><div class="noticia-fonte">TechCrunch · junho 2026</div><span class="noticia-badge badge-hot">🔴 Quente agora</span></div>
+        <div class="noticia hot" onclick="openModal('kitkat')"><div class="noticia-title">KitKat: roubo de 12 toneladas virou campanha</div><div class="noticia-fonte">Case verificado · Páscoa 2026</div><span class="noticia-badge badge-hot">🔴 Quente</span></div>
+        <div class="noticia hot" onclick="openModal('nike-mind')"><div class="noticia-title">Nike lançou tênis baseado em neurociência</div><div class="noticia-fonte">Nike Mind 001 · esgotou em 5 min · jan 2026</div><span class="noticia-badge badge-hot">🔴 Quente</span></div>
+        <div class="noticia warm" onclick="openModal('adidas')"><div class="noticia-title">Adidas lançou tênis de R$4.999</div><div class="noticia-fonte">Adizero Pro Evo 3 · Maratona de Londres 2026</div><span class="noticia-badge badge-warm">🟡 Relevante</span></div>
+        <div class="noticia warm" onclick="openModal('brahma')"><div class="noticia-title">Brahma: Ancelotti + Ronaldo Fenômeno na Copa</div><div class="noticia-fonte">Campanha Copa 2026 · verificada</div><span class="noticia-badge badge-warm">🟡 Relevante</span></div>
+        <div class="noticia warm" onclick="openModal('duolingo')"><div class="noticia-title">Duolingo matou o mascote — o mundo parou</div><div class="noticia-fonte">Case verificado · 2025</div><span class="noticia-badge badge-novo">🔵 Case</span></div>
+      </div>
+      <div>
+        <div class="card-title" style="margin-bottom:10px"><span>🟡</span> Cases evergreen — sempre funciona</div>
+        <div class="noticia warm" onclick="openModal('coca-garrafa')"><div class="noticia-title">Coca-Cola criou garrafa que só abre com outra</div><div class="noticia-fonte">Campanha universitária · viral</div><span class="noticia-badge badge-novo">🔵 Evergreen</span></div>
+        <div class="noticia warm" onclick="openModal('stanley')"><div class="noticia-title">Stanley: quase cancelou o produto mais vendido</div><div class="noticia-fonte">US$70mi → US$750mi em 4 anos</div><span class="noticia-badge badge-novo">🔵 Evergreen</span></div>
+        <div class="noticia warm" onclick="openModal('bobs')"><div class="noticia-title">Bob's chamou McDonald's de MilkFake</div><div class="noticia-fonte">Ovomaltine · newsjacking perfeito</div><span class="noticia-badge badge-novo">🔵 Evergreen</span></div>
+        <div class="noticia warm" onclick="openModal('baly')"><div class="noticia-title">Baly ultrapassou a Red Bull no Brasil</div><div class="noticia-fonte">Marca do interior · 2026</div><span class="noticia-badge badge-warm">🟡 Relevante</span></div>
+      </div>
+    </div>
+    <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('react')">💡 Mais ideias de react</span></div>
+  </div>
+</div>
+
+<!-- PAGE: DORES -->
+<div id="page-dores" style="display:none">
+  <div class="header"><div><div class="page-title">Dores do cliente</div><div class="page-sub">Conteúdo que faz o empresário pensar: "esse cara tá falando de mim"</div></div></div>
+  <div class="dor-grid section-gap">
+    <div class="dor" onclick="openModal('escavo')"><div class="dor-emoji">🔒</div><div class="dor-title">Empresa que aprisiona o dono</div><div class="dor-desc">Se parar, tudo para. Não consegue tirar férias. Tudo passa por ele.</div></div>
+    <div class="dor" onclick="openModal('marketing')"><div class="dor-emoji">📣</div><div class="dor-title">Marketing que não converte</div><div class="dor-desc">Tráfego rodando. Lead chegando. Venda não aparecendo.</div></div>
+    <div class="dor" onclick="openModal('cobrar')"><div class="dor-emoji">💸</div><div class="dor-title">Não consegue cobrar mais caro</div><div class="dor-desc">Tenta subir preço. Perde cliente. Volta atrás. Ciclo sem fim.</div></div>
+    <div class="dor" onclick="openModal('vendas')"><div class="dor-emoji">📞</div><div class="dor-title">Time que não vende</div><div class="dor-desc">Espera lead fácil. Não conduz. Não fecha. Culpa o lead.</div></div>
+    <div class="dor" onclick="openModal('cliente')"><div class="dor-emoji">🚪</div><div class="dor-title">Cliente sumindo sem avisar</div><div class="dor-desc">Empresa gasta trazendo cliente novo. Pela porta dos fundos saem 8 dos 10.</div></div>
+    <div class="dor" onclick="openModal('socio')"><div class="dor-emoji">🏛️</div><div class="dor-title">Sócio silencioso (governo)</div><div class="dor-desc">Regime tributário errado. Pagando mais do que deveria. Não sabe quanto.</div></div>
+    <div class="dor" onclick="openModal('concentrado')"><div class="dor-emoji">⚠️</div><div class="dor-title">Dependência de um cliente</div><div class="dor-desc">Um cliente = 40% do faturamento. Não consegue falar não pra ele.</div></div>
+    <div class="dor" onclick="openModal('decisao')"><div class="dor-emoji">⏰</div><div class="dor-title">Decisões adiadas</div><div class="dor-desc">Sabe que precisa trocar funcionário há 6 meses. Não troca. Paga juros invisíveis.</div></div>
+    <div class="dor" onclick="openModal('fatura')"><div class="dor-emoji">💰</div><div class="dor-title">Fatura bem mas não sobra nada</div><div class="dor-desc">Confunde faturamento com lucro. Caixa no negativo mesmo vendendo.</div></div>
+    <div class="dor" onclick="openModal('gargalo')"><div class="dor-emoji">⛓️</div><div class="dor-title">Tudo depende do dono</div><div class="dor-desc">Virou o Google da empresa. Todo mundo pergunta. Ninguém pensa.</div></div>
+    <div class="dor" onclick="openModal('segundo')"><div class="dor-emoji">👥</div><div class="dor-title">Cultura que ninguém construiu</div><div class="dor-desc">Comportamento ruim que se repetiu. Virou regra. Ninguém sabe de onde veio.</div></div>
+    <div class="dor" onclick="openModal('aviao')"><div class="dor-emoji">✈️</div><div class="dor-title">Cresceu em caos</div><div class="dor-desc">Vendas subiram. Atendimento piorou. Operação não aguenta. Dono no limite.</div></div>
+  </div>
+  <span class="btn" onclick="maisIdeias('dores')">💡 Mais ideias de dores</span>
+</div>
+
+<!-- PAGE: FLIPCHART -->
+<div id="page-flipchart" style="display:none">
+  <div class="header"><div><div class="page-title">Quadro · Flipchart</div><div class="page-sub">"Traduzindo marketing pra você que não entende porra nenhuma"</div></div></div>
+
+  <div class="card section-gap">
+    <div class="card-title"><span>📋</span> Termos novos — ainda não gravados</div>
+    <div class="grid2">
+      <div>
+        <div class="flip-item" onclick="openModal('flip-ltv')"><div class="flip-num">1</div><div class="flip-content"><div class="flip-title">LTV — quanto o cliente vale no total</div><div class="flip-sub">Não numa compra. Na vida inteira com você.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-mql')"><div class="flip-num">2</div><div class="flip-content"><div class="flip-title">MQL vs SQL — lead do marketing vs lead de vendas</div><div class="flip-sub">Mandar vendedor atrás de MQL é casar no primeiro dia.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-upsell')"><div class="flip-num">3</div><div class="flip-content"><div class="flip-title">Upsell · Downsell · Cross sell</div><div class="flip-sub">Dinheiro que você deixa na mesa toda vez que o cliente compra.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-nps')"><div class="flip-num">4</div><div class="flip-content"><div class="flip-title">NPS — de 0 a 10, quanto você indicaria?</div><div class="flip-sub">A pergunta mais importante que você não faz.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-landing')"><div class="flip-num">5</div><div class="flip-content"><div class="flip-title">Landing Page — uma página, um objetivo</div><div class="flip-sub">Não é site. É conversa que converte.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-churn')"><div class="flip-num">6</div><div class="flip-content"><div class="flip-title">Churn — cliente que foi embora e não voltou</div><div class="flip-sub">Encher banheira com ralo aberto.</div></div></div>
+      </div>
+      <div>
+        <div class="flip-item" onclick="openModal('flip-roi')"><div class="flip-num">7</div><div class="flip-content"><div class="flip-title">ROI — quanto voltou do que você jogou lá</div><div class="flip-sub">Se não sabe esse número, está fazendo fé.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-pitch')"><div class="flip-num">8</div><div class="flip-content"><div class="flip-title">Pitch — você tem 30 segundos. O que fala?</div><div class="flip-sub">Se demora 3 minutos, o problema não é a explicação.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-ancora')"><div class="flip-num">9</div><div class="flip-content"><div class="flip-title">Ancoragem de preço — de R$2.000 por R$997</div><div class="flip-sub">O cérebro precisa de referência. Psicologia, não ilusão.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-story')"><div class="flip-num">10</div><div class="flip-content"><div class="flip-title">Storytelling — dado convence, história conecta</div><div class="flip-sub">Você pode mostrar todos os números. História fecha.</div></div></div>
+        <div class="flip-item" onclick="openModal('newsjacking')"><div class="flip-num">11</div><div class="flip-content"><div class="flip-title">Newsjacking — sequestrar notícia pra falar do seu negócio</div><div class="flip-sub">A palavra do momento nas redes. Explicada do jeito certo.</div></div></div>
+        <div class="flip-item" onclick="openModal('flip-omni')"><div class="flip-num">12</div><div class="flip-content"><div class="flip-title">Omnichannel — estar em todo lugar do mesmo jeito</div><div class="flip-sub">Não é ter perfil em tudo. É ter a mesma identidade em tudo.</div></div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('flipchart')">💡 Mais termos pra explicar</span></div>
+  </div>
+</div>
+
+<!-- PAGE: REACT -->
+<div id="page-react" style="display:none">
+  <div class="header"><div><div class="page-title">React · Notícias 2026</div><div class="page-sub">Telas divididas — notícia + opinião do Juninho</div></div></div>
+  <div class="grid2">
+    <div>
+      <div class="card-title" style="margin-bottom:10px"><span>🔴</span> Quentes agora</div>
+      <div class="noticia hot" onclick="openModal('mangos')"><div class="noticia-title">MANGOS substituiu FAANG — Apple virou cliente</div><div class="noticia-fonte">TechCrunch · junho 2026 · 20k likes em 1 dia</div><span class="noticia-badge badge-hot">🔴 Viral agora</span></div>
+      <div class="noticia hot" onclick="openModal('kitkat')"><div class="noticia-title">KitKat: roubo de 12 toneladas virou campanha</div><div class="noticia-fonte">Case verificado · Páscoa 2026</div><span class="noticia-badge badge-hot">🔴 Quente</span></div>
+      <div class="noticia hot" onclick="openModal('nike-mind')"><div class="noticia-title">Nike lançou tênis de neurociência — esgotou em 5 min</div><div class="noticia-fonte">Nike Mind 001 · jan 2026</div><span class="noticia-badge badge-hot">🔴 Quente</span></div>
+      <div class="noticia hot" onclick="openModal('meta-demissoes')"><div class="noticia-title">Meta demitiu 8 mil e usou o trabalho deles pra treinar IA</div><div class="noticia-fonte">Meta 2026 · verificado</div><span class="noticia-badge badge-hot">🔴 Polêmico</span></div>
+      <div class="noticia warm" onclick="openModal('adidas')"><div class="noticia-title">Adidas — tênis de R$4.999 que prova posicionamento</div><div class="noticia-fonte">Adizero Pro Evo 3 · Maratona Londres 2026</div><span class="noticia-badge badge-warm">🟡 Relevante</span></div>
+      <div class="noticia warm" onclick="openModal('brahma')"><div class="noticia-title">Brahma: Ancelotti + Ronaldo Fenômeno na Copa 2026</div><div class="noticia-fonte">Campanha Copa 2026</div><span class="noticia-badge badge-warm">🟡 Relevante</span></div>
+    </div>
+    <div>
+      <div class="card-title" style="margin-bottom:10px"><span>🔵</span> Cases evergreen</div>
+      <div class="noticia warm" onclick="openModal('stanley')"><div class="noticia-title">Stanley: produto quase cancelado virou fenômeno global</div><div class="noticia-fonte">US$70mi → US$750mi em 4 anos</div><span class="noticia-badge badge-novo">🔵 Case</span></div>
+      <div class="noticia warm" onclick="openModal('duolingo')"><div class="noticia-title">Duolingo matou o mascote — trending global</div><div class="noticia-fonte">Campanha 2025 · missão coletiva</div><span class="noticia-badge badge-novo">🔵 Case</span></div>
+      <div class="noticia warm" onclick="openModal('bobs')"><div class="noticia-title">Bob's vs McDonald's — #MilkFake</div><div class="noticia-fonte">Ovomaltine · newsjacking perfeito</div><span class="noticia-badge badge-novo">🔵 Case</span></div>
+      <div class="noticia warm" onclick="openModal('coca-garrafa')"><div class="noticia-title">Coca-Cola: garrafa que só abre com outra</div><div class="noticia-fonte">140 milhões de views · campanha universitária</div><span class="noticia-badge badge-novo">🔵 Case viral</span></div>
+      <div class="noticia warm" onclick="openModal('baly')"><div class="noticia-title">Baly ultrapassou a Red Bull no Brasil</div><div class="noticia-fonte">Marca do interior · 2ª colocação nacional</div><span class="noticia-badge badge-novo">🔵 Case</span></div>
+      <div class="noticia warm" onclick="openModal('cataflamcar')"><div class="noticia-title">CataflamPRO patrocinou time rebaixado e ganhou</div><div class="noticia-fonte">Case verificado · Brasileirão 2025</div><span class="noticia-badge badge-novo">🔵 Case</span></div>
+    </div>
+  </div>
+  <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('react')">💡 Mais ideias de react</span></div>
+</div>
+
+<!-- PAGE: PLANEJADOR -->
+<div id="page-planejador" style="display:none">
+  <div class="header">
+    <div><div class="page-title">Planejador diário</div><div class="page-sub">Escolha até 6 posts do dia e defina a ordem de gravação</div></div>
+    <div class="form-field" style="width:170px"><label>Dia do plano</label><input type="date" id="planejador-data" onchange="mudarDataPlano()"></div>
+  </div>
+
+  <div class="planner-layout">
+    <div class="card">
+      <div class="card-title"><span>📚</span> Banco de temas — clique pra adicionar ao plano</div>
+      <input type="text" class="search-input" id="planejador-busca" placeholder="Buscar por título ou tema..." oninput="renderBrowseList()" style="margin-bottom:10px">
+      <div class="browse-filters" id="planejador-filtros"></div>
+      <div class="browse-list" id="planejador-lista"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>🗓️</span> Plano do dia (máx. 6)</div>
+      <div id="planejador-slots"></div>
+      <div class="toolbar">
+        <span class="btn btn-primary" onclick="salvarPlano()">💾 Salvar plano</span>
+        <span class="btn" onclick="exportarPlanoCSV()">⬇️ Exportar CSV</span>
+        <span class="btn btn-danger" onclick="limparPlano()">🗑️ Limpar dia</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: BUSCAR TEMAS -->
+<div id="page-buscar" style="display:none">
+  <div class="header"><div><div class="page-title">Buscar temas novos</div><div class="page-sub">Pesquise tendência no Google, TikTok e X/Grok — e nos roteiros que você já tem</div></div></div>
+  <div class="card section-gap">
+    <div class="card-title"><span>🔎</span> Pesquisar</div>
+    <div class="search-row">
+      <input type="text" id="busca-input" class="search-input" placeholder="Ex: tráfego pago, storytelling, Copa 2026..." oninput="buscarTemas()">
+    </div>
+    <div class="ext-links">
+      <a class="ext-link" id="link-google" target="_blank" rel="noopener">🔍 Buscar no Google</a>
+      <a class="ext-link" id="link-trends" target="_blank" rel="noopener">📈 Google Trends</a>
+      <a class="ext-link" id="link-tiktok" target="_blank" rel="noopener">🎵 Buscar no TikTok</a>
+      <a class="ext-link" id="link-x" target="_blank" rel="noopener">✦ Buscar no X / Grok</a>
+    </div>
+    <div class="note-box">Esses links abrem a busca em tempo real numa aba nova, usando o que você digitou acima. Não existe integração automática de API aqui porque Grok, Google e TikTok exigem chave/autenticação de servidor — não é seguro (nem possível) manter isso só em HTML/JS no navegador. Esse fluxo de 1 clique é o jeito confiável de puxar tendência fresca sem expor nenhuma credencial.</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>📚</span> Resultado nos seus roteiros</div>
+    <div id="busca-resultados"></div>
+  </div>
+</div>
+
+<!-- PAGE: SEMANA -->
+<div id="page-semana" style="display:none">
+  <div class="header"><div><div class="page-title">Rotina semanal</div><div class="page-sub">Seg a sex segue a escada do funil · clica no dia pra ver a sequência ou montar o plano</div></div></div>
+
+  <div class="card section-gap">
+    <div class="week-grid" id="semana-grid"></div>
+  </div>
+</div>
+
+<!-- PAGE: IMERSÃO -->
+<div id="page-imersal" style="display:none">
+  <div class="header"><div><div class="page-title">Comercial · Imersão PBE</div><div class="page-sub">Roteiros de venda conectados às dores certas</div></div></div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchSubTab(this,'im-aquecimento')">Aquecimento</div>
+    <div class="tab" onclick="switchSubTab(this,'im-venda')">Venda direta</div>
+    <div class="tab" onclick="switchSubTab(this,'im-urgencia')">Urgência</div>
+  </div>
+  <div id="im-aquecimento">
+    <div class="grid2">
+      <div>
+        <div class="funil-step" onclick="openModal('im-marketing')"><div class="funil-num">1</div><div><div class="funil-title">Você acha que o problema é marketing. Não é.</div><div class="funil-desc">Aquecimento · conecta dor → imersão</div></div></div>
+        <div class="funil-step" onclick="openModal('im-estrutura')"><div class="funil-num">2</div><div><div class="funil-title">Empresa que cresce sem estrutura vai quebrar</div><div class="funil-desc">Aquecimento · urgência de organizar</div></div></div>
+        <div class="funil-step" onclick="openModal('im-cobrar')"><div class="funil-num">3</div><div><div class="funil-title">Por que você não consegue cobrar mais</div><div class="funil-desc">Aquecimento · posicionamento → imersão</div></div></div>
+        <div class="funil-step" onclick="openModal('im-cliente-ruim')"><div class="funil-num">4</div><div><div class="funil-title">Você só atrai cliente ruim — e a culpa é sua</div><div class="funil-desc">Aquecimento · posicionamento → imersão</div></div></div>
+      </div>
+      <div>
+        <div class="funil-step" onclick="openModal('im-gargalo')"><div class="funil-num">5</div><div><div class="funil-title">Sua empresa poderia crescer 3x — mas você olha no lugar errado</div><div class="funil-desc">Aquecimento · clareza → imersão</div></div></div>
+        <div class="funil-step" onclick="openModal('im-lead')"><div class="funil-num">6</div><div><div class="funil-title">Um dia de imersão vale mais que 1 ano tentando sozinho</div><div class="funil-desc">Quebra de objeção · conversão</div></div></div>
+        <div class="funil-step" onclick="openModal('im-para-quem')"><div class="funil-num">7</div><div><div class="funil-title">Pra quem é a imersão — e pra quem não é</div><div class="funil-desc">Qualificação · filtra o público certo</div></div></div>
+        <div class="funil-step" onclick="openModal('im-abertura')"><div class="funil-num">8</div><div><div class="funil-title">Abertura oficial — anúncio da imersão</div><div class="funil-desc">Venda direta · CTA claro</div></div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('imersao-aquecimento')">💡 Mais ideias de aquecimento</span></div>
+  </div>
+  <div id="im-venda" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="item" onclick="openModal('venda-1')"><div class="item-title">Roteiro de venda — 60 segundos direto ao ponto</div><div class="item-desc">Hook na dor + o que é a imersão + CTA</div><div class="item-tags"><span class="tag tag-red">Conversão</span></div></div>
+        <div class="item" onclick="openModal('venda-2')"><div class="item-title">Você fatura mas não cresce — a imersão resolve isso</div><div class="item-desc">Narrativa: confusão → clareza → imersão</div><div class="item-tags"><span class="tag tag-red">Conversão</span></div></div>
+        <div class="item" onclick="openModal('venda-3')"><div class="item-title">O que acontece no dia 13 — hora a hora</div><div class="item-desc">Apresenta o cronograma. Gera desejo pela experiência.</div><div class="item-tags"><span class="tag tag-gold">Desejo</span></div></div>
+      </div>
+      <div>
+        <div class="item" onclick="openModal('venda-4')"><div class="item-title">Quem vai estar lá — time completo da VNOVE</div><div class="item-desc">Apresenta cada especialista com autoridade.</div><div class="item-tags"><span class="tag tag-blue">Autoridade</span></div></div>
+        <div class="item" onclick="openModal('venda-5')"><div class="item-title">O Hot Seat — sua empresa analisada ao vivo</div><div class="item-desc">O formato mais diferenciador da imersão. Gera FOMO.</div><div class="item-tags"><span class="tag tag-red">FOMO</span></div></div>
+        <div class="item" onclick="openModal('venda-6')"><div class="item-title">Não é curso. Não é palestra. É um dia de trabalho real.</div><div class="item-desc">Quebra de objeção clássica.</div><div class="item-tags"><span class="tag tag-gold">Objeção</span></div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('imersao-venda')">💡 Mais ideias de venda</span></div>
+  </div>
+  <div id="im-urgencia" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="item" onclick="openModal('urg-1')"><div class="item-title">"As vagas acabaram. Quase."</div><div class="item-desc">Escassez real. 20 vagas. Sem desespero.</div><div class="item-tags"><span class="tag tag-red">Urgência</span></div></div>
+        <div class="item" onclick="openModal('urg-2')"><div class="item-title">"Isso não é pra todo mundo. Literalmente."</div><div class="item-desc">Exclusividade + filtro de público certo.</div><div class="item-tags"><span class="tag tag-red">Urgência</span></div></div>
+        <div class="item" onclick="openModal('urg-3')"><div class="item-title">"Você vai deixar essa passar também?"</div><div class="item-desc">Provoca quem está em cima do muro.</div><div class="item-tags"><span class="tag tag-red">Provocação</span></div></div>
+      </div>
+      <div>
+        <div class="item" onclick="openModal('urg-4')"><div class="item-title">"Última chamada. Amanhã acontece."</div><div class="item-desc">Véspera. Tom de convite, não de desespero.</div><div class="item-tags"><span class="tag tag-red">Fechamento</span></div></div>
+        <div class="item" onclick="openModal('urg-5')"><div class="item-title">"Tô fechando as vagas. Você ainda quer ir?"</div><div class="item-desc">Diálogo direto. Story curto. Muito eficaz.</div><div class="item-tags"><span class="tag tag-red">Fechamento</span></div></div>
+        <div class="item" onclick="openModal('urg-6')"><div class="item-title">"Fechando. Agora."</div><div class="item-desc">O mais curto. Máximo 20 segundos. Para o scroll.</div><div class="item-tags"><span class="tag tag-red">Urgência máxima</span></div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('urgencia')">💡 Mais ideias de urgência</span></div>
+  </div>
+</div>
+
+<!-- PAGE: URGENCIA -->
+<div id="page-urgencia" style="display:none">
+  <div class="header"><div><div class="page-title">Urgência · Fechamento</div><div class="page-sub">Para quem está em cima do muro</div></div></div>
+  <div class="grid2">
+    <div>
+      <div class="item" onclick="openModal('urg-1')"><div class="item-title">"As vagas acabaram. Quase."</div><div class="item-desc">Escassez real. 20 vagas. Sem desespero.</div></div>
+      <div class="item" onclick="openModal('urg-2')"><div class="item-title">"Isso não é pra todo mundo. Literalmente."</div><div class="item-desc">Exclusividade que filtra.</div></div>
+      <div class="item" onclick="openModal('urg-3')"><div class="item-title">"Você vai deixar essa passar também?"</div><div class="item-desc">Provoca padrão de adiar decisão.</div></div>
+    </div>
+    <div>
+      <div class="item" onclick="openModal('urg-4')"><div class="item-title">"Última chamada. Amanhã acontece."</div><div class="item-desc">Véspera. Tom de convite.</div></div>
+      <div class="item" onclick="openModal('urg-5')"><div class="item-title">"Tô fechando as vagas. Você ainda quer ir?"</div><div class="item-desc">Diálogo direto. Story de 15 segundos.</div></div>
+      <div class="item" onclick="openModal('urg-6')"><div class="item-title">"Fechando. Agora."</div><div class="item-desc">O mais curto e mais forte. 20 segundos.</div></div>
+    </div>
+  </div>
+  <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('urgencia')">💡 Mais ideias de urgência</span></div>
+</div>
+
+<!-- PAGE: STORIES -->
+<div id="page-stories" style="display:none">
+  <div class="header"><div><div class="page-title">Stories · Enquetes</div><div class="page-sub">Sequências que geram resposta real — não stories genéricos</div></div></div>
+  <div class="grid2">
+    <div>
+      <div class="card-title" style="margin-bottom:10px"><span>📱</span> Sequências com enquete</div>
+      <div class="item" onclick="openModal('st-depende')"><div class="item-title">Você depende da empresa ou a empresa depende de você?</div><div class="item-desc">Enquete + provocação + CTA imersão</div><div class="item-tags"><span class="tag tag-red">Alta interação</span></div></div>
+      <div class="item" onclick="openModal('st-preco')"><div class="item-title">Você já perdeu cliente porque o cliente achou caro?</div><div class="item-desc">Enquete + diagnóstico de posicionamento</div><div class="item-tags"><span class="tag tag-gold">Posicionamento</span></div></div>
+      <div class="item" onclick="openModal('st-marketing')"><div class="item-title">Você acha que seu problema é marketing?</div><div class="item-desc">Enquete + desconstrução + CTA</div><div class="item-tags"><span class="tag tag-gold">Conversão</span></div></div>
+      <div class="item" onclick="openModal('st-escala')"><div class="item-title">Você trabalha mais e cresce menos?</div><div class="item-desc">3 enquetes em sequência · diagnóstico completo</div><div class="item-tags"><span class="tag tag-red">Diagnóstico</span></div></div>
+    </div>
+    <div>
+      <div class="card-title" style="margin-bottom:10px"><span>💬</span> Juninho Responde · caixinha</div>
+      <div class="item" onclick="openModal('jr-1')"><div class="item-title">Quando vale a pena contratar agência?</div><div class="item-desc">Resposta provocadora. Vira Reels.</div></div>
+      <div class="item" onclick="openModal('jr-2')"><div class="item-title">Meu time não vende. É o time ou o processo?</div><div class="item-desc">Diagnóstico direto. Sem rodeio.</div></div>
+      <div class="item" onclick="openModal('jr-3')"><div class="item-title">Como cobrar mais sem perder o cliente que já tenho?</div><div class="item-desc">A pergunta mais comum. A resposta mais ácida.</div></div>
+      <div class="item" onclick="openModal('jr-4')"><div class="item-title">O que você mudaria primeiro numa empresa travada?</div><div class="item-desc">Conecta direto com a imersão.</div></div>
+      <div class="item" onclick="openModal('jr-5')"><div class="item-title">Qual é a opinião mais impopular que você tem sobre o mercado?</div><div class="item-desc">Formato opinião impopular dentro do Q&A.</div></div>
+    </div>
+  </div>
+  <div style="margin-top:14px"><span class="btn" onclick="maisIdeias('stories')">💡 Mais ideias de stories</span></div>
+</div>
+
+<!-- PAGE: AGENDA -->
+<div id="page-agenda" style="display:none">
+  <div class="header"><div><div class="page-title">Agenda</div><div class="page-sub">Compromissos, gravações e reuniões — 7 dias à frente</div></div></div>
+  <div class="grid2 section-gap">
+    <div class="card">
+      <div class="card-title"><span>➕</span> Novo compromisso</div>
+      <div class="form-grid">
+        <div class="form-field"><label>Data</label><input type="date" id="agenda-data"></div>
+        <div class="form-field"><label>Hora</label><input type="time" id="agenda-hora"></div>
+        <div class="form-field" style="grid-column:1/3"><label>Título</label><input type="text" id="agenda-titulo" placeholder="Ex: Gravação Reels — dor do gargalo"></div>
+        <div class="form-field"><label>Tipo</label>
+          <select id="agenda-tipo">
+            <option value="gravacao">🎬 Gravação</option>
+            <option value="reuniao">🤝 Reunião</option>
+            <option value="imersao">🏆 Imersão / Comercial</option>
+            <option value="pessoal">🧘 Pessoal</option>
+            <option value="outro">📌 Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="toolbar"><span class="btn btn-primary" onclick="adicionarEvento()">➕ Adicionar à agenda</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>📷</span> Perfil</div>
+      <p class="item-desc" style="color:#555">Instagram: <strong style="color:#B8962E">@juninhodavnove</strong></p>
+      <div style="margin-top:10px"><a class="ext-link" href="https://www.instagram.com/juninhodavnove/" target="_blank" rel="noopener">📷 Abrir perfil no Instagram</a></div>
+      <div class="note-box">A agenda fica salva neste navegador. Use "Dados & Backup" pra exportar ou fazer backup.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>📆</span> Próximos 7 dias</div>
+    <div id="agenda-semana"></div>
+  </div>
+</div>
+
+<!-- PAGE: TAREFAS -->
+<div id="page-tarefas" style="display:none">
+  <div class="header"><div><div class="page-title">Tarefas</div><div class="page-sub">O que precisa ser feito antes de gravar e publicar</div></div></div>
+  <div class="card section-gap">
+    <div class="card-title"><span>➕</span> Nova tarefa</div>
+    <div class="form-grid">
+      <div class="form-field" style="grid-column:1/3"><label>O que precisa ser feito</label><input type="text" id="tarefa-titulo" placeholder="Ex: Editar reels do gargalo do dono"></div>
+      <div class="form-field"><label>Prazo</label><input type="date" id="tarefa-prazo"></div>
+      <div class="form-field"><label>Prioridade</label>
+        <select id="tarefa-prioridade">
+          <option value="alta">🔴 Alta</option>
+          <option value="media" selected>🟡 Média</option>
+          <option value="baixa">🟢 Baixa</option>
+        </select>
+      </div>
+    </div>
+    <div class="toolbar"><span class="btn btn-primary" onclick="adicionarTarefa()">➕ Adicionar tarefa</span></div>
+  </div>
+  <div class="kanban-grid">
+    <div class="card">
+      <div class="card-title"><span>🕓</span> A fazer</div>
+      <div id="tarefas-afazer"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>🚧</span> Em andamento</div>
+      <div id="tarefas-andamento"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>✅</span> Concluídas</div>
+      <div id="tarefas-concluidas"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: PERFORMANCE -->
+<div id="page-performance" style="display:none">
+  <div class="header"><div><div class="page-title">Registro de performance</div><div class="page-sub">Cada post, com o resultado real — integrado ao perfil do Instagram</div></div></div>
+  <div class="card section-gap">
+    <div class="card-title"><span>📷</span> Instagram conectado</div>
+    <p class="item-desc" style="color:#555">Perfil: <strong style="color:#B8962E">@juninhodavnove</strong></p>
+    <div style="margin-top:10px"><a class="ext-link" href="https://www.instagram.com/juninhodavnove/" target="_blank" rel="noopener">📷 Abrir perfil no Instagram</a></div>
+    <div class="note-box">O Instagram não deixa ler métricas de post direto do navegador sem um app aprovado pela Meta e um servidor guardando o token de acesso com segurança. Por isso o registro aqui é manual: abre o post no Instagram, copia os números, cola no formulário abaixo. Leva 30 segundos e não expõe nenhuma credencial seguindo esse caminho.</div>
+  </div>
+  <div class="card section-gap">
+    <div class="card-title"><span>📝</span> Registrar performance de um post</div>
+    <div class="form-grid">
+      <div class="form-field" style="grid-column:1/3"><label>Post / roteiro</label><select id="perf-chave"></select></div>
+      <div class="form-field"><label>Data de publicação</label><input type="date" id="perf-data"></div>
+      <div class="form-field"><label>Formato</label><input type="text" id="perf-formato" placeholder="Reels · 60s"></div>
+      <div class="form-field"><label>Visualizações</label><input type="number" id="perf-views" min="0"></div>
+      <div class="form-field"><label>Curtidas</label><input type="number" id="perf-likes" min="0"></div>
+      <div class="form-field"><label>Comentários</label><input type="number" id="perf-comments" min="0"></div>
+      <div class="form-field"><label>Compartilhamentos</label><input type="number" id="perf-shares" min="0"></div>
+      <div class="form-field"><label>Salvamentos</label><input type="number" id="perf-saves" min="0"></div>
+      <div class="form-field"><label>Alcance</label><input type="number" id="perf-reach" min="0"></div>
+      <div class="form-field" style="grid-column:1/3"><label>Observação</label><input type="text" id="perf-obs" placeholder="Opcional"></div>
+    </div>
+    <div class="toolbar">
+      <span class="btn btn-primary" onclick="registrarPerformance()">💾 Registrar</span>
+      <span class="btn" onclick="exportarPerformanceCSV()">⬇️ Exportar CSV</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>📋</span> Posts registrados</div>
+    <div id="perf-tabela"></div>
+  </div>
+</div>
+
+<!-- PAGE: HISTORICO -->
+<div id="page-historico" style="display:none">
+  <div class="header"><div><div class="page-title">Histórico comparativo</div><div class="page-sub">Compare formatos e semanas lado a lado</div></div></div>
+  <div id="historico-vazio" class="card" style="display:none"><div class="item-desc" style="color:#555">Nenhum dado de performance registrado ainda. Vá em "Registro de performance" e adicione seus primeiros posts pra ver os comparativos aqui.</div></div>
+  <div id="historico-conteudo">
+    <div class="grid2 section-gap">
+      <div class="card"><div class="card-title"><span>📊</span> Alcance médio por formato</div><div id="hist-formato"></div></div>
+      <div class="card"><div class="card-title"><span>🏆</span> Top 5 posts por engajamento</div><div id="hist-top5"></div></div>
+    </div>
+    <div class="card"><div class="card-title"><span>📅</span> Comparativo semana a semana — visualizações</div><div id="hist-semana"></div></div>
+  </div>
+</div>
+
+<!-- PAGE: CURSOS -->
+<div id="page-cursos" style="display:none">
+  <div class="header"><div><div class="page-title">Cursos & Produtos</div><div class="page-sub">Seus produtos digitais — gere roteiro de divulgação em 1 clique</div></div></div>
+  <div class="course-grid section-gap" id="cursos-grid"></div>
+  <div class="card">
+    <div class="card-title"><span>➕</span> Adicionar novo produto</div>
+    <div class="form-grid">
+      <div class="form-field" style="grid-column:1/3"><label>Nome do produto</label><input type="text" id="prod-nome"></div>
+      <div class="form-field" style="grid-column:1/3"><label>Descrição curta</label><input type="text" id="prod-desc"></div>
+      <div class="form-field"><label>Preço (opcional)</label><input type="text" id="prod-preco" placeholder="R$ 497"></div>
+    </div>
+    <div class="toolbar"><span class="btn btn-primary" onclick="adicionarProduto()">➕ Adicionar produto</span></div>
+  </div>
+</div>
+
+<!-- PAGE: DADOS -->
+<div id="page-dados" style="display:none">
+  <div class="header"><div><div class="page-title">Dados & Backup</div><div class="page-sub">Tudo fica salvo no seu navegador — exporte sempre que quiser</div></div></div>
+  <div class="grid3 section-gap">
+    <div class="metric"><div class="metric-num" id="stat-planos">0</div><div class="metric-label">Dias planejados</div></div>
+    <div class="metric"><div class="metric-num" id="stat-perf">0</div><div class="metric-label">Posts com performance registrada</div></div>
+    <div class="metric"><div class="metric-num" id="stat-ideias">0</div><div class="metric-label">Ideias/roteiros customizados</div></div>
+  </div>
+  <div class="card section-gap">
+    <div class="card-title"><span>⬇️</span> Exportar</div>
+    <div class="toolbar">
+      <span class="btn" onclick="exportarPerformanceCSV()">⬇️ Performance (CSV)</span>
+      <span class="btn" onclick="exportarTodosPlanosCSV()">⬇️ Todos os planos (CSV)</span>
+      <span class="btn" onclick="exportarTudoJSON()">⬇️ Backup completo (JSON)</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>⚠️</span> Zona de risco</div>
+    <div class="item-desc" style="color:#555;margin-bottom:12px">Isso apaga tudo que foi salvo neste navegador: planos, roteiros ajustados, ideias, performance, agenda, tarefas e produtos adicionados. Exporte um backup antes.</div>
+    <span class="btn btn-danger" onclick="limparDados()">🗑️ Apagar todos os dados salvos</span>
+  </div>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Roteiro</div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <div class="modal-close" onclick="toggleEdit()" title="Ajustar roteiro antes de gravar">✏️</div>
+        <div class="modal-close" onclick="closeModal()">✕</div>
+      </div>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const roteiros = {
+  'mangos': {
+    titulo: 'React · MANGOS vs FAANG',
+    formato: 'Reels · tela dividida · 90s',
+    hook: 'A Apple virou cliente.\nDa empresa que ela tentou copiar.\nIsso muda tudo — inclusive pra você.',
+    corpo: `Por anos o mundo falou em FAANG.\nApple. Amazon. Netflix. Google. Meta.\n\nAí chegou 2026.\n\nA Apple — empresa mais valiosa do planeta —\ntá usando o Google pra ter IA no iPhone.\n\nA Amazon investiu bilhões na Anthropic.\nA Microsoft colocou US$13 bilhões na OpenAI.\n\nAs três maiores do FAANG\nviraram clientes de quem construiu infraestrutura.\n\nIsso tem nome no mundo dos negócios:\nEmpresa de produto perdeu pra empresa de plataforma.\n\nFAANG vendia atenção.\nMANGOS vende o que faz a atenção funcionar.\n\nÉ a diferença entre ser dono do bar —\ne ser dono da energia elétrica que abastece todos os bares.\n\nBar depende de movimento.\nEnergia funciona enquanto você dorme.\n\nE o que isso tem a ver com a sua empresa?\n\nSimples.\n\nEmpresa que só vende produto —\num dia vira cliente de quem construiu plataforma.\n\nA Apple aprendeu isso da forma mais cara.\nVocê não precisa aprender do mesmo jeito.`,
+    cta: 'Manda esse vídeo pro seu sócio.\nE discute: a gente tá construindo produto ou estrutura?'
+  },
+  'kitkat': {
+    titulo: 'React · KitKat — roubo virou campanha',
+    formato: 'Reels · tela dividida · 90s',
+    hook: '12 toneladas de KitKat foram roubadas na Europa.\nA Nestlé transformou o prejuízo em campanha global.\nSem gastar um centavo de mídia.',
+    corpo: `Março de 2026. Véspera de Páscoa.\nUm caminhão saiu da Itália com destino à Polônia.\n413.793 barras de KitKat. 12 toneladas.\nDesapareceu.\n\nQualquer marca comum ia entrar em crise.\nChamar assessoria de imprensa.\nPedir pra não viralizar.\n\nA KitKat fez o contrário.\n\nPostou comunicado com o próprio slogan:\n"Sempre incentivamos uma pausa com o KitKat.\nMas os ladrões levaram a mensagem a sério demais."\n\nVirou meme global.\nRyanair entrou na conversa.\nOutras marcas também.\nEspecialistas chamaram de aula magistral de RP.\n\nE aí vieram com o detalhe que ninguém esperava:\nLançaram um site onde você digita o código da embalagem\npra ver se a sua barra fazia parte do carregamento roubado.\n\nVocê compra. Digita. Descobre se é roubada.\nCompra outra. Digita de novo.\n\nTransformaram rastreamento logístico em jogo.\n\nIsso não foi sorte. Foi equipe com liberdade criativa\npra olhar pra um problema e decidir transformar em oportunidade.\n\nQuando a crise chega — você tem duas opções.\nChora. Ou vende lenço.\n\nKitKat vendeu lenço.`,
+    cta: 'A sua empresa tem cultura pra fazer o mesmo?\nOu vai chamar o jurídico e pedir pra apagar?\n\nComenta aqui.'
+  },
+  'adidas': {
+    titulo: 'React · Adidas tênis de R$4.999',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'A Adidas lançou um tênis de R$4.999.\nPesa 97 gramas.\nMenos que um celular.\nE esgotou.',
+    corpo: `Três anos de desenvolvimento.\nMaterial inspirado em vela de kitesurf.\nCarbono. Espuma aeroespacial.\n11% mais retorno de energia.\n\nApareceu na Maratona de Londres.\nO queniano Sebastian Sawe correu 42km em 1h59min30s.\nPrimeiro sub-2h em prova oficial da história.\nNos pés: esse tênis.\n\nE olha o que a Adidas fez:\n\nNão tentou fazer tênis mais rápido que a Nike.\nNão tentou competir por preço.\nAbriu uma categoria nova:\nPerformance mental + fisica ao mesmo tempo.\n\nVenda limitada. Recorde mundial no lançamento.\nPosicionamento cirúrgico.\n\nA Adidas não vendeu tênis.\nVendeu prova.\nNo maior palco possível.\nCom o resultado mais histórico do esporte de corrida.\n\nIsso é posicionamento de produto na prática.\n\nVocê não precisa ser o mais barato.\nPrecisa ser o mais desejado.\nE desejo se constrói com produto real + resultado real + palco certo.`,
+    cta: 'Sua empresa vende produto ou vende prova?\nTem diferença de R$4.999 nessa resposta.'
+  },
+  'stanley': {
+    titulo: 'React · Stanley quase cancelou o produto',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'A Stanley quase cancelou o produto mais vendido da história deles.\nSó não cancelou porque um grupo de clientes foi até o escritório comprar o estoque inteiro.\nDe US$70 milhões pra US$750 milhões em 4 anos.',
+    corpo: `Stanley foi fundada em 1913.\nMais de 100 anos vendendo cantil e garrafa térmica.\n\nEm 2016 lançou o Quencher — o copo grande com alça.\nVendeu pouco. Quase cancelou.\n\nAí um grupo de consumidoras descobriu o produto.\nFoi até o escritório. Pediu pra comprar o estoque inteiro.\n5 mil unidades. Em dias.\n\nO CEO viu o sinal.\nE mudou tudo.\n\nAbraçou o público feminino.\nMudou as cores — de verde militar pra paleta vibrante.\nEntrou no TikTok com micro influenciadoras.\nDeixou o produto falar por si mesmo.\n\nNo Brasil virou febre no Carnaval.\nBrasil virou o segundo maior mercado da Stanley no mundo.\n\nDepois expandiu pra pets.\nMesmo posicionamento de durabilidade — novo nicho.\n\nSabe o que essa história ensina?\n\nÀs vezes o melhor produto já existe.\nO que falta é enxergar quem quer comprar.\n\nStanley não criou produto novo.\nDescobriu público novo pro produto que já tinha.`,
+    cta: 'Você conhece de verdade quem compra de você?\nOu você ainda tá tentando vender pra quem você acha que é seu cliente?'
+  },
+  'escavo': {
+    titulo: 'Reels · Empresa ou prisão?',
+    formato: 'Reels · selfie · câmera direta · 60s',
+    hook: 'Você construiu empresa.\nOu construiu prisão com CNPJ caro?',
+    corpo: `Deixa eu te descrever um empresário que eu conheço bem.\n\nAcorda às 6h respondendo WhatsApp.\nResolve problema de funcionário no almoço.\nAprova tudo — do post do Instagram ao papel higiênico do banheiro.\nDorme pensando no que vai acontecer amanhã se ele não estiver lá.\n\nEsse cara tem empresa há 10 anos.\nE ainda não tirou férias de verdade.\n\nSabe como a gente chama isso?\n\nEmprego. Com CNPJ caro.\n\nSe amanhã você sumir por 15 dias sem celular —\na sua empresa continua funcionando?\n\nSe a resposta for não —\nvocê não construiu negócio.\nVocê construiu dependência.\n\nE o pior?\nVocê continua pagando funcionário.\nPagando aluguel.\nPagando imposto.\n\nPra uma empresa que funciona só quando você tá lá.\n\nIsso não é empresa.\nÉ emprego que você não pode largar.`,
+    cta: 'Comenta aqui: sua empresa funciona sem você ou você é o único motor?'
+  },
+  'marketing': {
+    titulo: 'Reels · Seu problema não é marketing',
+    formato: 'Reels · câmera direta · 45s',
+    hook: 'Você acha que seu problema é marketing.\nE sinto te dizer: na maioria das vezes, não é.',
+    corpo: `Se fosse marketing era simples.\nInvestia mais, aparecia mais, resolvia.\nMas você já fez isso.\nE não resolveu.\n\nMarketing não corrige:\n— empresa desorganizada\n— time que não sabe pra onde vai\n— operação que depende de você pra tudo\n— posicionamento que atrai cliente ruim\n\nMarketing só amplifica o que já existe.\nSe tá quebrado por dentro — ele deixa o problema mais visível.\nPra todo mundo ver.\n\nTráfego em empresa desorganizada não cresce.\nAfunda mais rápido.\n\nDepois de 30 anos atendendo empresa —\no padrão que eu mais vejo é esse:\nEmpresário investindo em marketing\nantro de resolver estrutura.`,
+    cta: 'Na imersão isso ficou claro pra muita gente.\nSe você quer entender seu gargalo de verdade — link na bio.'
+  },
+  'vendas': {
+    titulo: 'Reels · Time que não vende',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Seu time não vende.\nEle espera o cliente fácil chegar.',
+    corpo: `Deixa eu te fazer uma pergunta.\n\nQuando o lead é difícil — o que seu time faz?\n\nEmpurra desconto.\nOu desiste.\n\nIsso não é time de vendas.\nÉ time de tomador de pedido.\n\nTime de vendas de verdade tem processo.\nSabe conduzir. Sabe contornar objeção. Sabe fechar sem implorar.\n\n71% das empresas não bateram meta de marketing em 2024.\nSabe por quê?\nNão faltam recursos. Falta método.\n\nVendedor sem processo não vende.\nVende quando dá vontade.\nVende quando o cliente já chegou decidido.\n\nVender não é talento.\nÉ método que se treina.\n\nSe o seu time só fecha o fácil —\nvocê não tem time de vendas.\nTem grupo de pessoas esperando lead quente.`,
+    cta: 'Comenta: seu time vende ou espera o cliente decidido chegar?'
+  },
+  'socio': {
+    titulo: 'Reels · O sócio silencioso',
+    formato: 'Reels · câmera direta · 45s',
+    hook: 'Tem alguém levando 30, 40% do que você fatura todo mês.\nSem trabalhar um dia.\nSem aparecer numa reunião.',
+    corpo: `E você provavelmente tá pagando mais do que deveria pra esse cara.\n\nEstrutura tributária errada é o custo invisível\nque ninguém fala — mas que come a margem de qualquer empresa.\n\nEmpresário que cresce rápido normalmente cresce no regime errado.\nAbre MEI. Vai pro Simples. Fica no Simples.\nE quando percebe que o Simples não é mais simples —\njá perdeu muito.\n\nNão é sobre sonegar.\nÉ sobre estruturar.\n\nEmpresa organizada paga o que deve.\nNem mais. Nem menos.\n\nMas pra pagar o que deve —\nvocê precisa saber exatamente quanto deve.\nE a maioria não sabe.`,
+    cta: 'Você sabe qual é a carga tributária real da sua empresa hoje?\nNão o que você acha. O que você sabe.'
+  },
+  'cobrar': {
+    titulo: 'Stories · Por que você não consegue cobrar mais',
+    formato: 'Sequência de 5 stories com enquete',
+    hook: 'Se você não consegue cobrar mais…\na culpa é sua.',
+    corpo: `Story 1: Se você não consegue cobrar mais — a culpa é sua.\n\nStory 2: O mercado ainda não te vê como alguém que vale mais.\nValor e preço são coisas diferentes.\nMas ninguém nunca te explicou isso direito, né?\n\n[ENQUETE: Faz sentido. Conta mais Juninho]\n\nStory 3: Posicionamento não se resolve com post bonito.\nNem com mais tráfego.\n\nO cliente paga mais por quem ele percebe que vale mais.\nSimples assim.\n\nStory 4: Na imersão Pare de Brincar de Empresa a gente mostra isso na prática.\n\nSe você quer parar de competir por preço e começar a atrair cliente que paga o que você vale —\nnão pode ficar de fora.\n\nStory 5 — CTA: Últimas vagas. Link na bio.`,
+    cta: 'Últimas vagas. Link na bio.'
+  },
+  'gargalo': {
+    titulo: 'Reels · O dono é o maior gargalo',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Quer saber quem tá impedindo sua empresa de crescer?\nProvavelmente você.',
+    corpo: `O empresário fala:\n"Minha equipe não resolve."\n"Ninguém faz igual eu."\n"Ninguém decide."\n\nMas deixa eu te perguntar uma coisa.\n\nQuem acostumou a equipe a perguntar tudo?\nQuem responde mensagem na hora?\nQuem aprova tudo?\nQuem centralizou tudo?\n\nVocê.\n\nToda vez que alguém perguntou — e você respondeu imediatamente —\nvocê criou dependência.\n\nNo começo parece eficiência.\nDepois vira prisão.\n\nVocê virou o Google da empresa.\nTodo mundo consulta.\nNinguém pensa.\n\nSe amanhã você sumir por uma semana —\nsua empresa continua funcionando?\n\nSe a resposta for não —\nvocê não construiu empresa.\nConstruiu emprego muito caro.`,
+    cta: 'Quantas decisões do dia a dia ainda chegam até você que não deveriam?'
+  },
+  'segundo': {
+    titulo: 'Reels · A maldição do segundo funcionário',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Existe um funcionário que pode destruir sua empresa antes dela crescer.\nNão é o décimo.\nÉ o segundo.',
+    corpo: `O primeiro aprende olhando você.\nO segundo aprende olhando o primeiro.\n\nEntendeu o problema?\n\nSe o primeiro chega atrasado — o segundo entende que pode também.\nSe o primeiro reclama de tudo — o segundo aprende que reclamar é normal.\nSe o primeiro resolve problema sozinho — o segundo começa a resolver também.\n\nEmpresário acha que cultura é aquele quadro bonitinho na parede.\nMissão. Visão. Valores.\n\nNão.\n\nCultura é comportamento repetido.\nO primeiro comportamento que ninguém corrigiu — virou regra.\n\nE daqui dois anos você vai olhar pra equipe e falar:\n"Não sei por que todo mundo faz isso aqui."\n\nSabe sim.\nPorque alguém fez primeiro — e você deixou passar.\n\nHabilidade você ensina.\nComportamento — a equipe copia.`,
+    cta: 'Na sua empresa tem algum comportamento que todo mundo faz e ninguém sabe quem começou?'
+  },
+  'aviao': {
+    titulo: 'Reels · Avião trocando motor no ar',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Empreender é igual trocar o motor de um avião enquanto ele tá voando.',
+    corpo: `Quem nunca empreendeu acha que empresa cresce organizada.\n\nNão cresce.\n\nEla cresce bagunçada.\n\nVocê vende. Contrata. Erra. Ajusta.\nTroca sistema. Troca fornecedor. Troca processo.\nTudo ao mesmo tempo.\nCom cliente esperando.\n\nVocê não pode pousar.\nNão pode parar.\nTem que resolver enquanto continua voando.\n\nO problema é que muita gente usa isso como desculpa pra viver no caos.\n\n"Depois eu organizo."\n"Depois eu documento."\n"Depois eu crio processo."\n\nEsse depois nunca chega.\n\nEmpresa saudável não é a que nunca tem problema.\nÉ a que melhora enquanto continua crescendo.\n\nQuem espera ficar tranquilo pra organizar —\nnunca organiza.`,
+    cta: 'Qual é o motor que você sabe que precisa trocar na sua empresa agora?'
+  },
+  'decisao': {
+    titulo: 'Reels · O custo invisível das decisões adiadas',
+    formato: 'Reels · câmera direta · 50s',
+    hook: 'Tem um custo na sua empresa que não aparece no extrato.\nMas pode ser o maior de todos.',
+    corpo: `A decisão adiada.\n\nVocê negocia fornecedor.\nEconomiza imposto.\nCorta despesa.\n\nE ignora o prejuízo mais caro.\n\nVocê sabe que precisa trocar aquele funcionário.\nEspera seis meses.\n\nVocê sabe que precisa aumentar o preço.\nEspera mais três.\n\nVocê sabe que precisa mudar o processo.\nMas deixa pra segunda-feira.\n\nToda decisão adiada cobra juros.\n\nEnquanto você espera —\nsua equipe perde tempo.\nSeu cliente perde confiança.\nSeu caixa perde dinheiro.\n\nComo esse prejuízo não chega em boleto —\nvocê finge que não existe.\n\nEmpresário bom não toma todas as decisões certas.\nEle toma as difíceis rápido.\n\nPorque problema pequeno envelhece.\nE quando envelhece — fica caro.`,
+    cta: 'Qual decisão você já sabe que precisa tomar mas continua empurrando?'
+  },
+  'cliente': {
+    titulo: 'Reels · Você não precisa de mais cliente',
+    formato: 'Reels · câmera direta · 50s',
+    hook: 'Talvez você não precise vender mais.\nTalvez você só precise parar de perder cliente.',
+    corpo: `Todo empresário fala:\n"Preciso trazer mais cliente."\n\nQuase ninguém pergunta:\n"Por que os antigos foram embora?"\n\nÉ muito mais fácil investir em anúncio\ndo que ligar pra quem nunca mais comprou.\n\nEmpresa que vive caçando cliente novo\nnormalmente tá tapando buraco.\n\nEnquanto entram dez — saem oito.\nVocê cresce cansado.\n\nCliente que volta —\ncusta menos.\nCompra mais.\nIndica mais.\nConfia mais.\n\nAntes de aumentar orçamento de marketing —\ndescobre por que alguém parou de comprar.\n\nSeu maior crescimento pode estar escondido na sua própria base.`,
+    cta: 'Você sabe exatamente por que seu último cliente foi embora?'
+  },
+  'concentrado': {
+    titulo: 'Reels · O cliente que você não consegue falar não',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Tem um cliente na sua carteira que representa 40, 50% do faturamento.\nE com ele você não faz o que faz com os outros.',
+    corpo: `Não aumenta preço quando deveria.\nNão recusa projeto fora do escopo.\nNão questiona prazo impossível.\nNão fala não quando deveria falar.\n\nPorque você tem medo.\n\nMedo de perder.\nMedo de comprometer o faturamento.\nMedo de que sem esse cliente — as contas não fecham.\n\nIsso não é parceria.\nÉ dependência disfarçada de faturamento.\n\nE o problema não é o cliente.\nÉ que você construiu uma empresa que não sobrevive sem ele.\n\nCliente concentrado demais não é resultado.\nÉ risco.\n\nPorque o dia que esse cliente sair —\ne ele vai sair —\nvocê vai descobrir que o negócio que parecia sólido\nera sustentado por uma relação que você tinha medo de questionar.`,
+    cta: 'Qual porcentagem do seu faturamento vem do seu maior cliente?\nSe passar de 30% — você tem um problema pra resolver agora.'
+  },
+  'fatura': {
+    titulo: 'Reels · Fatura bem mas não sabe onde o dinheiro foi',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Você sabe quanto sobrou de verdade esse mês?\nNão o que entrou na conta.\nO que sobrou.',
+    corpo: `A maioria dos empresários confunde três coisas diferentes.\n\nFaturamento é tudo que você vendeu.\nLucro é o que sobrou depois de pagar tudo.\nCaixa é o que você tem disponível agora.\n\nSão três números diferentes.\nE os três podem estar completamente desalinhados ao mesmo tempo.\n\nVocê pode faturar bem —\ne não ter lucro porque a margem tá errada.\n\nVocê pode ter lucro —\ne não ter caixa porque o prazo de recebimento é maior que o de pagamento.\n\nVocê pode ter caixa —\ne não ter patrimônio porque tá tudo no giro.\n\nEmpresário que confunde os três\ntrabalha muito, fatura bem —\ne fica sem dinheiro no fim do mês sem entender por quê.\n\nIsso não é azar.\nÉ falta de gestão financeira.`,
+    cta: 'Você sabe sua margem real? Não o faturamento. A margem.'
+  },
+  'semanal': {
+    titulo: 'Reels · Grade de conteúdo da semana',
+    formato: 'Reels · câmera direta · 90s',
+    hook: 'Em menos de 1 minuto eu monto sua grade de conteúdo da semana.\nPega um papel.',
+    corpo: `Se você não sabe o que postar — o problema não é criatividade.\nÉ bagunça.\n\nVocê abre o celular. Posta o que deu vontade. E depois reclama que não vende.\n\nNão vende porque não tem estratégia.\nTem improviso.\n\nPrimeiro passo: define cinco linhas editoriais.\n\nAutoridade — você prova que entende do negócio.\nEducação — você ajuda o cliente a tomar decisão melhor antes de comprar.\nBastidor — você mostra como trabalha de verdade.\nPosicionamento — você mostra o que defende e o que não aceita.\nVenda — você transforma interesse em decisão.\n\nAgora transforma isso numa semana.\n\nPensa na semana como escada.\nVocê não começa segunda empurrando oferta pra quem ainda não sabe que tem problema.\n\nSegunda: consciência. Você mostra o problema.\nTerça: clareza. Você mostra que existe solução.\nQuarta: profundidade. Você mostra seu método.\nQuinta: prova. Você mostra que já fez.\nSexta: venda. Você faz a oferta.\n\nPercebeu?\nVocê fez a oferta na sexta.\nMas começou a vender na segunda.`,
+    cta: 'Comenta aqui o que você vende.\nQuem sabe o próximo exemplo é do seu negócio.'
+  },
+  'newsjacking': {
+    titulo: 'Flipchart · Newsjacking',
+    formato: 'Quadro · flipchart · 90s',
+    hook: 'Newsjacking.\nA palavra do momento nas redes.\nVou te traduzir em 1 minuto.',
+    corpo: `News — notícia.\nJacking — sequestrar.\n\nVocê sequestra a atenção das pessoas\nem cima de uma notícia fresquinha\ne traz ela pro seu negócio.\n\nVini Jr terminou com a Virginia.\nMercadinho de esquina da sua cidade postou sobre isso.\n\nNeymar foi convocado pra Copa.\nRestaurante local usou pra divulgar o cardápio.\n\nNão é a marca do Vini Jr falando.\nÉ a pizzaria do bairro surfando na onda.\n\n[ESCREVE NO QUADRO: NOTÍCIA QUENTE + SEU PRODUTO = NEWSJACKING]\n\nMas presta atenção.\n\nVocê tem essa janela.\n[DESENHA JANELA PEQUENA]\n\nPra entrar na conversa antes esfriar.\n\nDepois disso?\n[RISCA]\n\nNinguém tá mais falando.\nE você virou aquela marca atrasada\nque ainda tá comentando coisa de semana passada.\n\nNewsjacking funciona quando tem conexão real com o que você vende.\nE quando você entra rápido.\n\nQuando é forçado — é mico com CNPJ.`,
+    cta: 'Comenta aqui: você usa essa técnica ou acha fake demais?'
+  },
+  'nike-mind': {
+    titulo: 'React · Nike Mind 001 — tênis de neurociência',
+    formato: 'Reels · tela dividida · 75s',
+    hook: 'A Nike inventou o iPhone dos tênis.\nVocê usa nos pés.\nFoi pensado pra sua cabeça.',
+    corpo: `Nike Mind 001.\nPrimeiro tênis baseado em neurociência da história.\nMais de uma década de pesquisa com scanner cerebral móvel.\n\nO resultado?\nUm tênis pra te deixar mais calmo, focado e presente.\n\n22 nós de espuma independentes na sola.\nFuncionam como pistões.\nA cada passo — estimulam receptores sensoriais nos pés\nque enviam sinal direto pro cérebro.\n\nÉ uma massagem neurológica a cada passada.\n\nEsgotou em menos de 5 minutos no lançamento.\n\nMas o que me impressiona não é o produto.\nÉ o posicionamento.\n\nA Nike parou de perguntar:\n"Como faço o tênis mais rápido?"\n\nE começou a perguntar:\n"O que o atleta realmente precisa que ninguém tá entregando?"\n\nResposta: presença mental.\nProduto: tênis neurocientífico.\nResultado: categoria nova. Sem concorrente. Preço que quiser.\n\nO futuro do produto não é funcional.\nÉ emocional.\nA Nike só provou isso com 22 nós de espuma.`,
+    cta: 'Sua empresa vende produto ou vende o que o cliente sente quando usa?\nTem diferença enorme no preço que você cobra.'
+  },
+  'brahma': {
+    titulo: 'React · Brahma — Ancelotti + Ronaldo Fenômeno',
+    formato: 'Reels · tela dividida · 60s',
+    hook: 'Brahma pagou pra Ancelotti e Ronaldo Fenômeno dizerem que dá pra acreditar no Brasil.\nE acertou em cheio no timing.',
+    corpo: `Brasil chegando na Copa cercado de ceticismo.\nTodo mundo com pé atrás.\nMídia duvidando.\n\nE a Brahma entra com um filme —\nAncelotti e Ronaldo Fenômeno sentados, conversando como dois amigos —\ncom o slogan "Tá liberado acreditar."\n\nPor que funcionou?\n\nPorque a escolha das pessoas não foi aleatória.\n\nAncelotti é o técnico da Seleção.\nRonaldo é ídolo nacional.\n\nOs dois juntos numa mesa falando sobre acreditar —\né credibilidade em cima de credibilidade.\n\nE o produto da Brahma — cerveja —\nnão tem nada a ver com futebol tecnicamente.\n\nMas tem tudo a ver com o ritual de assistir futebol.\n\nIsso é posicionamento por contexto.\nNão pelo que você vende.\nPelo momento em que você aparece.\n\nCerveja não patrocinou o jogo.\nPatrocinou o ritual de assistir o jogo.`,
+    cta: 'Qual é o ritual do seu cliente que a sua marca poderia habitar?'
+  },
+  'duolingo': {
+    titulo: 'React · Duolingo matou o mascote',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'O Duolingo matou a própria mascote.\nE o mundo parou pra ver.',
+    corpo: `O Duolingo passou mais de uma década construindo a coruja Duo.\nPersonagem com dezenas de milhões de seguidores.\nUm universo próprio.\n\nAí anunciou a morte de Duo nas redes.\nSem contexto. Sem explicação.\n\nA hashtag #RIPDuo tomou o mundo.\n\nMas foi mais longe:\nOs usuários precisavam completar desafios no app\npara "ressuscitar" o mascote.\n\nMissão coletiva.\n1 bilhão de XP em conjunto.\n\nSabe o que o Duolingo fez aqui na prática?\n\nTransformou a maior fraqueza — perder sequência de estudo —\nem campanha que ativou a base inteira.\n\nE soltou o dado junto:\n57,7% dos alunos que perdem sequência voltam em até 1 mês.\n\nA campanha foi reativação de base disfarçada de conteúdo.\nUma ação. Dois resultados.\n\nIsso é eficiência de marketing.\n\nMarca sem personagem com personalidade forte não consegue fazer isso.\nPersonagem é ativo emocional.\nAtivo emocional é distribuição gratuita.`,
+    cta: 'Sua marca tem personagem ou só tem logotipo?\nTem diferença enorme no engajamento.'
+  },
+  'bobs': {
+    titulo: 'React · Bob\'s vs McDonald\'s — MilkFake',
+    formato: 'Reels · tela dividida · 60s',
+    hook: 'Bob\'s perdeu a exclusividade do Ovomaltine.\nEm vez de chorar, chamou o McDonald\'s de MilkFake.\nE todo mundo falou do milkshake por dias. De graça.',
+    corpo: `Quando o McDonald\'s anunciou o milkshake de Ovomaltine —\no Bob\'s não entrou em crise.\n\nRespondeu com humor:\n"#MilkFake"\n\nSe posicionou como o original.\nBurger King entrou na conversa.\nPizza Hut também.\n\nResultado: todo mundo falou do milkshake de Ovomaltine por dias.\nSem ninguém pagar nada.\n\nIsso é leitura de mercado em tempo real.\n\nO Bob\'s não criou o momento.\nTransformou ameaça em oportunidade.\n\nSe tivesse entrado com nota de esclarecimento —\nninguém teria visto.\nSe tivesse ignorado —\no McDonald\'s teria levado toda a atenção.\n\nEntrando com humor e velocidade —\ncaptou mídia gratuita que nenhuma verba compraria.\n\nQuando o concorrente entrar no seu território —\nvocê vai chorar ou vai criar campanha?`,
+    cta: 'Me conta: você transformaria crise de concorrente em oportunidade?\nComo você faria?'
+  },
+  'baly': {
+    titulo: 'React · Baly ultrapassou a Red Bull',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Marca catarinense ultrapassou a Red Bull no Brasil.\nNão foi com verba gigante.\nFoi com posicionamento.',
+    corpo: `Baly.\nMarca de energético do interior de Santa Catarina.\nNinguém conhecia fora do Sul.\n\n2026: segunda marca mais consumida no segmento.\nAtrás só da Monster.\nUltrapassou a Red Bull.\n\nComo?\n\nIdentidade visual forte que comunica energia sem copiar ninguém.\nNarrativa de origem — marca brasileira pra brasileiro.\nEstratégia de trade marketing — presença e giro nas gôndolas certas.\nDistribuição inteligente antes de verba em mídia.\n\nNão tentou ser a Red Bull.\nNão tentou ser a Monster.\nEncontrou o espaço que as duas deixaram.\n\nE ocupou.\n\nIsso é o case que eu mostro pra todo empresário do interior\nque acha que não pode competir com empresa grande.\n\nPode.\nDesde que tenha posicionamento claro.\nE não tente jogar o jogo do concorrente.`,
+    cta: 'Você ainda acha que não pode competir por ser pequeno ou do interior?\nA Baly era menor que você quando começou.'
+  },
+  'coca-garrafa': {
+    titulo: 'React · Coca-Cola garrafa que só abre com outra',
+    formato: 'Reels · tela dividida · 75s',
+    hook: 'A Coca-Cola criou uma garrafa defeituosa de propósito.\nE deu uma aula de marketing.',
+    corpo: `A tampa não abria sozinha.\nVocê girava. Forçava. Nada.\nSó abria quando encaixava em outra garrafa igual.\n\nOu seja: pra abrir a sua Coca, você precisava de alguém.\n\nRodou em universidades.\nOnde todo mundo chega sem conhecer ninguém.\n\nSem anúncio. Sem frase bonita. Sem comercial emocionante.\nSó o produto obrigando a conexão acontecer.\n\nE olha o detalhe que ninguém fala:\n\nEssa campanha não foi feita pra vender Coca-Cola.\nNão tinha meta de conversão. Não tinha link de compra.\n\nO objetivo era um só: criar buzz.\nFazer as pessoas filmarem, comentarem, compartilharem.\n\nE funcionou.\n\nA campanha viralizou na internet sem um centavo de tráfego pago.\nPorque a experiência era boa o suficiente pra pessoa querer contar pra todo mundo.\n\nIsso é o que separa marca que interrompe de marca que pertence.\nMarca que interrompe é ignorada.\nMarca que cria experiência — é compartilhada.`,
+    cta: 'Sua marca cria experiência ou só cria conteúdo?\nTem diferença enorme no resultado.'
+  },
+  'meta-demissoes': {
+    titulo: 'React · Meta demitiu e usou o trabalho deles pra treinar IA',
+    formato: 'Reels · tela dividida · 60s',
+    hook: 'A Meta demitiu 8 mil funcionários.\nAntes de mandar embora — rastreou cada clique deles.\nPra treinar a IA que vai substituí-los.',
+    corpo: `Isso não é crueldade.\nÉ estratégia.\n\nA Meta não tem vergonha nenhuma:\n"Redução de demanda operacional."\n\nOs funcionários trabalharam.\nOs dados foram coletados.\nA IA aprendeu.\nOs funcionários foram demitidos.\n\nEu não tô aqui pra julgar a Meta.\nTô aqui pra te fazer uma pergunta.\n\nVocê tá usando IA pra crescer —\nou esperando ela te alcançar?\n\nPorque esse movimento aconteceu nas maiores empresas do mundo.\nE vai acontecer na menor também.\nSó mais devagar.\n\nEmpresa que não estrutura IA na operação hoje —\nvai correr atrás de quem estruturou.\nE corrida de alcance é sempre mais cara.\n\nIA não vai substituir ninguém.\nVai substituir quem não sabe usar.\nA Meta acabou de provar isso.`,
+    cta: 'Você tá preparando seu time pra IA ou vai descobrir quando já for tarde?'
+  },
+  'cataflamcar': {
+    titulo: 'Carrossel · CataflamPRO patrocinou rebaixamento',
+    formato: 'Carrossel · 8 slides',
+    hook: 'A CataflamPRO anunciou que ia patrocinar o primeiro time rebaixado do Brasileirão.\nTodo mundo achou loucura.\nFoi a jogada mais inteligente do ano.',
+    corpo: `Slide 1 — CAPA\n"A marca que patrocinou o rebaixamento — e foi a campanha mais inteligente do ano."\n\nSlide 2 — O CONTEXTO\nQuando um time cai pra série B — patrocinador foge.\nAssociar marca a rebaixamento parece suicídio de marketing.\nA CataflamPRO fez o contrário.\n\nSlide 3 — A IDEIA\nCampanha: "Caiu? Doeu? CataflamPRO!"\nProtagonista: Vampeta — que viveu três rebaixamentos.\nNão é produto. É empatia com humor.\n\nSlide 4 — O RESULTADO\nTodo Brasil falou da CataflamPRO. De graça.\nMídia espontânea que nenhuma verba compraria.\n\nSlide 5 — A ESTRATÉGIA\nEnquanto concorrente pagava caro pra aparecer em times grandes —\na CataflamPRO entrou sozinha num espaço sem concorrente.\n\nSlide 6 — A LIÇÃO\nVocê não precisa ir onde todo mundo vai.\nPrecisa ir onde ninguém foi ainda.\n\nSlide 7 — DETALHE QUE NINGUÉM VIU\nSport tem uma das torcidas mais apaixonadas do Nordeste.\nMercado enorme. Com atenção total depois do rebaixamento.\n\nSlide 8 — CTA\n"Qual é o espaço que ninguém quer ocupar no seu mercado — mas que tem público real esperando?"`,
+    cta: 'Comenta aqui qual espaço do seu mercado está desocupado.'
+  },
+  'vw-car': {
+    titulo: 'Carrossel · Volkswagen voltou após 12 anos',
+    formato: 'Carrossel · 7 slides',
+    hook: 'A Volkswagen ficou 12 anos sem patrocinar a Seleção Brasileira.\nVoltou em 2026.\nE acertou em cheio no timing.',
+    corpo: `Slide 1 — CAPA\n"A Volkswagen ficou 12 anos fora. Voltou no momento certo. Isso não é coincidência."\n\nSlide 2 — O CONTEXTO\nA VW saiu da CBF em 2014. Mesmo ano do 7 a 1.\nVoltou em fevereiro de 2026.\nCom Ancelotti. Com samba. Com manifesto sobre o Hexa.\n\nSlide 3 — A CAMPANHA\nAncelotti na campanha. Trilha sonora do samba "O Amanhã" de 1978.\nUma montadora alemã usando samba brasileiro pra falar de sonho.\nIsso não é acidente. É leitura cultural precisa.\n\nSlide 4 — POR QUE AGORA\nBrasil chegando na Copa como favorito.\nAncelotti — primeiro estrangeiro a comandar a Seleção.\nO país inteiro esperando o Hexa depois de 24 anos.\nEntrar nesse contexto custa menos e aparece mais.\n\nSlide 5 — A LIÇÃO\nTiming de posicionamento é decisão de negócio.\nNão é decisão de marketing.\nMarca que entende o momento certo paga menos e aparece mais.\n\nSlide 6 — O DETALHE\nA VW não vendeu carro na campanha.\nVendeu sonho. Pertencimento. Identidade nacional.\nProduto como veículo de emoção — não de especificação.\n\nSlide 7 — CTA\n"Quando foi a última vez que você tomou uma decisão de posicionamento baseada no momento do seu cliente?"`,
+    cta: 'Você entra no mercado no momento certo ou quando tem orçamento disponível?'
+  },
+  'cocacar': {
+    titulo: 'Carrossel · Coca-Cola na Copa 2026',
+    formato: 'Carrossel · 7 slides',
+    hook: 'A Coca-Cola não fez campanha na Copa.\nEla virou parte da Copa.\nDiferença enorme.',
+    corpo: `Slide 1 — CAPA\n"Enquanto todo mundo brigava por 30 segundos de comercial — a Coca-Cola criou uma narrativa que durou a Copa inteira."\n\nSlide 2 — O QUE FEZ\n"Essa Coca-Cola Toda" usou dados históricos do futebol brasileiro.\nMomentos reais. Memórias reais. Emoções reais.\nUma narrativa que acompanhou o torcedor do início ao fim.\n\nSlide 3 — A ESTRATÉGIA\nPresença contínua vs aparição pontual.\nEm vez de 30 segundos e sumir —\nCoca-Cola estava em cada momento da jornada do torcedor.\n\nSlide 4 — A LIÇÃO 1\nMarca que interrompe é ignorada.\nMarca que pertence ao momento é lembrada.\nVocê sabe a diferença entre as duas.\n\nSlide 5 — A LIÇÃO 2\nA Coca-Cola é patrocinadora da Copa há décadas.\nPoderia ter feito qualquer campanha.\nEscolheu fazer uma que não parece campanha. Parece memória.\nMemória fica. Campanha passa.\n\nSlide 6 — O DADO\n77% dos brasileiros estavam interessados na Copa 2026.\nA Coca-Cola não tentou convencer esse público de nada.\nApenas apareceu no que ele já amava. Do jeito que ele já amava.\n\nSlide 7 — CTA\n"Sua marca aparece ou pertence? Qual das duas você tá construindo?"`,
+    cta: 'Comenta: sua marca aparece no momento do cliente ou só no feed dele?'
+  },
+  'mcdonaldscar': {
+    titulo: 'Carrossel · McDonald\'s transformou o M em gol',
+    formato: 'Carrossel · 7 slides',
+    hook: 'McDonald\'s pegou o logo mais famoso do mundo e transformou em trave de gol.\nChamou Ronaldinho e Lamine Yamal pra bater.\nPrimeiro viral publicitário da Copa de 2026.',
+    corpo: `Slide 1 — CAPA\n"Como o McDonald\'s transformou o M mais famoso do mundo em gol — e gerou o primeiro viral da Copa."\n\nSlide 2 — A IDEIA\nViraram o M de cabeça pra baixo. Virou trave.\nRonaldinho chega. Bate. Entra. "Comigo é assim."\nLamine Yamal repete o feito. 30 segundos. Viral imediato.\n\nSlide 3 — POR QUE FUNCIONOU\nPegaram o elemento mais forte que tinham —\ne colocaram no contexto mais quente do momento.\nLogo icônico + Copa + dois dos jogadores mais amados.\nSem roteiro. A imagem falou sozinha.\n\nSlide 4 — A LIÇÃO 1\nVocê não precisa criar campanha do zero.\nÀs vezes o ativo mais poderoso já existe.\nSó precisa olhar pra ele de um ângulo diferente.\n\nSlide 5 — A LIÇÃO 2\nIsso só funciona porque o logo é forte o suficiente.\nMarca sem identidade clara não consegue fazer isso.\nIdentidade é o quanto o público te reconhece sem ver o nome.\n\nSlide 6 — O QUE POUCOS PERCEBEM\nMcDonald\'s não investiu em celebridade nova.\nUsou o que já tinha — o M — de forma inesperada.\nCreatividade com ativo próprio. Custo baixo. Impacto alto.\n\nSlide 7 — CTA\n"Qual é o elemento mais forte da sua marca? Você consegue levar pra qualquer contexto sem precisar explicar quem você é?"`,
+    cta: 'Sua marca tem identidade forte o suficiente pra se adaptar sem se perder?'
+  },
+  'stanley-car': {
+    titulo: 'Carrossel · Stanley de US$70mi pra US$750mi',
+    formato: 'Carrossel · 8 slides',
+    hook: 'A Stanley quase descontinuou o produto mais vendido da história deles.\nSe tivesse cancelado — você nunca teria ouvido falar da marca.',
+    corpo: `Slide 1 — CAPA\n"A empresa de 110 anos que quase cancelou o produto que a salvou."\n\nSlide 2 — CONTEXTO\nStanley foi fundada em 1913. Mais de um século de garrafa térmica.\nEm 2016 lançou o Quencher. Vendeu pouco. Quase cancelou.\n\nSlide 3 — A VIRADA\nUm grupo de consumidoras foi até o escritório.\nPediu pra comprar o estoque inteiro. 5 mil unidades. Em dias.\nO CEO viu o sinal. E mudou tudo.\n\nSlide 4 — A MUDANÇA\nAbraçou o público feminino.\nMudou as cores — de verde militar pra paleta vibrante.\nEntrou no TikTok com micro influenciadoras.\nDeixou o produto falar por si mesmo.\n\nSlide 5 — OS NÚMEROS\nDe US$70 milhões em 2019 pra US$750 milhões em 2023.\nEm 4 anos.\nNo Brasil virou febre no Carnaval. 2º maior mercado do mundo.\n\nSlide 6 — A EXPANSÃO\nDepois expandiu pra pets. Comedouro e bebedouro Stanley.\nMesmo posicionamento de durabilidade — novo nicho.\nMarca com identidade clara entra em qualquer mercado com credibilidade.\n\nSlide 7 — A LIÇÃO\nÀs vezes o melhor produto já existe.\nO que falta é enxergar quem quer comprar.\nStanley não criou produto novo. Descobriu público novo.\n\nSlide 8 — CTA\n"Você conhece de verdade quem compra de você? Ou tá tentando vender pra quem você acha que é seu cliente?"`,
+    cta: 'Você tem algum produto que ainda não encontrou o público certo?'
+  },
+  'grade-car': {
+    titulo: 'Carrossel · Grade de conteúdo da semana',
+    formato: 'Carrossel · 8 slides',
+    hook: 'Se você não sabe o que postar — o problema não é criatividade.\nÉ bagunça.',
+    corpo: `Slide 1 — CAPA: "Vou montar sua grade de conteúdo da semana agora."\n\nSlide 2 — O PROBLEMA\nVocê abre o celular e posta o que deu vontade.\nResultado: conteúdo confuso, sem consistência e que não vende.\n\nSlide 3 — AS 5 LINHAS\nAutoridade · Educação · Bastidor · Posicionamento · Venda\nUma linha editorial por pilar. Toda semana.\n\nSlide 4 — EXEMPLO PRÁTICO\nSe você é empresário do setor de serviços:\nAutoridade: "O erro que encarece qualquer projeto"\nEducação: "Como escolher fornecedor sem se arrepender"\nBastidor: "O que acontece entre fechar o contrato e entregar"\nPosicionamento: "O que eu não faço mesmo quando o cliente pede"\nVenda: "Quando vale a pena contratar meu serviço"\n\nSlide 5 — A ESCADA\nSemana como escada. Não começa segunda vendendo.\n\nSlide 6 — SEG/TER/QUA\nSegunda: consciência — mostra o problema\nTerça: clareza — mostra que tem solução\nQuarta: profundidade — mostra seu método\n\nSlide 7 — QUI/SEX\nQuinta: prova — case real de cliente\nSexta: venda — oferta direta\n\nSlide 8 — CTA: "Você faz a oferta na sexta. Mas começa a vender na segunda."`,
+    cta: 'Comenta o que você vende. Próximo vídeo monto a grade do seu negócio.'
+  },
+  'funil-car': {
+    titulo: 'Carrossel · O funil que ninguém usa direito',
+    formato: 'Carrossel · 7 slides',
+    hook: 'Funil de vendas.\nTodo mundo fala.\nQuase ninguém usa.\nE é por isso que o seu marketing não converte.',
+    corpo: `Slide 1 — CAPA: "O erro que faz 90% do dinheiro em marketing virar fumaça."\n\nSlide 2 — O QUE É\nTopo: todo mundo que te vê\nMeio: quem ficou interessado\nFundo: quem comprou\nSempre foi assim. Sempre vai ser.\n\nSlide 3 — O ERRO\nVocê só foca no fundo.\nFica gritando "compra agora" pra quem tá lá em cima.\nÉ como pedir em casamento no primeiro encontro.\nA pessoa foge.\n\nSlide 4 — TOPO\nA pessoa nem sabe que tem problema ainda.\nSeu conteúdo precisa criar consciência. Não vender.\n\nSlide 5 — MEIO\nEla já sabe mas tá pesquisando.\nSeu conteúdo precisa educar e gerar confiança.\n\nSlide 6 — FUNDO\nEla quer comprar.\nAgora sim você faz a oferta.\n\nSlide 7 — CTA\n"Se você investe em tráfego e não converte — você tá vendendo no lugar errado do funil."`,
+    cta: 'Você sabe em que etapa do funil está a maioria dos seus leads?'
+  },
+  'pos-car': {
+    titulo: 'Carrossel · Por que você não consegue cobrar mais',
+    formato: 'Carrossel · 7 slides',
+    hook: 'Você não consegue cobrar mais.\nE a culpa não é do produto.\nNem do mercado.\nNem do cliente.',
+    corpo: `Slide 1 — CAPA: "Por que você não consegue cobrar mais — mesmo sendo bom no que faz."\n\nSlide 2 — A CAUSA REAL\nNão é porque você não é bom.\nÉ porque o mercado não percebe o valor antes de contratar.\n\nSlide 3 — PERCEPÇÃO VS PREÇO\nPercepção de valor vem antes do preço.\nSe você precisa se justificar, já perdeu.\n\nSlide 4 — O PROBLEMA\nO problema não é o que você entrega.\nÉ como você se posiciona antes da entrega.\n\nSlide 5 — A REGRA\nQuem cobra mais não é o melhor.\nÉ quem comunica valor com mais clareza.\n\nSlide 6 — POSICIONAMENTO\nPosicionamento define preço. Não o contrário.\nEmpresa sem posicionamento compete por preço.\nSempre vai ter alguém mais barato.\n\nSlide 7 — CTA\n"Por que alguém deveria te escolher sem perguntar o preço?\nSe você demorou pra responder — você tem problema de posicionamento."`,
+    cta: 'Me responde: você consegue explicar em uma frase por que alguém deveria te contratar além do preço?'
+  },
+  'ia-car': {
+    titulo: 'Carrossel · IA não vai substituir você — vai substituir quem não usa',
+    formato: 'Carrossel · 8 slides',
+    hook: 'IA não vai substituir ninguém.\nVai substituir quem não sabe usar.\nE tem dado de 2026 que prova isso.',
+    corpo: `Slide 1 — CAPA: "O que acontece com empresa que não estrutura IA agora."\n\nSlide 2 — O DADO\n58% das empresas já usam IA.\nMas sem estratégia integrada, consistente ou madura.\nNão faltam recursos. Falta método.\n\nSlide 3 — O MANGOS\nAmazon, Apple e Microsoft viraram clientes da OpenAI e Anthropic.\nEmpresa de produto perdeu pra empresa de infraestrutura.\n\nSlide 4 — A DIFERENÇA\nUsar ChatGPT pra escrever e-mail não é ter empresa estruturada com IA.\nÉ usar ferramenta no improviso.\n\nSlide 5 — O QUE É ESTRUTURAR\nProcesso definido de onde a IA entra.\nDado organizado pra ela processar.\nTime treinado pra revisar o que ela gera.\n\nSlide 6 — A BARREIRA REAL\nEmpresa sem estrutura não consegue adotar IA.\nNão consegue adotar processo nenhum.\nNão tem base pra implementar nada.\n\nSlide 7 — A JANELA\nA diferença competitiva não está em usar IA.\nEstá em quanto da sua operação funciona com IA.\n\nSlide 8 — CTA\n"Sua empresa usa IA com processo definido ou só quando lembra?"`,
+    cta: 'Você tá estruturando IA na operação ou esperando o mercado te alcançar?'
+  },
+  // Flipchart items
+  'flip-ltv': {
+    titulo: 'Flipchart · LTV',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'LTV.\nSe você não sabe o que é, você tá jogando dinheiro fora toda vez que um cliente vai embora.',
+    corpo: `LTV. Lifetime Value.\nQuanto o cliente deixa com você no total da vida dele como cliente.\nNão numa compra só. No total.\n\n[ESCREVE NO QUADRO]\nLTV = ticket médio × frequência de compra × tempo como cliente\n\nSe o seu cliente compra R$500 por mês durante 2 anos —\nseu LTV é R$12.000.\n\nAgora me diz: quanto você gastou pra trazer ele?\n\nEsse número é o seu CAC.\nCusto de Aquisição de Cliente.\n\nSe o CAC é maior que o LTV —\nvocê tá pagando pra ter cliente.\nNão lucrando com ele.\n\nE a maioria das empresas não sabe os dois.\nFica investindo em tráfego sem saber se tá lucrando ou perdendo.`,
+    cta: 'Qual é o LTV do seu cliente principal?\nSe não sabe — esse é o primeiro número que você precisa descobrir.'
+  },
+  'flip-mql': {
+    titulo: 'Flipchart · MQL vs SQL',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'MQL vs SQL.\nParece complicado.\nNão é.',
+    corpo: `[ESCREVE NO QUADRO]\nMQL = Marketing Qualified Lead\nSQL = Sales Qualified Lead\n\nMQL é o cara que baixou seu e-book.\nDeixou o e-mail. Assistiu um webinar.\nEle demonstrou interesse. Mas não tá pronto pra comprar ainda.\n\nSQL é o cara que pediu proposta.\nFoi direto no "quero comprar".\nEsse sim vai pro vendedor.\n\nSão coisas completamente diferentes.\n\nO erro que a maioria comete?\n\nManda vendedor atrás de MQL.\nÉ igual mandar o noivo buscar quem ainda não sabe se quer casar.\n\nVendedor precisa de tempo.\nMQL precisa de nutrição.\n\nConfundir os dois queima o vendedor,\nfrustram o lead\ne você acha que o time de vendas é ruim.\n\nNão é ruim.\nVocê tá mandando pra conversa errada na hora errada.`,
+    cta: 'Me diz: seu time de vendas recebe lead qualificado ou qualquer contato que chega?'
+  },
+  'flip-churn': {
+    titulo: 'Flipchart · Churn',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'Churn.\nEsse aqui dói.\nPorque representa dinheiro que você já tinha — e perdeu.',
+    corpo: `[ESCREVE NO QUADRO]\nCHURN = taxa de clientes que foram embora\n\nFórmula simples:\nVocê tinha 100 clientes esse mês.\nPerdeu 10.\nSeu churn é 10%.\n\nParece pouco?\n\nEm 1 ano com 10% de churn —\nvocê perdeu praticamente toda a sua base.\n\nE sabe o pior?\n\nA maioria das empresas não mede churn.\nFica feliz com cliente novo que chegou\ne não percebe que tá perdendo os antigos na mesma velocidade.\n\n[DESENHA] Banheira com torneira aberta e ralo aberto.\n\nÉ exatamente isso.\nVocê fica enchendo enquanto o ralo drena.\n\nAntes de investir pra trazer cliente novo —\ndescobre por que o antigo foi embora.\n\nCada cliente recuperado custa 5x menos que um novo.`,
+    cta: 'Você sabe o seu churn mensal? Não o faturamento. A taxa de saída de cliente.'
+  },
+  'flip-roi': {
+    titulo: 'Flipchart · ROI',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'ROI.\nReturn on Investment.\nQuanto voltou do que você jogou lá.',
+    corpo: `[ESCREVE NO QUADRO]\nROI = (Retorno - Investimento) ÷ Investimento × 100\n\nVocê investiu R$1.000 em anúncio.\nVeio R$3.000 em venda.\n\nROI = (3.000 - 1.000) ÷ 1.000 × 100\nROI = 200%\n\nVocê triplicou o que investiu.\n\nSimples assim.\n\nMas deixa eu te fazer a pergunta que a maioria não consegue responder:\n\nQual é o ROI do seu marketing esse mês?\n\nNão o alcance.\nNão o engajamento.\nNão as curtidas.\n\nQuanto voltou em venda do que você investiu?\n\nSe você não sabe esse número —\nvocê não tá fazendo marketing.\nVocê tá fazendo fé.\n\nE milagre só na Universal.`,
+    cta: 'Você sabe o ROI do seu marketing esse mês?\nSe não — essa é a primeira planilha que você precisa montar.'
+  },
+  'flip-upsell': {
+    titulo: 'Flipchart · Upsell · Downsell · Cross sell',
+    formato: 'Quadro · flipchart · 75s',
+    hook: 'Três palavras.\nTrês formas de faturar mais sem precisar de mais cliente.',
+    corpo: `[ESCREVE NO QUADRO]\nUPSELL · DOWNSELL · CROSS SELL\n\nUPSELL — vender algo maior pra quem já comprou.\nCliente acabou de comprar. A carteira tá aberta.\nEsse é o melhor momento pra oferecer algo maior.\nPorque ele já confiou.\n\nEXEMPLO: vendeu consultoria de 1 mês. Oferece de 3 meses com desconto.\n\nDOWNSELL — quando o cliente recusa a oferta principal.\nVocê oferece algo menor.\nEle diz sim. Você fechou.\nA maioria ouve o não e deixa o cliente ir embora.\nIsso é desperdício.\n\nEXEMPLO: recusou o pacote premium? Oferece o básico.\n\nCROSS SELL — vender produto complementar.\nCliente comprou tênis? Oferece meia.\nCliente comprou consultoria? Oferece curso de acompanhamento.\n\n[DESENHA as três situações no quadro]\n\nOs três juntos podem aumentar seu faturamento\nsem trazer um cliente novo sequer.`,
+    cta: 'Qual dos três você usa na sua empresa?\nMais provável: nenhum. Porque ninguém ensinou isso pro time de vendas.'
+  },
+  'flip-nps': {
+    titulo: 'Flipchart · NPS',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'NPS.\nA pergunta mais importante que você pode fazer pro seu cliente.\nE que a maioria nunca faz.',
+    corpo: `[ESCREVE NO QUADRO]\nNPS = Net Promoter Score\n\nUma pergunta só:\n"De 0 a 10, quanto você indicaria nossa empresa pra alguém?"\n\n[DIVIDE O QUADRO EM 3]\n\n9 e 10 — PROMOTORES\nEsse cara fala bem de você. Indica. Defende.\n\n7 e 8 — NEUTROS\nNão fala mal. Não fala bem. Só usa.\n\n0 a 6 — DETRATORES\nEsse tá falando mal de você pra alguém agora.\n\nFórmula:\nNPS = % promotores - % detratores\n\nSe você nunca perguntou isso pro seu cliente —\nvocê não sabe o que ele pensa de verdade.\nSó o que ele fala na sua frente.\n\nE cliente que não indica não é cliente satisfeito.\nÉ cliente que ainda não virou promotor.`,
+    cta: 'Você já mediu o NPS da sua empresa?\nSe não — manda uma mensagem pro seu cliente agora. Literalmente agora.'
+  },
+  'flip-landing': {
+    titulo: 'Flipchart · Landing Page',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'Landing Page.\nNão é site.\nÉ a diferença entre converter e desperdiçar tráfego.',
+    corpo: `[ESCREVE NO QUADRO]\nLANDING PAGE = uma página. um objetivo.\n\nSite tem:\nMenu. Sobre. Contato. Blog. Portfólio.\n\nLanding Page tem:\nUma oferta. Uma ação. Uma decisão.\n\nQuando você manda lead pro site —\nele entra e se perde em 10 opções.\nSai sem fazer nada.\n\nQuando você manda lead pra landing page —\nele só pode fazer uma coisa:\nConverter ou sair.\n\n[DESENHA: site com várias portas vs landing page com uma porta]\n\nEmpresa que manda lead pra home do site\ntá jogando tráfego fora.\n\nEmpresa que tem landing page bem feita\nconverte 3x a 5x mais com o mesmo tráfego.\n\nVocê não precisa de mais lead.\nPrecisa de uma página que converte o lead que já tem.`,
+    cta: 'Você tem landing page separada pro seu produto principal?\nOu manda todo mundo pro site e torce pra alguém ligar?'
+  },
+  'flip-pitch': {
+    titulo: 'Flipchart · Pitch',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'Pitch.\nAlguém te pergunta o que você faz.\nVocê tem 30 segundos.\nO que você fala?',
+    corpo: `[ESCREVE NO QUADRO]\nPITCH = apresentação de 30 segundos do que você faz\n\nA maioria das pessoas responde assim:\n"Eu trabalho com gestão empresarial, marketing digital,\nestutegia de crescimento, posicionamento e..."\n\n[IMITA PESSOA DORMINDO]\n\nO bom pitch tem três elementos:\n\n1. Para quem você atende\n2. Que problema você resolve\n3. Como você faz diferente\n\nEXEMPLO:\n"Eu ajudo empresários que faturam bem mas continuam travados\na estruturar marketing e vendas\npra crescer sem depender deles o tempo todo."\n\n30 segundos. Claro. Sem jargão.\n\nSe você demora 3 minutos pra explicar o que faz —\no problema não é a explicação.\nÉ o posicionamento.`,
+    cta: 'Me manda nos comentários seu pitch de 30 segundos.\nVou te dizer o que ajustar.'
+  },
+  'flip-ancora': {
+    titulo: 'Flipchart · Ancoragem de preço',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'De R$2.000 por R$997.\nVocê vê isso em todo lugar.\nSabe por que funciona?\nPsicologia. Não enganação.',
+    corpo: `[ESCREVE NO QUADRO]\nANCORAGEM DE PREÇO = mostrar o alto antes do real\n\nExperimento clássico:\nGrupo A vê direto: "R$997"\nGrupo B vê: "De R$2.000 por R$997"\n\nGrupo B converte muito mais.\n\nPor quê?\n\nO cérebro humano não processa valor absoluto.\nProcessa valor relativo.\n\nSem âncora — R$997 parece caro.\nCom âncora de R$2.000 — parece barato.\n\nIsso não é mentira desde que:\n1. O preço original tenha sido praticado em algum momento\n2. O desconto seja real\n\n[DESENHA: balança com âncora de um lado]\n\nCom ancoragem você não muda o preço.\nVocê muda a percepção de valor.\n\nE percepção define compra.`,
+    cta: 'Você usa ancoragem de preço nas suas ofertas?\nSe não — tá deixando conversão na mesa.'
+  },
+  'flip-story': {
+    titulo: 'Flipchart · Storytelling',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'Dado convence.\nHistória conecta.\nSabe qual dos dois fecha venda?',
+    corpo: `[ESCREVE NO QUADRO]\nSTORYTELLING = contar história pra vender\n\nExperimento:\n\nGrupo A recebe:\n"Nossa taxa de conversão é 47% acima da média do mercado."\n\nGrupo B recebe:\n"João tinha empresa que faturava 80k mas não sobrava nada.\nEm 3 meses com a gente ele entendeu onde estava perdendo dinheiro.\nHoje fatura 120k com metade do custo operacional."\n\nQual dos dois você lembrou amanhã?\n\nDado convence a razão.\nHistória conecta com emoção.\n\nE compra é decisão emocional justificada pela razão.\n\nSempre.\n\nVocê pode mostrar todos os números do mundo.\nMas quando você conta a história do João —\na pessoa para. Se identifica. E compra.\n\nSem história você vende produto.\nCom história você vende transformação.`,
+    cta: 'Você tem um case de cliente que poderia contar como história?\nEsse é o conteúdo mais poderoso que você pode criar.'
+  },
+  'flip-omni': {
+    titulo: 'Flipchart · Omnichannel',
+    formato: 'Quadro · flipchart · 60s',
+    hook: 'Omnichannel.\nNão é estar em todo lugar.\nÉ ser o mesmo em todo lugar.',
+    corpo: `[ESCREVE NO QUADRO]\nOMNICHANNEL = mesma experiência em todos os canais\n\nEmpresa que confunde omnichannel:\n"A gente tá no Instagram, no TikTok, no LinkedIn, no WhatsApp, no site..."\n\nMas em cada canal parece uma empresa diferente.\nTom diferente. Visual diferente. Mensagem diferente.\n\n[DESENHA: 4 quadrados com estilos diferentes]\n\nIsso não é omnichannel.\nÉ presença fragmentada.\n\nOmnichannel de verdade é:\nCliente que te vê no Instagram, no WhatsApp e na loja física —\nsente que é a mesma marca.\nMesmo tom. Mesma identidade. Mesma promessa.\n\nNão importa o canal que ele usa —\na experiência é consistente.\n\nConsistência constrói confiança.\nConfiança constrói marca.\nMarca constrói o preço que você cobra.`,
+    cta: 'Seus canais se parecem com a mesma empresa ou com empresas diferentes?'
+  },
+  // Stories sequências
+  'seg-stories': {
+    titulo: 'Stories · Segunda — Opinião impopular',
+    formato: 'Sequência de 5 stories · segunda-feira',
+    hook: 'Segunda. Vou começar com uma coisa que vai incomodar.',
+    corpo: `STORY 1\n"Segunda. Vou começar com uma coisa que vai incomodar."\n\nSTORY 2 — ENQUETE\n"Você concorda: trabalhar mais não é solução pra empresa que não cresce?"\n> Concordo\n> Discordo\n\nSTORY 3 — Quem concordou:\n"Você já entendeu o jogo.\nQuem discordou — você ainda tá confundindo esforço com estrutura."\n\nSTORY 4\n"Esforço sem estrutura só te cansa mais rápido.\nEmpresa que cresce é empresa organizada.\nNão é empresa com dono trabalhando 14h."\n\nSTORY 5 — CAIXINHA\n"Me manda sua opinião impopular sobre empreendedorismo.\nVou responder as melhores essa semana."`,
+    cta: 'Caixinha aberta. Esperando as perguntas.'
+  },
+  'ter-stories': {
+    titulo: 'Stories · Terça — Juninho Responde',
+    formato: 'Sequência de 6 stories · terça-feira',
+    hook: 'Juninho Responde.\nSem filtro. Sem papas na língua.',
+    corpo: `STORY 1\n"Juninho Responde. Sem filtro. Sem papas na língua."\n\nSTORY 2\n"Pergunta da semana:\n[PERGUNTA REAL DA CAIXINHA]"\n\nSTORY 3 — VÍDEO\nJuninho responde em 30 segundos. Direto.\nPode discordar da premissa se necessário.\n\nSTORY 4\n"Mais uma:\n[SEGUNDA PERGUNTA]"\n\nSTORY 5 — VÍDEO\nJuninho responde. Pode ser mais curto.\n\nSTORY 6 — CAIXINHA\n"Manda a sua pra semana que vem."`,
+    cta: 'Caixinha aberta para a próxima semana.'
+  },
+  'qua-stories': {
+    titulo: 'Stories · Quarta — Bastidor real',
+    formato: 'Sequência de 5 stories · quarta-feira',
+    hook: 'Quarta. Bastidor.',
+    corpo: `STORY 1\n"Quarta. Bastidor."\n\nSTORY 2\n[FOTO OU VÍDEO DO QUE TÁ ACONTECENDO — reunião, viagem, VNOVE]\nTexto simples descrevendo o contexto.\n\nSTORY 3 — ENQUETE\n"Você sabia que a maioria das decisões de negócio acontece assim — numa conversa informal?"\n> Faz sentido\n> Não acredito nisso\n\nSTORY 4\n"O problema não é onde você toma a decisão.\nÉ se você tem clareza pra tomar a decisão certa."\n\nSTORY 5\n"Clareza vem de estrutura.\nNão de mais reunião."`,
+    cta: 'Continua acompanhando o dia.'
+  },
+  'qui-stories': {
+    titulo: 'Stories · Quinta — Diagnóstico com enquetes',
+    formato: 'Sequência de 6 stories · quinta-feira',
+    hook: 'Quinta de diagnóstico rápido.\nResponde com honestidade.',
+    corpo: `STORY 1\n"Quinta de diagnóstico rápido. Responde com honestidade."\n\nSTORY 2 — ENQUETE\n"Você sabe de onde vem a maioria dos seus clientes hoje?"\n> Sei exatamente\n> Não faço ideia\n\nSTORY 3 — ENQUETE\n"Seu processo de vendas funciona sem você?"\n> Sim, roda sozinho\n> Só funciona se eu empurrar\n\nSTORY 4 — ENQUETE\n"Você tem previsibilidade de receita pro mês que vem?"\n> Tenho, sei o que vem\n> Torço pra aparecer\n\nSTORY 5\n"Três nãos — empresa no improviso.\nDois nãos — melhorando mas ainda trava.\nZero nãos — você é exceção."\n\nSTORY 6 — CTA\n"Se você quer sair do improviso de vez — link na bio."`,
+    cta: 'Link na bio. Últimas vagas da imersão.'
+  },
+  'sex-stories': {
+    titulo: 'Stories · Sexta — React ou análise de marca',
+    formato: 'Sequência de 5 stories · sexta-feira',
+    hook: 'Sexta. Vou reagir a uma coisa que vi essa semana.',
+    corpo: `STORY 1\n"Sexta. Vou reagir a uma coisa que vi essa semana."\n\nSTORY 2\n[MOSTRA PRINT, NOTÍCIA OU POST]\n\nSTORY 3 — VÍDEO\nJuninho reage em 30-45 segundos.\nCom opinião real. Pode elogiar ou criticar.\n\nSTORY 4 — ENQUETE\n"Você concorda com o que eu falei?"\n> Sim, faz sentido\n> Discordo\n\nSTORY 5\n"Quem discordou — me manda nos comentários por quê.\nAdoro debate bom."`,
+    cta: 'Comenta no post qual foi a sua opinião sobre isso.'
+  },
+  'sab-stories': {
+    titulo: 'Stories · Sábado — Case e prova social',
+    formato: 'Sequência de 5 stories · sábado',
+    hook: 'Sábado. Deixa eu te contar uma história.',
+    corpo: `STORY 1\n"Sábado. Deixa eu te contar uma história."\n\nSTORY 2\n[CASE REAL DE CLIENTE — sem nome se preferir]\nSituação que chegou. O que estava errado. O que foi feito.\n\nSTORY 3\n"O resultado não veio de milagre.\nVeio de estrutura."\n\nSTORY 4 — ENQUETE\n"Você já passou por situação parecida?"\n> Sim, me vi aqui\n> Não, meu caso é diferente\n\nSTORY 5 — CTA\n"Se você quer esse olhar no seu negócio — link na bio.\nÚltimas vagas da imersão."`,
+    cta: 'Link na bio. Imersão PBE.'
+  },
+  'dom-stories': {
+    titulo: 'Stories · Domingo — Provocação e caixinha',
+    formato: 'Sequência de 5 stories · domingo',
+    hook: 'Antes de começar mais uma semana igual à anterior —',
+    corpo: `STORY 1\n"Antes de começar mais uma semana igual à anterior —"\n\nSTORY 2 — ENQUETE\n"Você vai fazer algo diferente essa semana?"\n> Sim, já sei o que mudar\n> Provavelmente não\n\nSTORY 3\n"Quem respondeu 'provavelmente não' —\na pergunta não é o que você vai fazer diferente.\nÉ o que você vai PARAR de fazer igual."\n\nSTORY 4\n"Empresa que não muda — não cresce.\nSó envelhece."\n\nSTORY 5 — CAIXINHA\n"Me manda o que tá te travando essa semana.\nRespondo segunda."`,
+    cta: 'Caixinha aberta. Responde na segunda.'
+  },
+  // Comercial imersão
+  'im-marketing': {
+    titulo: 'Stories · Aquecimento — Marketing não resolve',
+    formato: 'Sequência de 5 stories',
+    hook: 'Você acha que seu problema é marketing.\nE sinto te dizer: na maioria das vezes, não é.',
+    corpo: `STORY 1\n"Você acha que seu problema é marketing.\nE sinto te dizer: na maioria das vezes, não é."\n\nSTORY 2\n"Se fosse marketing era simples.\nInvestia mais, aparecia mais, resolvia.\nMas você já fez isso. E não resolveu."\n\nSTORY 3\n"Marketing não corrige:\n— empresa desorganizada\n— time desalinhado\n— operação fraca\n— posicionamento ruim"\n\nSTORY 4\n"Marketing só deixa mais visível o problema que já existe.\nPra todo mundo ver."\n\nSTORY 5 — CTA\n"Na última imersão isso abriu a cabeça de muita gente.\nSe você quer entender seu gargalo de verdade — não pode ficar de fora.\nÚltimas vagas. Link na bio."`,
+    cta: 'Link na bio. Últimas vagas imersão PBE.'
+  },
+  'im-cobrar': {
+    titulo: 'Stories · Aquecimento — Não consegue cobrar mais',
+    formato: 'Sequência de 5 stories',
+    hook: 'Se você não consegue cobrar mais — a culpa é sua.',
+    corpo: `STORY 1 — GANCHO\n"Se você não consegue cobrar mais — a culpa é sua."\n\nSTORY 2\n"O mercado ainda não te vê como alguém que vale mais.\nValor e preço são diferentes.\nMas ninguém nunca te disse isso, né?"\n\n[ENQUETE: Faz sentido. Conta mais Juninho]\n\nSTORY 3\n"Posicionamento não se resolve com post bonito.\nNem com mais tráfego.\nVocê precisa GERAR VALOR ATRAVÉS DA PERCEPÇÃO do seu cliente."\n\nSTORY 4\n"Na imersão PBE eu e meu time te mostramos isso na prática.\nQuer parar de competir por preço?\nNão fique de fora da próxima edição."\n\nSTORY 5 — CTA\n"Últimas vagas. Link na bio."`,
+    cta: 'Link na bio. Imersão PBE.'
+  },
+  'im-abertura': {
+    titulo: 'Reels · Abertura oficial da imersão',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Tá na hora de abrir.\nDia 13 de junho. Um dia inteiro. Sua empresa sai com clareza e direção.',
+    corpo: `Não é palestra. Não é curso. Não é motivação.\n\nÉ trabalho real com quem já estruturou mais de 600 projetos\ne acompanhou mais de 200 milhões faturados no digital.\n\nVocê não sai com mais conteúdo pra estudar.\nVocê sai sabendo o que está travando seu crescimento\ne o que precisa ser feito primeiro.\n\nClareza. Direção. Próximo passo real.\n\nAs vagas são poucas. De propósito.\n\nO link está na bio.\n\nSe você está pronto pra parar de improvisar —\nte vejo no dia 13.`,
+    cta: 'Link na bio. Garante sua vaga agora.'
+  },
+  'im-para-quem': {
+    titulo: 'Reels · Para quem é a imersão',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Vou ser direto sobre pra quem é a imersão.\nE sobre pra quem não é.',
+    corpo: `A imersão do dia 13 não é pra todo mundo.\n\nÉ pra você que já tem empresa ou já atua como especialista —\nmas sente que o negócio ainda depende demais de você.\n\nÉ pra você que fatura, mas sem previsibilidade.\nQue tem marketing rodando, mas sem clareza de resultado.\n\nÉ pra você que está crescendo, mas de forma desorganizada —\ne já percebeu que isso não é sustentável.\n\nNão é pra quem está começando do zero.\nNão é pra quem quer fórmula pronta ou atalho rápido.\nNão é pra quem não está disposto a olhar pra própria empresa com honestidade.\n\nSe você se viu no primeiro grupo — o link está na bio.\nSe você se viu no segundo — tudo bem. Não é o momento.\n\nMas se é pra você — não deixa pra depois.`,
+    cta: 'Link na bio. Vagas se encerrando.'
+  },
+  // Urgência
+  'urg-1': {
+    titulo: 'Stories · Urgência — Vagas quase no fim',
+    formato: 'Story · 15 segundos',
+    hook: 'As vagas acabaram. Quase.',
+    corpo: `Não é discurso de marketing.\nSão 20 vagas.\n\nNão é porque é bonito falar.\nÉ porque a imersão funciona com grupo pequeno — ou não funciona.\n\nSe você está aqui ainda em cima do muro:\na próxima oportunidade não tem data.`,
+    cta: 'Link na bio. Enquanto tem vaga.'
+  },
+  'urg-2': {
+    titulo: 'Stories · Urgência — Não é pra todo mundo',
+    formato: 'Story · 15 segundos',
+    hook: 'Isso não é pra todo mundo. Literalmente.',
+    corpo: `20 vagas.\nNão é discurso.\n\nÉ porque imersão que funciona não funciona com 200 pessoas.\n\nSe você estava esperando sinal —\nesse é o sinal.`,
+    cta: 'Link na bio. Enquanto dá.'
+  },
+  'urg-3': {
+    titulo: 'Stories · Urgência — Vai deixar essa passar',
+    formato: 'Story · 20 segundos',
+    hook: 'Você vai deixar essa passar também?',
+    corpo: `Eu sei que você está pensando.\n"Vou ver se encaixa na agenda."\n"Vou deixar pro próximo."\n"Vou esperar o momento certo."\n\nMas o momento certo não vem.\nVocê sabe disso melhor do que ninguém.\n\nEnquanto você espera — a empresa continua no mesmo lugar.`,
+    cta: 'Se você sabe que precisa — para de esperar. Link na bio.'
+  },
+  'urg-4': {
+    titulo: 'Stories · Urgência — Última chamada',
+    formato: 'Story · 15 segundos',
+    hook: 'Última chamada.',
+    corpo: `Não tem countdown.\nNão tem "só hoje".\n\nMas as vagas são finitas.\nE quando a última fechar, acabou.\n\nSimples assim.`,
+    cta: 'Link na bio. Garante agora.'
+  },
+  'urg-5': {
+    titulo: 'Stories · Urgência — Você ainda quer ir?',
+    formato: 'Story · 15 segundos',
+    hook: 'Tô fechando as vagas. Você ainda quer ir?',
+    corpo: `Pergunta simples.\nSe a resposta for sim — garante agora.\nSe for "deixa eu pensar" — já pensou o suficiente.\n\nEmpresa que precisa de estrutura não espera você decidir.\nEla continua no improviso enquanto você pensa.`,
+    cta: 'Link na bio. Responde com ação, não com "vou ver".'
+  },
+  'urg-6': {
+    titulo: 'Stories · Urgência máxima — Fechando. Agora.',
+    formato: 'Story · 10 segundos máximo',
+    hook: 'Fechando. Agora.',
+    corpo: `Simples.\n\nAs vagas estão encerrando.\n\nSe você queria ir — agora é a hora.\nSe estava esperando sinal — esse é o sinal.`,
+    cta: 'Link na bio. Enquanto dá.'
+  },
+  // Venda
+  'venda-1': {
+    titulo: 'Reels · Venda direta 60s',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Você fatura bem. Trabalha feito louco.\nE no fim do mês não sabe por que não sobrou mais.',
+    corpo: `Isso não é mercado difícil.\nNão é falta de cliente.\nÉ sua empresa sem estrutura.\n\nMarketing que não converte.\nVendas que dependem da sua energia.\nOperação que para quando você para.\n\nDia 13 de junho eu abro a VNOVE pra 20 empresários.\n\nNão é curso. Não é palestra motivacional.\nÉ um dia inteiro desmontando o que tá travando o seu negócio.\n\nPosicionamento. Marketing. Vendas. Financeiro.\nTudo na mesa. Sem papas na língua.\n\nVocê sai com clareza e um plano real.\nNão com caderno cheio de anotação bonita.\n\n20 vagas. Esgota.`,
+    cta: 'Pronto pra parar de brincar de empresa? Link na bio.'
+  },
+  'venda-2': {
+    titulo: 'Reels · Você fatura mas não cresce',
+    formato: 'Reels · câmera direta · 45s',
+    hook: 'Você vende. Mas não cresce.\nE sabe que o problema não é falta de esforço.',
+    corpo: `Você já tentou mais tráfego.\nJá tentou novo vendedor.\nJá tentou mudar o produto.\n\nE continua no mesmo lugar.\n\nPorque o problema não é nenhum desses.\n\nÉ estrutura.\n\nMarketing organizado. Vendas previsíveis. Posicionamento claro.\n\nÉ exatamente isso que a gente trabalha na imersão Pare de Brincar de Empresa.\n\nUm dia. 20 empresários. Resultado real.`,
+    cta: 'Link na bio. Últimas vagas.'
+  },
+  'venda-3': {
+    titulo: 'Stories · O que acontece no dia 13',
+    formato: 'Sequência de 4 stories',
+    hook: 'Deixa eu te mostrar o que vai acontecer no dia 13.',
+    corpo: `STORY 1 — "Deixa eu te mostrar o que vai acontecer no dia 13."\n\nSTORY 2\n"09h — Recepção + Coffee\n09h30 — Pare de Brincar de Empresa com Juninho\n11h — Sabatina 20x1 com Juninho\n11h40 — Erros financeiros que impedem crescimento\n12h10 — Processos como alavanca de crescimento"\n\nSTORY 3\n"13h — Almoço com chef na VNOVE\n14h — Tráfego pago para empresários\n14h30 — Posicionamento como motor de vendas\n15h — HOT SEAT: sua empresa analisada ao vivo com Juninho e time"\n\nSTORY 4 — CTA\n"Um dia inteiro. 20 empresários. Time completo da VNOVE.\nVocê sai com direção — não com motivação.\nLink na bio."`,
+    cta: 'Link na bio.'
+  },
+  'venda-4': {
+    titulo: 'Stories · O time que vai estar lá',
+    formato: 'Sequência de 5 stories',
+    hook: 'No dia 13 você não vai falar só com Juninho.',
+    corpo: `STORY 1 — "No dia 13 você não vai falar só com Juninho."\n\nSTORY 2 — Juninho Brum\n"30 anos de empresa. Fundador da VNOVE.\n+600 projetos. +R$200M faturados no digital.\nNão é guru. É empresário."\n\nSTORY 3 — Otávio Spinelli\n"CFO da VNOVE. Vai falar sobre os erros financeiros que impedem crescimento.\nO que você não vê no seu caixa mas deveria."\n\nSTORY 4 — Patrizia + Lucas + Dayane\n"Patrizia — processos e estrutura.\nLucas — performance e tráfego.\nDayane — posicionamento e autoridade."\n\nSTORY 5 — CTA\n"Um dia. Seis especialistas. 20 vagas.\nLink na bio."`,
+    cta: 'Link na bio.'
+  },
+  'venda-5': {
+    titulo: 'Stories · Hot Seat — sua empresa ao vivo',
+    formato: 'Sequência de 3 stories',
+    hook: 'Tem um momento na imersão que ninguém esquece.',
+    corpo: `STORY 1 — "Tem um momento na imersão que ninguém esquece."\n\nSTORY 2\n"O Hot Seat.\n\nVocê coloca a sua empresa na mesa.\nJuninho e o time analisam ao vivo.\nDiante de todo mundo.\n\nSem filtro.\nSem papas na língua.\nCom a leitura de quem já viu 600 empresas por dentro."\n\nSTORY 3 — CTA\n"Você sai sabendo exatamente o que tá travando.\nNão o que você acha.\nO que realmente é.\n\nLink na bio. 20 vagas."`,
+    cta: 'Link na bio.'
+  },
+  'venda-6': {
+    titulo: 'Stories · Não é curso nem palestra',
+    formato: 'Sequência de 4 stories',
+    hook: 'A imersão não é curso.\nNão é palestra.\nNão é evento pra anotar frase bonita.',
+    corpo: `STORY 1 — "Não é curso. Não é palestra. Não é evento pra anotar frase bonita."\n\nSTORY 2\n"É um dia pra você olhar pro seu negócio de verdade.\nEnxergar os gargalos.\nE decidir se vai continuar improvisando — ou estruturar de vez."\n\nSTORY 3\n"Você não sai com motivação.\nVocê sai com um plano."\n\nSTORY 4 — CTA\n"20 vagas. Dia 13 de junho. Link na bio."`,
+    cta: 'Link na bio.'
+  },
+  'im-estrutura': {
+    titulo: 'Reels · Empresa que cresce sem estrutura vai quebrar',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Deixa eu te contar o que acontece com a empresa que cresce rápido sem estrutura.',
+    corpo: `No começo parece ótimo.\nVendas subindo. Clientes chegando. Faturamento batendo recorde.\n\nAí começa.\n\nAtendimento piora porque não tem processo.\nCliente reclama porque não tem padrão.\nFuncionário erra porque não tem treinamento.\nDono trabalha 14h tentando segurar tudo.\nCaixa aperta porque crescer custa.\n\nO negócio que parecia estar decolando começa a rachar por dentro.\n\nIsso não é azar.\nÉ previsível.\n\nEmpresa que cresce sem base chega num ponto\nondem o crescimento vira o problema.\n\nA solução não é crescer menos.\nÉ crescer com estrutura.`,
+    cta: 'Na imersão a gente para e monta essa base. Link na bio.'
+  },
+  'im-cliente-ruim': {
+    titulo: 'Stories · Aquecimento — Cliente ruim',
+    formato: 'Sequência de 5 stories',
+    hook: 'Você só atrai cliente ruim.\nFica brigando por preço, demora pra fechar, quer que entregue até as calças.',
+    corpo: `STORY 1 — GANCHO\n"Você só atrai cliente ruim. Fica brigando por preço, demora pra fechar, quer que entregue até as calças."\n\nSTORY 2\n"Acredita, depois de 30 anos de marketing eu sei.\nMas tenho que te dar uma notícia:\nCliente ruim não aparece por azar. Aparece pelo que você comunica."\n\nSTORY 3\n"Se você negocia demais — você comunicou que o preço é negociável.\nSe o cliente questiona valor — você não comunicou valor, comunicou preço.\nSe você precisa convencer pra fechar — o posicionamento não qualificou antes da venda."\n\nSTORY 4\n"Você não atrai o cliente que quer.\nVocê atrai o cliente que sua comunicação transmite."\n\nSTORY 5 — CTA\n"Quer resolver isso e aprender a atrair o cliente que paga de verdade?\nVem pra imersão dia 13. Clica aqui pra saber mais."`,
+    cta: 'Link na bio. Últimas vagas.'
+  },
+  'im-gargalo': {
+    titulo: 'Reels · Sua empresa poderia crescer 3x mais',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Sua empresa poderia estar crescendo 3x mais.\nMas você tá olhando pro lugar errado.',
+    corpo: `Acha que é marketing.\nAcha que é equipe.\nAcha que é preço.\n\nMas a real é que você não faz a menor ideia de onde tá vazando.\n\nE sem essa clareza e direção —\nvocê só tenta fazer tudo ao mesmo tempo e continua patinando.\n\nEu sei. Acredite.\nIsso é mais comum do que você imagina.\n30 anos lidando com empresários me mostraram isso na prática.\n\nNas últimas imersões, mais de 40 empresários abriram a cabeça\ne souberam ONDE ESTÁ o que está impedindo o crescimento.\n\nVai acontecer mais uma edição pra somente 20 empresários.`,
+    cta: 'Você não vai continuar rodando em círculo, né? Link na bio.'
+  },
+  'im-lead': {
+    titulo: 'Reels · Um dia vale mais que 1 ano sozinho',
+    formato: 'Reels · câmera direta · 60s',
+    hook: 'Você já tentou resolver sozinho por quanto tempo?\nUm ano? Dois? Três?',
+    corpo: `E em quanto tempo você chegou numa clareza real\nsobre o que precisava mudar?\n\nIsso não é crítica. É realidade.\nQuando você está dentro do negócio —\né difícil enxergar o que está travando.\n\nVocê está operacional demais pra ser estratégico.\n\nUma imersão presencial não é curso.\nNão é palestra.\n\nÉ um dia inteiro de olho na sua empresa.\nIdentificando gargalos.\nEstruturando marketing.\nOrganizando vendas.\n\nVocê sai com clareza do que precisa fazer.\nNão com mais informação.\nCom decisão.\n\nUm dia bem investido vale mais do que um ano\ntentando sozinho no escuro.`,
+    cta: 'Acessa o link na bio e garante sua vaga.'
+  },
+  // Juninho Responde stories
+  'jr-1': {
+    titulo: 'Juninho Responde · Quando contratar agência',
+    formato: 'Story/Reels · 30-45s',
+    hook: 'Me perguntaram: quando vale a pena contratar agência?',
+    corpo: `Resposta direta:\n\nNunca — se você não sabe o que quer que a agência faça.\n\nAgência de serviço executa o que você pede.\nSe você não sabe o que pedir —\nvocê vai pagar pra ter alguém executando no escuro.\n\nAgência de solução — como a VNOVE — diz o que você precisa.\nMesmo que não seja o que você quer ouvir.\n\nAntes de contratar qualquer agência —\nresponde uma pergunta:\n\nVocê sabe qual é o seu problema real?\nNão o que você acha que é.\nO que realmente está travando o crescimento?\n\nSe não sabe — primeiro resolve isso.\nDepois contrata agência.`,
+    cta: 'Manda a próxima pergunta na caixinha.'
+  },
+  'jr-2': {
+    titulo: 'Juninho Responde · Time não vende',
+    formato: 'Story/Reels · 30-45s',
+    hook: 'Me perguntaram: meu time não vende. É o time ou o processo?',
+    corpo: `Provavelmente o processo.\n\nMas deixa eu ser honesto:\nnove em dez vezes que o empresário me faz essa pergunta —\no problema é os dois.\n\nTime ruim em processo ruim = desastre garantido.\nTime bom em processo ruim = resultado medíocre.\nTime ruim em processo bom = pode funcionar mais do que você imagina.\nTime bom em processo bom = empresa que escala.\n\nAntes de demitir o vendedor —\npergunta: ele tem script? Tem processo de follow up?\nSabe quais objeções vai receber e como contornar?\n\nSe não tem —\nvocê não tem time de vendas fraco.\nVocê tem time sem ferramenta.`,
+    cta: 'Manda a próxima pergunta na caixinha.'
+  },
+  'jr-3': {
+    titulo: 'Juninho Responde · Como cobrar mais',
+    formato: 'Story/Reels · 30-45s',
+    hook: 'Me perguntaram: como cobrar mais sem perder o cliente que já tenho?',
+    corpo: `Primeiro: se o cliente vai embora por aumento de preço —\nele nunca foi seu cliente.\nFoi do preço.\n\nSegundo: você não cobra mais de uma vez.\nVocê reconstrói a percepção de valor — e cobra mais naturalmente.\n\nComo reconstrói percepção?\n\nEntregando mais do que promete.\nComunicando o processo, não só o resultado.\nMostrando o que ninguém mais mostra.\nCriando comparação onde você ganha.\n\nQuando o cliente percebe o valor —\nele não pergunta o preço.\nEle pergunta como fecha.`,
+    cta: 'Manda a próxima pergunta na caixinha.'
+  },
+  'jr-4': {
+    titulo: 'Juninho Responde · O que mudar primeiro',
+    formato: 'Story/Reels · 30-45s',
+    hook: 'Me perguntaram: o que você mudaria primeiro numa empresa travada?',
+    corpo: `Sempre a mesma resposta:\n\nA clareza do dono.\n\nNão o marketing.\nNão o time.\nNão o produto.\n\nA clareza do dono.\n\nEmpresário que não sabe por que está travado\nvai mudar a coisa errada.\n\nVai trocar o vendedor quando o problema é o posicionamento.\nVai investir em tráfego quando o problema é o processo de vendas.\nVai contratar gestor quando o problema é ele mesmo não saber delegar.\n\nAntes de mudar qualquer coisa —\nentende o que realmente está travando.\n\nEsse é o trabalho que eu faço.\nNão vendo solução antes de diagnosticar o problema.`,
+    cta: 'Na imersão isso é o primeiro passo. Link na bio.'
+  },
+  'jr-5': {
+    titulo: 'Juninho Responde · Opinião impopular',
+    formato: 'Story/Reels · 45s',
+    hook: 'Me pediram minha opinião mais impopular sobre o mercado.\nLá vai.',
+    corpo: `A maioria dos gurus de marketing\nnunca construiu uma empresa de verdade.\n\nÉ fácil ensinar o que nunca precisou fazer.\nÉ fácil vender método quando você não paga funcionário,\nnão tem inadimplência,\nnão tem cliente ligando às 22h.\n\nEu tenho 30 anos de empresa.\nJá tive agência. Já lancei produto. Já errei. Já perdi cliente. Já aprendi na porrada.\n\nE é por isso que quando eu falo de estrutura de negócio —\nnão é teoria.\n\nÉ o que eu vivi.\nE o que vi funcionar em mais de 600 projetos.\n\nA diferença entre consultor e empresário:\nConsultor aconselha.\nEmpresário arca com as consequências.`,
+    cta: 'Se você quer conselho de quem arca — aqui é o lugar.'
+  },
+  // Stories enquetes
+  'st-depende': {
+    titulo: 'Stories enquete · Você depende ou a empresa depende?',
+    formato: 'Sequência de 5 stories',
+    hook: 'Me faz uma pergunta honesta.',
+    corpo: `STORY 1 — "Me faz uma pergunta honesta."\n\nSTORY 2 — ENQUETE\n"Se você sumir por 15 dias sem celular — o que acontece com sua empresa?"\n> Continua funcionando normal\n> Para tudo\n\nSTORY 3\n"Quem respondeu 'para tudo' —\nvocê não tem empresa.\nVocê tem emprego com CNPJ."\n\nSTORY 4\n"Isso tem solução.\nMas não é contratar mais gente.\nÉ estrutura."\n\nSTORY 5 — CTA\n"Dia 13 a gente trabalha exatamente isso.\n20 vagas. Link na bio."`,
+    cta: 'Link na bio.'
+  },
+  'st-preco': {
+    titulo: 'Stories enquete · Perdeu cliente pelo preço?',
+    formato: 'Sequência de 5 stories',
+    hook: 'Pergunta honesta.',
+    corpo: `STORY 1 — "Pergunta honesta."\n\nSTORY 2 — ENQUETE\n"Você já perdeu cliente porque ele achou caro demais?"\n> Sim, acontece sempre\n> Raramente\n\nSTORY 3\n"Cliente que vai embora por 20% de aumento —\nnunca foi seu cliente.\nFoi do preço."\n\nSTORY 4\n"Isso não é problema de preço.\nÉ problema de posicionamento.\nO mercado não percebe o valor antes de comprar."\n\nSTORY 5 — CTA\n"Na imersão a gente resolve isso.\nLink na bio."`,
+    cta: 'Link na bio.'
+  },
+  'st-marketing': {
+    titulo: 'Stories enquete · Problema é marketing?',
+    formato: 'Sequência de 5 stories',
+    hook: 'Você acha que seu problema é marketing. E sinto te dizer: na maioria das vezes, Não é.',
+    corpo: `STORY 1 — GANCHO\n"Você acha que seu problema é marketing.\nE sinto te dizer: na maioria das vezes, Não é."\n\nSTORY 2\n"Se fosse marketing era simples.\nInvestia mais, aparecia mais, resolvia.\nMas você já fez isso. E não resolveu."\n\nSTORY 3\n"Marketing não corrige:\n— desorganização\n— time desalinhado\n— operação fraca\n— posicionamento ruim"\n\nSTORY 4\n"Marketing só deixa mais visível o problema que já existe.\nPra todo mundo ver."\n\nSTORY 5 — CTA\n"Na última imersão, isso foi o que mais abriu a cabeça da galera.\nSe você quer entender o seu gargalo de verdade, não pode ficar de fora.\nÚLTIMAS VAGAS IMERSÃO PBE."`,
+    cta: 'Link na bio.'
+  },
+  'st-escala': {
+    titulo: 'Stories enquete · Trabalha mais e cresce menos?',
+    formato: 'Sequência de 6 stories',
+    hook: 'Quinta de diagnóstico.',
+    corpo: `STORY 1 — "Quinta de diagnóstico. Responde com honestidade."\n\nSTORY 2 — ENQUETE\n"Você trabalha mais de 10h por dia?"\n> Sim, sempre\n> Às vezes\n\nSTORY 3 — ENQUETE\n"E a empresa cresceu proporcionalmente ao seu esforço?"\n> Sim, cresceu\n> Não, continua igual\n\nSTORY 4 — ENQUETE\n"Você sabe exatamente o que está impedindo o crescimento?"\n> Sei claramente\n> Não faço ideia\n\nSTORY 5\n"Esforço sem estrutura não escala.\nSó cansa.\nIsso tem nome: empresa sem base."\n\nSTORY 6 — CTA\n"Se você quer clareza do que está travando — link na bio.\nImersão PBE. Últimas vagas."`,
+    cta: 'Link na bio.'
+  }
+};
+
+/* ===== V2 — data model ===== */
+const CHAVE_STORAGE = 'vnoveDashboardV2';
+let dados = {
+  planos: {},
+  roteirosEditados: {},
+  ideiasCustom: {},
+  performance: [],
+  produtos: [],
+  agenda: [],
+  tarefas: [],
+  gravados: {}
+};
+let roteirosCustom = {};
+
+function uid() { return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function hojeISO() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(CHAVE_STORAGE);
+    if (raw) dados = Object.assign(dados, JSON.parse(raw));
+  } catch (e) { console.warn('Falha ao ler dados salvos', e); }
+  roteirosCustom = dados.ideiasCustom || {};
+}
+function saveData() {
+  dados.ideiasCustom = roteirosCustom;
+  localStorage.setItem(CHAVE_STORAGE, JSON.stringify(dados));
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function getRoteiro(key) {
+  if (roteirosCustom[key]) return roteirosCustom[key];
+  const base = roteiros[key];
+  if (!base) return null;
+  const edit = dados.roteirosEditados[key];
+  return edit ? Object.assign({}, base, edit) : base;
+}
+
+/* categorias — pra busca, filtro e planejador */
+const categoriaPorChave = {};
+function registrarCategoria(nome, chaves) {
+  chaves.forEach(k => { (categoriaPorChave[k] = categoriaPorChave[k] || []).push(nome); });
+}
+registrarCategoria('Topo de funil', ['semanal','aviao','mangos','segundo','marketing','gargalo','decisao','cliente','vendas','escavo','socio','concentrado','stanley-car','cataflamcar','vw-car','cocacar','mcdonaldscar','grade-car','funil-car','pos-car','ia-car']);
+registrarCategoria('Dores do cliente', ['escavo','marketing','cobrar','vendas','cliente','socio','concentrado','decisao','fatura','gargalo','segundo','aviao']);
+registrarCategoria('React · Notícias', ['mangos','kitkat','adidas','stanley','nike-mind','brahma','duolingo','bobs','baly','coca-garrafa','meta-demissoes']);
+registrarCategoria('Flipchart', ['flip-ltv','flip-mql','flip-upsell','flip-nps','flip-landing','flip-churn','flip-roi','flip-pitch','flip-ancora','flip-story','newsjacking','flip-omni']);
+registrarCategoria('Rotina semanal', ['seg-stories','ter-stories','qua-stories','qui-stories','sex-stories','sab-stories','dom-stories']);
+registrarCategoria('Comercial · Imersão', ['im-marketing','im-estrutura','im-cobrar','im-cliente-ruim','im-gargalo','im-lead','im-para-quem','im-abertura','venda-1','venda-2','venda-3','venda-4','venda-5','venda-6']);
+registrarCategoria('Urgência · Fechamento', ['urg-1','urg-2','urg-3','urg-4','urg-5','urg-6']);
+registrarCategoria('Stories · Enquetes', ['st-depende','st-preco','st-marketing','st-escala','jr-1','jr-2','jr-3','jr-4','jr-5']);
+
+function todasChaves() { return Object.keys(roteiros).concat(Object.keys(roteirosCustom)); }
+function categoriasDe(key) { return categoriaPorChave[key] || (roteirosCustom[key] ? [roteirosCustom[key].categoria || 'Ideia customizada'] : ['Outros']); }
+function formatoClassificado(formatoStr) {
+  const f = (formatoStr || '').toLowerCase();
+  if (f.includes('carrossel')) return 'Carrossel';
+  if (f.includes('stor')) return 'Stories';
+  if (f.includes('flipchart') || f.includes('quadro')) return 'Flipchart';
+  return 'Reels';
+}
+
+/* pilares da escada semanal — usados na Rotina semanal + Planejador */
+const pilarPorChave = {
+  consciencia: ['escavo','marketing','cliente','gargalo','decisao','concentrado','fatura','aviao'],
+  clareza: ['flip-ltv','flip-mql','flip-churn','flip-roi','cobrar','socio'],
+  profundidade: ['grade-car','funil-car','pos-car','ia-car','flip-upsell','flip-nps','flip-story'],
+  prova: ['stanley','stanley-car','baly','cataflamcar','duolingo','bobs','coca-garrafa','kitkat','adidas','nike-mind','brahma','mcdonaldscar','vw-car','cocacar'],
+  venda: ['venda-1','venda-2','venda-3','venda-4','venda-5','venda-6','im-abertura','im-para-quem','urg-1','urg-2','urg-3']
+};
+const nomePilar = { consciencia: 'Consciência', clareza: 'Clareza', profundidade: 'Profundidade', prova: 'Prova', venda: 'Venda' };
+
+/* ===== Navegação ===== */
+function showPage(id) {
+  document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
+  document.getElementById('page-' + id).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (window.event && window.event.currentTarget) window.event.currentTarget.classList.add('active');
+}
+
+function switchSubTab(el, targetId) {
+  const parent = el.closest('.main > div');
+  parent.querySelectorAll('[id]').forEach(d => {
+    if (!d.id.startsWith('page-') && !d.id.startsWith('modal')) d.style.display = 'none';
+  });
+  document.getElementById(targetId).style.display = 'block';
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ===== Mais ideias — gerador de temas ===== */
+const bancoIdeias = {
+  'topo-reels': {
+    ganchos: ['Você já percebeu que {x} e não sabe por quê?', 'Ninguém te conta isso sobre {x}.', 'O erro mais caro que empresário comete com {x}.', '{x} não é o problema. É o sintoma.', 'Isso vai incomodar quem trabalha com {x}.'],
+    itens: ['contratação','precificação','delegação','fluxo de caixa','atendimento','processo comercial','cultura de time','gestão do tempo','tomada de decisão','escala','margem de lucro','retenção de cliente'],
+    formatos: ['Reels · câmera direta · 45-60s','Reels · selfie · 60s','Reels · tela dividida · 60s']
+  },
+  'topo-carrossel': {
+    ganchos: ['Como {x} virou case só com posicionamento', 'O erro de {x} que quase custou a marca inteira', '{x}: a jogada que ninguém viu vir', 'O que {x} fez que todo empresário deveria copiar'],
+    itens: ['Netflix','Spotify','Ifood','Nubank','Magalu','Havaianas','Natura','Renner','Ambev','Localiza'],
+    formatos: ['Carrossel · 7 slides','Carrossel · 8 slides','Carrossel · 6 slides']
+  },
+  'react': {
+    ganchos: ['{x} fez uma jogada que ninguém esperava', 'A notícia que tá bombando sobre {x} — e o que ela ensina', '{x} virou piada ou virou case? Eu decido no vídeo', 'Todo mundo comentando {x}. Poucos entendendo o porquê real'],
+    itens: ['Shein','Temu','Mercado Livre','Casas Bahia','Boticário','Americanas','Vivo','TikTok','OpenAI','Amazon'],
+    formatos: ['Reels · tela dividida · 75s','Reels · câmera direta · 60s']
+  },
+  'dores': {
+    ganchos: ['Se {x} — o problema não é o que você pensa', '{x}. E ninguém fala sobre isso abertamente', 'A dor que todo empresário sente mas não nomeia: {x}', 'Você reconhece isso? {x}'],
+    itens: ['funcionário que some na hora de decidir','cliente que só aparece quando quer desconto','equipe que trabalha mas não entrega resultado','fornecedor que atrasa e você aceita','meta que nunca é revisada','planilha que ninguém mais entende','processo que só existe na cabeça do dono','decisão que devia ter sido tomada há meses'],
+    formatos: ['Reels · câmera direta · 45s','Stories · sequência com enquete']
+  },
+  'flipchart': {
+    ganchos: ['{x}. Você já ouviu — mas sabe o que significa de verdade?', '{x}: a palavra que todo mundo usa errado', 'Vou traduzir {x} em 1 minuto'],
+    itens: ['CAC','Payback','Funil invertido','Ticket médio','Onboarding','Playbook de vendas','Growth','Retenção','Copywriting','Prova social','Gatilho mental','Persona'],
+    formatos: ['Quadro · flipchart · 60s','Quadro · flipchart · 75s']
+  },
+  'imersao-aquecimento': {
+    ganchos: ['{x} é o motivo que mais leva empresário pra imersão', 'Se {x} — a imersão PBE foi feita pra isso', 'Antes de mais tráfego, resolve {x}'],
+    itens: ['operação que trava no dono','time que não bate meta','crescimento sem estrutura','margem que desaparece','falta de processo comercial','dependência de um único cliente'],
+    formatos: ['Sequência de 5 stories','Reels · câmera direta · 60s']
+  },
+  'imersao-venda': {
+    ganchos: ['{x} — e é isso que você vive no dia 13', 'Dentro da imersão a gente resolve {x}', 'O momento da imersão que mais gera resultado: {x}'],
+    itens: ['diagnóstico ao vivo da sua empresa','plano de ação em 1 dia','estrutura de vendas na prática','clareza financeira real','posicionamento que atrai cliente certo'],
+    formatos: ['Reels · câmera direta · 45-60s','Sequência de 4 stories']
+  },
+  'urgencia': {
+    ganchos: ['Faltam poucas vagas — e {x}', '{x}. As vagas não esperam', 'Se {x}, essa é sua última chance'],
+    itens: ['você ainda tá pensando','o grupo funciona pequeno','o próximo lote sobe de preço','só abre de novo em meses'],
+    formatos: ['Story · 15-20s','Reels · câmera direta · 30s']
+  },
+  'stories': {
+    ganchos: ['Enquete rápida: {x}', 'Pergunta honesta pra hoje: {x}', 'Antes de continuar o dia, responde: {x}'],
+    itens: ['você sabe seu número de churn?','sua equipe decide sem te consultar?','você já perdeu venda por não ter processo?','seu marketing gera lead ou gera confusão?'],
+    formatos: ['Sequência de 5 stories com enquete','Sequência de 4 stories']
+  }
+};
+const nomeCategoriaIdeia = { 'topo-reels': 'Topo de funil · Reels', 'topo-carrossel': 'Topo de funil · Carrossel', 'react': 'React · Notícias', 'dores': 'Dores do cliente', 'flipchart': 'Flipchart', 'imersao-aquecimento': 'Comercial · Aquecimento', 'imersao-venda': 'Comercial · Venda', 'urgencia': 'Urgência · Fechamento', 'stories': 'Stories · Enquetes' };
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function gerarIdeias(categoria, qtd) {
+  qtd = qtd || 4;
+  const banco = bancoIdeias[categoria];
+  const ideias = [];
+  const usados = new Set();
+  let tentativas = 0;
+  while (ideias.length < qtd && tentativas < qtd * 10) {
+    tentativas++;
+    const gancho = pick(banco.ganchos);
+    const item = pick(banco.itens);
+    const formato = pick(banco.formatos);
+    const titulo = gancho.replace('{x}', item);
+    if (usados.has(titulo)) continue;
+    usados.add(titulo);
+    ideias.push({ titulo, formato, categoria });
+  }
+  return ideias;
+}
+
+function maisIdeias(categoria) {
+  const ideias = gerarIdeias(categoria, 4);
+  const nomeCat = nomeCategoriaIdeia[categoria] || categoria;
+  document.getElementById('modal-title').textContent = '💡 Mais ideias — ' + nomeCat;
+  const html = ideias.map((idea, i) => `
+    <div class="idea-card" onclick="usarIdeia(${i})">
+      <div class="idea-title">${idea.titulo}</div>
+      <div class="idea-sub">${idea.formato}</div>
+    </div>
+  `).join('');
+  document.getElementById('modal-body').innerHTML = `
+    <p style="font-size:12px;color:#555;margin-bottom:14px">Sugestões geradas a partir do seu banco de temas. Clique numa pra transformar em roteiro editável — adapte antes de gravar.</p>
+    ${html}
+    <div class="toolbar"><span class="btn" onclick="maisIdeias('${categoria}')">🔄 Gerar outras 4</span></div>
+  `;
+  window._ideiasAtuais = ideias;
+  modalChaveAtual = null;
+  document.getElementById('modal').classList.add('show');
+}
+
+function usarIdeia(i) {
+  const idea = window._ideiasAtuais[i];
+  const key = 'custom-' + uid();
+  roteirosCustom[key] = {
+    titulo: idea.titulo,
+    formato: idea.formato,
+    hook: idea.titulo,
+    corpo: '[Desenvolva aqui: contexto → tensão → virada → ensinamento. Use o tom direto do Juninho — sem enrolação.]',
+    cta: '[Escreva aqui a chamada para ação — comentário, link na bio ou pergunta.]',
+    categoria: idea.categoria
+  };
+  saveData();
+  openModal(key);
+  modalEditando = true;
+  renderModalBody();
+  toast('Ideia criada — ajuste o roteiro antes de gravar.');
+}
+
+/* ===== Modal de roteiro (com ajuste antes de gravar) ===== */
+let modalChaveAtual = null;
+let modalEditando = false;
+
+function openModal(key) {
+  const r = getRoteiro(key);
+  if (!r) return;
+  modalChaveAtual = key;
+  modalEditando = false;
+  renderModalBody();
+  document.getElementById('modal').classList.add('show');
+}
+
+function renderModalBody() {
+  const key = modalChaveAtual;
+  const r = getRoteiro(key);
+  if (!r) return;
+  document.getElementById('modal-title').innerHTML = r.titulo + (dados.roteirosEditados[key] ? '<span class="modal-badge">✏️ ajustado</span>' : '');
+
+  if (!modalEditando) {
+    document.getElementById('modal-body').innerHTML = `
+      <p style="font-size:12px;color:#555;margin-bottom:16px">${r.formato}</p>
+      <div class="modal-section">
+        <div class="modal-label">Gancho — primeiros 3 segundos</div>
+        <div class="modal-hook">${r.hook.replace(/\n/g,'<br>')}</div>
+      </div>
+      <div class="divider-modal"></div>
+      <div class="modal-section">
+        <div class="modal-label">Roteiro completo</div>
+        <div class="modal-body">${r.corpo}</div>
+      </div>
+      <div class="divider-modal"></div>
+      <div class="modal-section">
+        <div class="modal-label">CTA</div>
+        <div class="modal-cta">${r.cta}</div>
+      </div>
+      <div class="toolbar">
+        <span class="copy-btn" onclick="copyRoteiro()" style="margin-top:0">📋 Copiar roteiro completo</span>
+        <span class="btn" onclick="adicionarAoPlanoHoje('${key}')">🗓️ Adicionar ao plano de hoje</span>
+      </div>
+    `;
+  } else {
+    document.getElementById('modal-body').innerHTML = `
+      <div class="edit-label">Formato</div>
+      <input class="edit-input" id="edit-formato" value="${(r.formato||'').replace(/"/g,'&quot;')}">
+      <div class="edit-label">Gancho</div>
+      <textarea class="edit-textarea" id="edit-hook" rows="3">${r.hook}</textarea>
+      <div class="edit-label">Roteiro completo</div>
+      <textarea class="edit-textarea" id="edit-corpo" rows="10">${r.corpo}</textarea>
+      <div class="edit-label">CTA</div>
+      <textarea class="edit-textarea" id="edit-cta" rows="3">${r.cta}</textarea>
+      <div class="toolbar">
+        <span class="btn btn-primary" onclick="salvarAjuste()">💾 Salvar ajuste</span>
+        ${(!roteirosCustom[key] && dados.roteirosEditados[key]) ? '<span class="btn" onclick="restaurarOriginal()">↩️ Restaurar original</span>' : ''}
+        <span class="btn" onclick="cancelarEdicao()">✕ Cancelar</span>
+      </div>
+    `;
+  }
+}
+
+function toggleEdit() {
+  if (!modalChaveAtual) return;
+  modalEditando = !modalEditando;
+  renderModalBody();
+}
+
+function salvarAjuste() {
+  const key = modalChaveAtual;
+  const novo = {
+    formato: document.getElementById('edit-formato').value,
+    hook: document.getElementById('edit-hook').value,
+    corpo: document.getElementById('edit-corpo').value,
+    cta: document.getElementById('edit-cta').value
+  };
+  if (roteirosCustom[key]) {
+    Object.assign(roteirosCustom[key], novo);
+  } else {
+    dados.roteirosEditados[key] = novo;
+  }
+  saveData();
+  modalEditando = false;
+  renderModalBody();
+  renderBrowseList();
+  renderPlannerSlots();
+  toast('Roteiro ajustado e salvo!');
+}
+
+function restaurarOriginal() {
+  delete dados.roteirosEditados[modalChaveAtual];
+  saveData();
+  modalEditando = false;
+  renderModalBody();
+  renderBrowseList();
+  renderPlannerSlots();
+  toast('Roteiro restaurado ao original.');
+}
+
+function cancelarEdicao() {
+  modalEditando = false;
+  renderModalBody();
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  modalChaveAtual = null;
+  modalEditando = false;
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+function copyRoteiro() {
+  const r = getRoteiro(modalChaveAtual);
+  if (!r) return;
+  const texto = `${r.titulo}\n${r.formato}\n\nGANCHO:\n${r.hook}\n\nROTEIRO:\n${r.corpo}\n\nCTA:\n${r.cta}`;
+  navigator.clipboard.writeText(texto).then(() => toast('✓ Roteiro copiado!'));
+}
+
+/* ===== CSV / download helpers ===== */
+function escapeCSV(v) {
+  v = String(v == null ? '' : v).replace(/\n/g, ' ');
+  if (/[",;]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+  return v;
+}
+function linhasParaCSV(headers, rows) {
+  return [headers.join(';')].concat(rows.map(r => r.map(escapeCSV).join(';'))).join('\r\n');
+}
+function baixarArquivo(filename, conteudo, tipo) {
+  const blob = new Blob([conteudo], { type: tipo || 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ===== Planejador diário ===== */
+let planoAtual = { data: hojeISO(), itens: [] };
+let filtroPlanejador = 'todos';
+
+function mudarDataPlano() {
+  const data = document.getElementById('planejador-data').value || hojeISO();
+  planoAtual = { data, itens: (dados.planos[data] || []).slice() };
+  renderPlannerSlots();
+}
+
+function renderPlannerFiltros() {
+  const cats = ['todos'].concat(Object.keys(nomeCategoriaIdeia).length ? [] : []);
+  const todasCats = ['todos','Topo de funil','Dores do cliente','React · Notícias','Flipchart','Rotina semanal','Comercial · Imersão','Urgência · Fechamento','Stories · Enquetes'];
+  document.getElementById('planejador-filtros').innerHTML = todasCats.map(c =>
+    `<span class="filter-chip ${c === filtroPlanejador ? 'active' : ''}" onclick="setFiltroPlanejador('${c.replace(/'/g,"\\'")}')">${c}</span>`
+  ).join('');
+}
+function setFiltroPlanejador(cat) { filtroPlanejador = cat; renderPlannerFiltros(); renderBrowseList(); }
+
+function renderBrowseList() {
+  const termo = (document.getElementById('planejador-busca').value || '').toLowerCase();
+  const lista = document.getElementById('planejador-lista');
+  const chaves = todasChaves().filter(k => {
+    const r = getRoteiro(k);
+    if (!r) return false;
+    if (filtroPlanejador !== 'todos' && !categoriasDe(k).includes(filtroPlanejador)) return false;
+    if (termo && !(r.titulo.toLowerCase().includes(termo) || (r.hook || '').toLowerCase().includes(termo))) return false;
+    return true;
+  });
+  lista.innerHTML = chaves.slice(0, 120).map(k => {
+    const r = getRoteiro(k);
+    const selecionado = planoAtual.itens.includes(k);
+    return `<div class="browse-item ${selecionado ? 'selected' : ''}" onclick="toggleSelecaoPlano('${k}')">
+      <div class="browse-check">${selecionado ? '✓' : ''}</div>
+      <div><div class="item-title" style="margin-bottom:2px">${r.titulo}</div><div class="item-desc">${r.formato}</div></div>
+    </div>`;
+  }).join('') || '<div class="plan-empty">Nada encontrado com esse filtro.</div>';
+}
+
+function toggleSelecaoPlano(key) {
+  const idx = planoAtual.itens.indexOf(key);
+  if (idx >= 0) {
+    planoAtual.itens.splice(idx, 1);
+  } else {
+    if (planoAtual.itens.length >= 6) { toast('Máximo de 6 posts por dia. Remova um pra adicionar outro.'); return; }
+    planoAtual.itens.push(key);
+  }
+  dados.planos[planoAtual.data] = planoAtual.itens;
+  saveData();
+  renderBrowseList();
+  renderPlannerSlots();
+}
+
+function moverItemPlano(idx, dir) {
+  const novo = idx + dir;
+  if (novo < 0 || novo >= planoAtual.itens.length) return;
+  const tmp = planoAtual.itens[idx];
+  planoAtual.itens[idx] = planoAtual.itens[novo];
+  planoAtual.itens[novo] = tmp;
+  dados.planos[planoAtual.data] = planoAtual.itens;
+  saveData();
+  renderPlannerSlots();
+}
+function removerItemPlano(idx) {
+  planoAtual.itens.splice(idx, 1);
+  dados.planos[planoAtual.data] = planoAtual.itens;
+  saveData();
+  renderPlannerSlots();
+  renderBrowseList();
+}
+function toggleGravado(key) {
+  const gk = key + '_' + planoAtual.data;
+  dados.gravados[gk] = !dados.gravados[gk];
+  saveData();
+  renderPlannerSlots();
+}
+
+function renderPlannerSlots() {
+  const el = document.getElementById('planejador-slots');
+  let html = '';
+  for (let i = 0; i < 6; i++) {
+    const key = planoAtual.itens[i];
+    if (!key) { html += `<div class="plan-slot"><div class="plan-num">${i+1}</div><div class="plan-empty">Slot vazio</div></div>`; continue; }
+    const r = getRoteiro(key);
+    if (!r) continue;
+    const gk = key + '_' + planoAtual.data;
+    const gravado = !!dados.gravados[gk];
+    html += `<div class="plan-slot filled">
+      <div class="plan-num">${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div class="item-title" style="cursor:pointer" onclick="openModal('${key}')">${r.titulo}</div>
+        <div class="item-desc">${r.formato}${gravado ? ' · ✅ gravado' : ''}</div>
+      </div>
+      <div class="plan-actions">
+        <div class="icon-btn" onclick="moverItemPlano(${i},-1)" title="Subir">▲</div>
+        <div class="icon-btn" onclick="moverItemPlano(${i},1)" title="Descer">▼</div>
+        <div class="icon-btn" onclick="toggleGravado('${key}')" title="Marcar gravado">${gravado ? '↺' : '✓'}</div>
+        <div class="icon-btn" onclick="removerItemPlano(${i})" title="Remover">✕</div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('planejador-slots').innerHTML = html;
+}
+
+function adicionarAoPlanoHoje(key) {
+  if (planoAtual.itens.includes(key)) { toast('Esse post já está no plano do dia.'); return; }
+  if (planoAtual.itens.length >= 6) { toast('Máximo de 6 posts por dia. Vá no Planejador pra ajustar.'); return; }
+  planoAtual.itens.push(key);
+  dados.planos[planoAtual.data] = planoAtual.itens;
+  saveData();
+  renderPlannerSlots();
+  renderBrowseList();
+  toast('Adicionado ao plano de hoje!');
+}
+
+function salvarPlano() {
+  dados.planos[planoAtual.data] = planoAtual.itens;
+  saveData();
+  renderDados();
+  toast('Plano salvo!');
+}
+function limparPlano() {
+  if (!confirm('Limpar o plano deste dia?')) return;
+  planoAtual.itens = [];
+  dados.planos[planoAtual.data] = [];
+  saveData();
+  renderPlannerSlots();
+  renderBrowseList();
+}
+function exportarPlanoCSV() {
+  const rows = planoAtual.itens.map((k, i) => {
+    const r = getRoteiro(k);
+    return [i + 1, r ? r.titulo : k, r ? r.formato : ''];
+  });
+  const csv = linhasParaCSV(['Ordem','Título','Formato'], rows);
+  baixarArquivo('plano_' + planoAtual.data + '.csv', csv);
+}
+function exportarTodosPlanosCSV() {
+  const rows = [];
+  Object.keys(dados.planos).sort().forEach(data => {
+    (dados.planos[data] || []).forEach((k, i) => {
+      const r = getRoteiro(k);
+      rows.push([data, i + 1, r ? r.titulo : k, r ? r.formato : '']);
+    });
+  });
+  const csv = linhasParaCSV(['Data','Ordem','Título','Formato'], rows);
+  baixarArquivo('todos_os_planos.csv', csv);
+}
+
+function montarPlanoPorPilar(pilar) {
+  const chaves = (pilarPorChave[pilar] || []).slice(0, 6);
+  planoAtual.itens = chaves;
+  dados.planos[planoAtual.data] = chaves;
+  saveData();
+  showPage('planejador');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('planejador-data').value = planoAtual.data;
+  renderPlannerFiltros();
+  renderBrowseList();
+  renderPlannerSlots();
+  toast('Plano sugerido (' + nomePilar[pilar] + ') montado — ajuste como quiser.');
+}
+
+/* ===== Rotina semanal ===== */
+const semanaDados = [
+  { nome: 'SEG', icon: '⚡', tipo: 'Opinião impopular + enquete', key: 'seg-stories', pilar: 'consciencia' },
+  { nome: 'TER', icon: '💬', tipo: 'Juninho Responde · caixinha', key: 'ter-stories', pilar: 'clareza' },
+  { nome: 'QUA', icon: '📸', tipo: 'Bastidor real do dia', key: 'qua-stories', pilar: 'profundidade' },
+  { nome: 'QUI', icon: '🩺', tipo: 'Diagnóstico + 3 enquetes', key: 'qui-stories', pilar: 'prova' },
+  { nome: 'SEX', icon: '📰', tipo: 'React · análise de marca', key: 'sex-stories', pilar: 'venda' },
+  { nome: 'SÁB', icon: '📊', tipo: 'Case + prova social + CTA', key: 'sab-stories', pilar: 'prova' },
+  { nome: 'DOM', icon: '❓', tipo: 'Provocação + caixinha aberta', key: 'dom-stories', pilar: 'consciencia' }
+];
+function renderSemana() {
+  document.getElementById('semana-grid').innerHTML = semanaDados.map(d => `
+    <div class="day" onclick="openModal('${d.key}')">
+      <div class="day-name">${d.nome}</div>
+      <div class="day-icon">${d.icon}</div>
+      <div class="day-tipo">${d.tipo}</div>
+      <div class="pilar-tag">${nomePilar[d.pilar]}</div>
+      <div style="margin-top:6px"><span class="icon-btn" style="width:auto;padding:0 6px" onclick="event.stopPropagation();montarPlanoPorPilar('${d.pilar}')" title="Montar plano com esse pilar">🗓️</span></div>
+    </div>
+  `).join('');
+}
+
+/* ===== Buscar temas novos ===== */
+function buscarTemas() {
+  const termo = document.getElementById('busca-input').value.trim();
+  const q = encodeURIComponent(termo);
+  document.getElementById('link-google').href = 'https://www.google.com/search?q=' + q;
+  document.getElementById('link-trends').href = 'https://trends.google.com/trends/explore?q=' + q + '&geo=BR';
+  document.getElementById('link-tiktok').href = 'https://www.tiktok.com/search?q=' + q;
+  document.getElementById('link-x').href = 'https://x.com/search?q=' + q + '&src=typed_query';
+
+  const termoLower = termo.toLowerCase();
+  const resultados = document.getElementById('busca-resultados');
+  if (!termo) { resultados.innerHTML = '<div class="plan-empty">Digite um tema acima pra ver roteiros relacionados aqui.</div>'; return; }
+  const chaves = todasChaves().filter(k => {
+    const r = getRoteiro(k);
+    return r && (r.titulo.toLowerCase().includes(termoLower) || (r.hook || '').toLowerCase().includes(termoLower) || (r.corpo || '').toLowerCase().includes(termoLower));
+  });
+  resultados.innerHTML = chaves.length ? chaves.slice(0, 30).map(k => {
+    const r = getRoteiro(k);
+    return `<div class="item" onclick="openModal('${k}')"><div class="item-title">${r.titulo}</div><div class="item-desc">${r.formato}</div></div>`;
+  }).join('') : '<div class="plan-empty">Nenhum roteiro seu bate com esse termo — use os links acima pra pesquisar tendência nova.</div>';
+}
+
+/* ===== Agenda ===== */
+const tipoAgendaLabel = { gravacao: '🎬 Gravação', reuniao: '🤝 Reunião', imersao: '🏆 Imersão', pessoal: '🧘 Pessoal', outro: '📌 Outro' };
+const tipoAgendaCor = { gravacao: 'tag-gold', reuniao: 'tag-blue', imersao: 'tag-red', pessoal: 'tag-green', outro: 'tag-blue' };
+
+function adicionarEvento() {
+  const data = document.getElementById('agenda-data').value;
+  const hora = document.getElementById('agenda-hora').value;
+  const titulo = document.getElementById('agenda-titulo').value.trim();
+  const tipo = document.getElementById('agenda-tipo').value;
+  if (!data || !titulo) { toast('Preencha data e título do compromisso.'); return; }
+  dados.agenda.push({ id: uid(), data, hora: hora || '00:00', titulo, tipo });
+  saveData();
+  document.getElementById('agenda-titulo').value = '';
+  document.getElementById('agenda-hora').value = '';
+  renderAgenda();
+  renderDados();
+  toast('Compromisso adicionado à agenda!');
+}
+function removerEvento(id) {
+  dados.agenda = dados.agenda.filter(e => e.id !== id);
+  saveData();
+  renderAgenda();
+  renderDados();
+}
+function renderAgenda() {
+  const cont = document.getElementById('agenda-semana');
+  const dias = [];
+  const hoje = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(hoje);
+    d.setDate(hoje.getDate() + i);
+    const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    dias.push({ iso, label: d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }) });
+  }
+  cont.innerHTML = dias.map(dia => {
+    const eventos = (dados.agenda || []).filter(e => e.data === dia.iso).sort((a, b) => a.hora.localeCompare(b.hora));
+    return `<div class="agenda-day">
+      <div class="agenda-day-header"><span>${dia.label}</span></div>
+      ${eventos.length ? eventos.map(e => `
+        <div class="agenda-evento">
+          <div class="agenda-hora">${e.hora}</div>
+          <div class="agenda-titulo">${e.titulo}</div>
+          <span class="tag ${tipoAgendaCor[e.tipo] || 'tag-blue'} agenda-tipo">${tipoAgendaLabel[e.tipo] || e.tipo}</span>
+          <div class="icon-btn" onclick="removerEvento('${e.id}')" title="Remover">✕</div>
+        </div>
+      `).join('') : '<div class="agenda-vazio">Nada agendado.</div>'}
+    </div>`;
+  }).join('');
+}
+
+/* ===== Tarefas ===== */
+function adicionarTarefa() {
+  const titulo = document.getElementById('tarefa-titulo').value.trim();
+  const prazo = document.getElementById('tarefa-prazo').value;
+  const prioridade = document.getElementById('tarefa-prioridade').value;
+  if (!titulo) { toast('Escreva o que precisa ser feito.'); return; }
+  dados.tarefas.push({ id: uid(), titulo, prazo, prioridade, status: 'afazer' });
+  saveData();
+  document.getElementById('tarefa-titulo').value = '';
+  document.getElementById('tarefa-prazo').value = '';
+  renderTarefas();
+  toast('Tarefa adicionada!');
+}
+function avancarTarefa(id) {
+  const t = dados.tarefas.find(x => x.id === id);
+  if (!t) return;
+  t.status = t.status === 'afazer' ? 'andamento' : (t.status === 'andamento' ? 'concluida' : 'afazer');
+  saveData();
+  renderTarefas();
+}
+function removerTarefa(id) {
+  dados.tarefas = dados.tarefas.filter(t => t.id !== id);
+  saveData();
+  renderTarefas();
+}
+function renderTarefas() {
+  const grupos = { afazer: [], andamento: [], concluida: [] };
+  (dados.tarefas || []).forEach(t => (grupos[t.status] || grupos.afazer).push(t));
+  const render = (lista) => lista.length ? lista.map(t => `
+    <div class="tarefa-item ${t.status === 'concluida' ? 'feita' : ''}">
+      <div class="tarefa-check" onclick="avancarTarefa('${t.id}')" title="Avançar status">${t.status === 'concluida' ? '✓' : ''}</div>
+      <div class="tarefa-titulo">${t.titulo}</div>
+      <div class="tarefa-meta">
+        ${t.prazo ? `<span>${t.prazo}</span>` : ''}
+        <span class="prioridade-${t.prioridade}">●</span>
+        <div class="icon-btn" onclick="removerTarefa('${t.id}')">✕</div>
+      </div>
+    </div>
+  `).join('') : '<div class="plan-empty">Vazio.</div>';
+  document.getElementById('tarefas-afazer').innerHTML = render(grupos.afazer);
+  document.getElementById('tarefas-andamento').innerHTML = render(grupos.andamento);
+  document.getElementById('tarefas-concluidas').innerHTML = render(grupos.concluida);
+}
+
+/* ===== Performance ===== */
+function popularSelectPerformance() {
+  const sel = document.getElementById('perf-chave');
+  sel.innerHTML = '<option value="">— selecionar post —</option>' + todasChaves().map(k => {
+    const r = getRoteiro(k);
+    return r ? `<option value="${k}">${r.titulo}</option>` : '';
+  }).join('') + '<option value="__outro__">Outro (não listado)</option>';
+}
+document.addEventListener('change', function (e) {
+  if (e.target && e.target.id === 'perf-chave') {
+    const k = e.target.value;
+    const r = k && k !== '__outro__' ? getRoteiro(k) : null;
+    document.getElementById('perf-formato').value = r ? r.formato : '';
+  }
+});
+
+function registrarPerformance() {
+  const chave = document.getElementById('perf-chave').value;
+  if (!chave) { toast('Selecione o post.'); return; }
+  const r = chave !== '__outro__' ? getRoteiro(chave) : null;
+  const entry = {
+    id: uid(),
+    data: document.getElementById('perf-data').value || hojeISO(),
+    chave: chave,
+    titulo: r ? r.titulo : 'Post não listado',
+    formato: document.getElementById('perf-formato').value,
+    views: Number(document.getElementById('perf-views').value) || 0,
+    likes: Number(document.getElementById('perf-likes').value) || 0,
+    comments: Number(document.getElementById('perf-comments').value) || 0,
+    shares: Number(document.getElementById('perf-shares').value) || 0,
+    saves: Number(document.getElementById('perf-saves').value) || 0,
+    reach: Number(document.getElementById('perf-reach').value) || 0,
+    obs: document.getElementById('perf-obs').value
+  };
+  dados.performance.push(entry);
+  saveData();
+  ['perf-views','perf-likes','perf-comments','perf-shares','perf-saves','perf-reach','perf-obs'].forEach(id => document.getElementById(id).value = '');
+  renderPerfTabela();
+  renderHistorico();
+  renderDados();
+  toast('Performance registrada!');
+}
+function excluirPerformance(id) {
+  dados.performance = dados.performance.filter(p => p.id !== id);
+  saveData();
+  renderPerfTabela();
+  renderHistorico();
+  renderDados();
+}
+function renderPerfTabela() {
+  const lista = (dados.performance || []).slice().sort((a, b) => b.data.localeCompare(a.data));
+  const cont = document.getElementById('perf-tabela');
+  if (!lista.length) { cont.innerHTML = '<div class="plan-empty">Nenhum post registrado ainda.</div>'; return; }
+  cont.innerHTML = `<div style="overflow-x:auto"><table class="perf-table"><thead><tr>
+    <th>Data</th><th>Post</th><th>Formato</th><th>Views</th><th>Likes</th><th>Coment.</th><th>Compart.</th><th>Salvos</th><th>Alcance</th><th></th>
+  </tr></thead><tbody>${lista.map(p => `
+    <tr>
+      <td>${p.data}</td><td>${p.titulo}</td><td>${p.formato || '—'}</td>
+      <td>${p.views}</td><td>${p.likes}</td><td>${p.comments}</td><td>${p.shares}</td><td>${p.saves}</td><td>${p.reach}</td>
+      <td><div class="icon-btn" onclick="excluirPerformance('${p.id}')">✕</div></td>
+    </tr>
+  `).join('')}</tbody></table></div>`;
+}
+function exportarPerformanceCSV() {
+  const rows = (dados.performance || []).map(p => [p.data, p.titulo, p.formato, p.views, p.likes, p.comments, p.shares, p.saves, p.reach, p.obs]);
+  const csv = linhasParaCSV(['Data','Post','Formato','Visualizações','Curtidas','Comentários','Compartilhamentos','Salvamentos','Alcance','Observação'], rows);
+  baixarArquivo('performance_juninho.csv', csv);
+}
+
+/* ===== Histórico comparativo ===== */
+function isoSemana(dataStr) {
+  const d = new Date(dataStr + 'T00:00:00');
+  const alvo = new Date(d.valueOf());
+  const diaSemana = (d.getDay() + 6) % 7;
+  alvo.setDate(d.getDate() - diaSemana + 3);
+  const primeiraQuinta = new Date(alvo.getFullYear(), 0, 4);
+  const semana = 1 + Math.round(((alvo - primeiraQuinta) / 86400000 - 3 + ((primeiraQuinta.getDay() + 6) % 7)) / 7);
+  return 'Sem ' + semana + ' · ' + alvo.getFullYear();
+}
+function renderBars(containerId, items) {
+  const max = Math.max(1, ...items.map(i => i.value));
+  document.getElementById(containerId).innerHTML = items.map(i => `
+    <div class="bar-row">
+      <div class="bar-label">${i.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(i.value / max * 100)}%"></div></div>
+      <div class="bar-value">${Math.round(i.value)}</div>
+    </div>
+  `).join('') || '<div class="plan-empty">Sem dados.</div>';
+}
+function renderHistorico() {
+  const dadosPerf = dados.performance || [];
+  document.getElementById('historico-vazio').style.display = dadosPerf.length ? 'none' : 'block';
+  document.getElementById('historico-conteudo').style.display = dadosPerf.length ? 'block' : 'none';
+  if (!dadosPerf.length) return;
+
+  const porFormato = {};
+  dadosPerf.forEach(p => {
+    const f = formatoClassificado(p.formato);
+    if (!porFormato[f]) porFormato[f] = { soma: 0, n: 0 };
+    porFormato[f].soma += p.views; porFormato[f].n++;
+  });
+  renderBars('hist-formato', Object.keys(porFormato).map(f => ({ label: f, value: porFormato[f].soma / porFormato[f].n })));
+
+  const top5 = dadosPerf.slice().map(p => ({ p, taxa: (p.likes + p.comments + p.shares + p.saves) / Math.max(1, p.views) }))
+    .sort((a, b) => b.taxa - a.taxa).slice(0, 5);
+  document.getElementById('hist-top5').innerHTML = top5.map(t => `
+    <div class="item"><div class="item-title">${t.p.titulo}</div><div class="item-desc">${t.p.views} views · engajamento ${(t.taxa * 100).toFixed(1)}%</div></div>
+  `).join('') || '<div class="plan-empty">Sem dados.</div>';
+
+  const porSemana = {};
+  dadosPerf.forEach(p => { const s = isoSemana(p.data); porSemana[s] = (porSemana[s] || 0) + p.views; });
+  renderBars('hist-semana', Object.keys(porSemana).sort().map(s => ({ label: s, value: porSemana[s] })));
+}
+
+/* ===== Cursos & Produtos ===== */
+const produtosFixos = [
+  { id: 'trafego-pago', nome: 'Tráfego Pago para Empresários', desc: 'Aprenda a rodar tráfego pago com estratégia, sem depender de agência.', preco: '', fixo: true },
+  { id: 'manychat', nome: 'ManyChat na Prática', desc: 'Automatize atendimento e vendas no Instagram e WhatsApp com fluxos que convertem.', preco: '', fixo: true },
+  { id: 'venda-massa', nome: 'Ações de Venda em Massa', desc: 'Estruture campanhas e ativações que vendem pra centenas de clientes de uma vez.', preco: '', fixo: true },
+  { id: 'tiktokshop', nome: 'TikTok Shop — Do Zero ao Primeiro Pedido', desc: 'Monte sua loja dentro do TikTok Shop e comece a vender pela plataforma.', preco: '', fixo: true },
+  { id: 'lp-sozinho', nome: 'Como Fazer uma Landing Page Sozinho, da Sua Casa', desc: 'Sem programar, sem agência: sua página de vendas no ar em poucas horas.', preco: '', fixo: true },
+  { id: 'renda-extra-tiktok', nome: 'Renda Extra com TikTok Shop', desc: 'Estratégias práticas pra gerar uma renda extra vendendo através do TikTok Shop.', preco: '', fixo: true }
+];
+function garantirProdutos() {
+  if (!dados.produtos || !dados.produtos.length) {
+    dados.produtos = produtosFixos.map(p => Object.assign({}, p));
+    saveData();
+  }
+}
+function renderCursos() {
+  garantirProdutos();
+  document.getElementById('cursos-grid').innerHTML = dados.produtos.map((p, i) => `
+    <div class="course-card">
+      <div class="course-num">${i + 1}</div>
+      <div class="course-title">${p.nome}</div>
+      <div class="course-desc">${p.desc}</div>
+      <div class="course-price"><input type="text" value="${(p.preco||'').replace(/"/g,'&quot;')}" placeholder="Definir preço" onblur="atualizarPrecoProduto(${i}, this.value)"></div>
+      <div class="course-actions">
+        <span class="btn btn-sm btn-primary" onclick="gerarRoteiroPromo(${i})">✏️ Gerar roteiro de divulgação</span>
+        ${!p.fixo ? `<span class="btn btn-sm btn-danger" onclick="removerProduto(${i})">🗑️ Remover</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+function atualizarPrecoProduto(i, valor) {
+  dados.produtos[i].preco = valor;
+  saveData();
+}
+function adicionarProduto() {
+  const nome = document.getElementById('prod-nome').value.trim();
+  const desc = document.getElementById('prod-desc').value.trim();
+  const preco = document.getElementById('prod-preco').value.trim();
+  if (!nome) { toast('Digite o nome do produto.'); return; }
+  garantirProdutos();
+  dados.produtos.push({ id: 'custom-' + uid(), nome, desc, preco, fixo: false });
+  saveData();
+  document.getElementById('prod-nome').value = '';
+  document.getElementById('prod-desc').value = '';
+  document.getElementById('prod-preco').value = '';
+  renderCursos();
+  renderDados();
+  toast('Produto adicionado!');
+}
+function removerProduto(i) {
+  if (!confirm('Remover este produto?')) return;
+  dados.produtos.splice(i, 1);
+  saveData();
+  renderCursos();
+  renderDados();
+}
+function gerarRoteiroPromo(i) {
+  const p = dados.produtos[i];
+  const key = 'promo-' + uid();
+  roteirosCustom[key] = {
+    titulo: 'Divulgação · ' + p.nome,
+    formato: 'Reels · câmera direta · 45-60s',
+    hook: `Você já ouviu falar de "${p.nome}"?`,
+    corpo: `[Desenvolva aqui: qual dor "${p.nome}" resolve, como funciona na prática, e uma prova de resultado.]\n\n${p.desc}`,
+    cta: '[Chamada para ação — link na bio, comentário ou DM]',
+    categoria: 'Cursos & Produtos'
+  };
+  saveData();
+  openModal(key);
+  modalEditando = true;
+  renderModalBody();
+  toast('Rascunho de divulgação criado — ajuste antes de gravar.');
+}
+
+/* ===== Dados & Backup ===== */
+function renderDados() {
+  document.getElementById('stat-planos').textContent = Object.keys(dados.planos || {}).filter(d => (dados.planos[d] || []).length).length;
+  document.getElementById('stat-perf').textContent = (dados.performance || []).length;
+  document.getElementById('stat-ideias').textContent = Object.keys(roteirosCustom || {}).length;
+}
+function exportarTudoJSON() {
+  baixarArquivo('vnove-dashboard-backup.json', JSON.stringify(dados, null, 2), 'application/json');
+}
+function limparDados() {
+  if (!confirm('Isso apaga TODOS os dados salvos neste navegador. Tem certeza?')) return;
+  localStorage.removeItem(CHAVE_STORAGE);
+  location.reload();
+}
+
+/* ===== Init ===== */
+document.querySelectorAll('[id^="topo-"]').forEach((el,i) => el.style.display = i === 0 ? 'block' : 'none');
+document.querySelectorAll('[id^="im-"]').forEach((el,i) => el.style.display = i === 0 ? 'block' : 'none');
+
+loadData();
+garantirProdutos();
+planoAtual = { data: hojeISO(), itens: (dados.planos[hojeISO()] || []).slice() };
+document.getElementById('planejador-data').value = planoAtual.data;
+document.getElementById('agenda-data').value = hojeISO();
+document.getElementById('perf-data').value = hojeISO();
+renderPlannerFiltros();
+renderBrowseList();
+renderPlannerSlots();
+renderSemana();
+renderAgenda();
+renderTarefas();
+popularSelectPerformance();
+renderPerfTabela();
+renderHistorico();
+renderCursos();
+renderDados();
+buscarTemas();
+</script>
+</body>
+</html>
+
+
