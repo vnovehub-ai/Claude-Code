@@ -1153,11 +1153,23 @@ function viewSettings(){
     </div>
   `;
 }
-function exportBackup(){
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+async function exportBackup(){
+  const json=JSON.stringify(state,null,2);
+  const filename='vnove-dashboard-backup-'+todayStr()+'.json';
+  try{
+    if(window.claude&&window.claude.use){
+      const downloads=await window.claude.use('downloads');
+      if(downloads){
+        await downloads.save({filename,data:json});
+        toast('Backup baixado.');
+        return;
+      }
+    }
+  }catch(e){/* segue pro fallback abaixo */}
+  const blob=new Blob([json],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;a.download='vnove-dashboard-backup-'+todayStr()+'.json';
+  a.href=url;a.download=filename;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
   toast('Backup baixado.');
