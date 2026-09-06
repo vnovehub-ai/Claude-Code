@@ -230,6 +230,25 @@ const MASTER_TOPICS = [
 ];
 const DOW = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+/* Categoria/tipo de cliente — cor própria por nicho, pra identificar visualmente rápido */
+const CATEGORY_META = {
+  infoproduto:{label:'Infoproduto / Pessoal',color:'#B8962E'},
+  app:{label:'App',color:'#3a8fd0'},
+  consultoria:{label:'Consultoria',color:'#9a5fd6'},
+  cripto_fin:{label:'Cripto / Fintech',color:'#2fb08a'},
+  trading:{label:'Mesa proprietária',color:'#d69a3e'},
+  marca_varejo:{label:'Marca / Varejo',color:'#d65f5f'},
+  projeto_completo:{label:'Projeto completo',color:'#c85fa0'}
+};
+function hexToRgba(hex,alpha){
+  const h=hex.replace('#','');
+  const r=parseInt(h.substring(0,2),16),g=parseInt(h.substring(2,4),16),b=parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+function categoryChip(catKey){
+  const m=CATEGORY_META[catKey];if(!m)return'';
+  return `<span class="tag" style="background:${hexToRgba(m.color,0.14)};color:${m.color};border:0.5px solid ${hexToRgba(m.color,0.4)}">${m.label}</span>`;
+}
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function todayStr(){return fmtISO(new Date());}
@@ -243,55 +262,55 @@ function jsStr(s){return "'"+String(s==null?'':s).replace(/\\/g,'\\\\').replace(
 
 function defaultClients(){
   const mk=(o)=>Object.assign({
-    id:uid(),status:'ativo',responsavel:'Você',demandas:[],subClients:[],tasks:[],calendar:[],agenda:[],notas:'',destaque:'',fullDashboardLink:null
+    id:uid(),status:'ativo',categoria:'',responsavel:'Você',demandas:[],subClients:[],tasks:[],calendar:[],agenda:[],notas:'',destaque:'',fullDashboardLink:null
   },o);
   return [
-    mk({name:'Juninho Brum',niche:'Conteúdo pessoal / Infoproduto',responsavel:'Você (gestão completa)',
+    mk({name:'Juninho Brum',niche:'Conteúdo pessoal / Infoproduto',categoria:'infoproduto',responsavel:'Você (gestão completa)',
       demandas:['Conteúdo diário','Esteira de produtos','Imersão / Evento','Tráfego','Acompanhamento de métricas','Crescimento de perfil','Novas ideias','Roteiros','Edição'],
       destaque:'🔥 Prioridade máxima — cuido de tudo dele. Precisa de ultra organização: métricas, crescimento, ideias, roteiros, edição e tráfego.',
       fullDashboardLink:'dashboard_juninho.html'}),
-    mk({name:'Fábio Libório',niche:'Flow — mesa proprietária (pré-lançamento)',status:'estruturacao',
+    mk({name:'Fábio Libório',niche:'Flow — mesa proprietária (pré-lançamento)',categoria:'trading',status:'estruturacao',
       demandas:['Estruturação de lançamento','Tráfego'],
       destaque:'Em processo de estruturação para lançar nos próximos meses.'}),
-    mk({name:'GM Editora',niche:'Editora',
+    mk({name:'GM Editora',niche:'Editora',categoria:'consultoria',
       demandas:['Consultoria','Acompanhamento de insights','Acompanhamento de métricas','Tráfego']}),
-    mk({name:'Léo Corvo',niche:'Consultoria',
+    mk({name:'Léo Corvo',niche:'Consultoria',categoria:'consultoria',
       demandas:['Consultoria','Operacional (subir jobs de criação)']}),
-    mk({name:'Norton',niche:'Infoproduto',
+    mk({name:'Norton',niche:'Infoproduto',categoria:'infoproduto',
       demandas:['Agendamento de lives','Conteúdo (posts semanais)','Estratégia de campanha','Tráfego']}),
-    mk({name:'LZ',niche:'Cripto — maior comunidade do Brasil',status:'estruturacao',
+    mk({name:'LZ',niche:'Cripto — maior comunidade do Brasil',categoria:'cripto_fin',status:'estruturacao',
       demandas:['Estruturação de lançamento','Tráfego'],
       destaque:'Estruturando o lançamento.'}),
-    mk({name:'Justpet',niche:'App — Pet',responsavel:'Você (estratégico) + Talline (operacional)',
+    mk({name:'Justpet',niche:'App — Pet',categoria:'app',responsavel:'Você (estratégico) + Talline (operacional)',
       demandas:['Conteúdo diário','Imersão / Evento','Edição','Captação','Tráfego'],
       destaque:'⚠️ Cliente exigente — odeiam atraso e erro. Zero margem para falha.'}),
-    mk({name:'Medjus',niche:'App — Área médica (mesmos donos do Justpet)',
+    mk({name:'Medjus',niche:'App — Área médica (mesmos donos do Justpet)',categoria:'app',
       demandas:['Conteúdo (posts semanais)','Ads','Estratégia de campanha','Tráfego'],
       destaque:'Vão mudar de formato em breve — acompanhar.'}),
-    mk({name:'V9HUB',niche:'Braço da V9 — Scale',
+    mk({name:'V9HUB',niche:'Braço da V9 — Scale',categoria:'consultoria',
       demandas:['Scale','Imersões','Consultoria','Mentoria','Conteúdo diário','Tráfego']}),
-    mk({name:'Blue',niche:'—',
+    mk({name:'Blue',niche:'—',categoria:'marca_varejo',
       demandas:['Conteúdo (posts semanais)','Ads','Tráfego']}),
-    mk({name:'V9',niche:'—',
+    mk({name:'V9',niche:'—',categoria:'marca_varejo',
       demandas:['Conteúdo (posts semanais)','Stories diários','Cases']}),
-    mk({name:'Pushinpay',niche:'Fintech (novo)',status:'novo',
+    mk({name:'Pushinpay',niche:'Fintech (novo)',categoria:'cripto_fin',status:'novo',
       demandas:['Posicionamento','Conteúdo (posts semanais)','Ads','Tráfego'],
       destaque:'Cliente novo — escopo completo, do zero.'}),
-    mk({name:'Reinaldo',niche:'Novo (aguardando transição de setor)',status:'novo',
+    mk({name:'Reinaldo',niche:'Novo (aguardando transição de setor)',categoria:'infoproduto',status:'novo',
       demandas:['Posicionamento','Conteúdo (posts semanais)','Tráfego'],
       destaque:'Ainda não veio para a carteira — está em outro setor.'}),
-    mk({name:'TikTok Shop Consultoria',niche:'Consultoria',
+    mk({name:'TikTok Shop Consultoria',niche:'Consultoria',categoria:'consultoria',
       demandas:['Consultoria'],
       destaque:'Cadastre as contas atendidas na aba "Contas" para desenhar o plano de cada uma.'}),
-    mk({name:'Multiplica',niche:'Novo — projeto completo',status:'novo',
+    mk({name:'Multiplica',niche:'Novo — projeto completo',categoria:'projeto_completo',status:'novo',
       demandas:['Plataforma / Tecnologia','Planos','Fornecedores','Programa de pontos','Plataforma de pagamento','Identidade de marca (brand)','Campanhas','Tráfego','Ads','Comercial','Programa de afiliados'],
       destaque:'🚀 Maior escopo da carteira — lançamento em dezembro.'}),
-    mk({name:'Marcela Raposo',niche:'Mentoria premium (lançamento)',status:'lancamento',
+    mk({name:'Marcela Raposo',niche:'Mentoria premium (lançamento)',categoria:'infoproduto',status:'lancamento',
       demandas:['Mentoria','Estruturação de lançamento'],
       destaque:'Em processo de lançamento.'}),
-    mk({name:'Viviane',niche:'Administração condominial',
+    mk({name:'Viviane',niche:'Administração condominial',categoria:'marca_varejo',
       demandas:['Reconhecimento de marca']}),
-    mk({name:'Essencial',niche:'Empório de alimentos',
+    mk({name:'Essencial',niche:'Empório de alimentos',categoria:'marca_varejo',
       demandas:['Conteúdo (posts semanais)','Ads','Vídeos','Captação','Edição']})
   ];
 }
@@ -314,6 +333,7 @@ function ensureShape(st){
     c.calendar=c.calendar||[];
     c.agenda=c.agenda||[];
     c.notas=c.notas||'';
+    c.categoria=c.categoria||'';
     allDemandas.push(...c.demandas);
   });
   const lib=new Set(MASTER_TOPICS);
@@ -366,7 +386,7 @@ function renderSidebar(){
       <div class="clients-list">
         ${state.clients.map(c=>`
           <div class="nav-item ${v==='client'&&state.currentClientId===c.id?'active':''}" onclick="goto('client','${c.id}')">
-            <span class="dot" style="background:${statusColor(c.status)}"></span>
+            <span class="dot" style="background:${(CATEGORY_META[c.categoria]||{}).color||statusColor(c.status)}" title="${c.categoria?CATEGORY_META[c.categoria].label:''}"></span>
             <span class="name">${escapeHtml(c.name)}</span>
           </div>`).join('')}
       </div>
@@ -424,6 +444,10 @@ function agendaTodayCount(){
 function viewOverview(){
   const clients=state.clients;
   const ativos=clients.filter(c=>c.status==='ativo').length;
+  const filter=state.overviewFilter||null;
+  const visible=filter?clients.filter(c=>c.categoria===filter):clients;
+  const catCounts={};
+  clients.forEach(c=>{if(c.categoria)catCounts[c.categoria]=(catCounts[c.categoria]||0)+1;});
   return `
     <div class="header">
       <div>
@@ -442,18 +466,30 @@ function viewOverview(){
       <div class="metric"><div class="metric-num">${agendaTodayCount()}</div><div class="metric-label">Compromissos hoje</div></div>
     </div>
 
+    <div class="tabs section-gap">
+      <div class="tab ${!filter?'active':''}" onclick="setOverviewFilter(null)">Todos (${clients.length})</div>
+      ${Object.entries(CATEGORY_META).filter(([k])=>catCounts[k]).map(([k,m])=>`
+        <div class="tab ${filter===k?'active':''}" style="${filter===k?`color:${m.color};border-color:${hexToRgba(m.color,0.5)}`:''}" onclick="setOverviewFilter('${k}')">
+          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${m.color};margin-right:5px"></span>${m.label} (${catCounts[k]})
+        </div>`).join('')}
+    </div>
+
     <div class="clients-grid">
-      ${clients.map(clientCard).join('')}
+      ${visible.length?visible.map(clientCard).join(''):`<div class="empty-state">${emptyLine('Nenhum cliente nessa categoria.')}</div>`}
     </div>
   `;
+}
+function setOverviewFilter(cat){
+  state.overviewFilter=cat;save();render();
 }
 
 function clientCard(c){
   const pend=(c.tasks||[]).filter(t=>!t.done).length;
   const upcoming=(c.calendar||[]).filter(x=>x.date>=todayStr()).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const sm=STATUS_META[c.status]||STATUS_META.ativo;
+  const catColor=(CATEGORY_META[c.categoria]||{}).color||'#2a2a2a';
   return `
-    <div class="client-card" onclick="goto('client','${c.id}')">
+    <div class="client-card" style="border-left:3px solid ${catColor}" onclick="goto('client','${c.id}')">
       <div class="client-card-top">
         <div>
           <div class="client-name">${escapeHtml(c.name)}</div>
@@ -461,6 +497,7 @@ function clientCard(c){
         </div>
         <span class="status ${sm.cls}">${sm.label}</span>
       </div>
+      ${c.categoria?categoryChip(c.categoria):''}
       ${c.destaque?`<div class="client-alert">${escapeHtml(c.destaque)}</div>`:''}
       <div class="client-meta">
         <span>📌 <b>${pend}</b> tarefa${pend===1?'':'s'}</span>
@@ -479,7 +516,7 @@ function viewClient(c){
   return `
     <div class="header">
       <div>
-        <div class="page-title">${escapeHtml(c.name)} <span class="status ${sm.cls}">${sm.label}</span></div>
+        <div class="page-title">${escapeHtml(c.name)} <span class="status ${sm.cls}">${sm.label}</span> ${c.categoria?categoryChip(c.categoria):''}</div>
         <div class="page-sub">${escapeHtml(c.niche||'')} · Responsável: ${escapeHtml(c.responsavel||'Você')}</div>
       </div>
       <div class="header-actions">
@@ -1156,8 +1193,14 @@ function openClientModal(clientId){
           ${Object.entries(STATUS_META).map(([k,m])=>`<option value="${k}" ${c&&c.status===k?'selected':''}>${m.label}</option>`).join('')}
         </select>
       </div>
-      <div class="field"><label>Responsável</label><input type="text" id="cResp" value="${c?escapeAttr(c.responsavel||'Você'):'Você'}"></div>
+      <div class="field"><label>Categoria / tipo de cliente</label>
+        <select id="cCategoria">
+          <option value="">Sem categoria</option>
+          ${Object.entries(CATEGORY_META).map(([k,m])=>`<option value="${k}" ${c&&c.categoria===k?'selected':''}>${m.label}</option>`).join('')}
+        </select>
+      </div>
     </div>
+    <div class="field"><label>Responsável</label><input type="text" id="cResp" value="${c?escapeAttr(c.responsavel||'Você'):'Você'}"></div>
     <div class="field"><label>Alerta / observação de destaque (opcional)</label><input type="text" id="cDestaque" value="${c?escapeAttr(c.destaque||''):''}" placeholder="Ex: cliente exigente, sem margem para erro..."></div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal()">Cancelar</button>
@@ -1170,13 +1213,14 @@ function saveClientModal(clientId){
   if(!name){toast('Dê um nome ao cliente.');return;}
   const niche=document.getElementById('cNiche').value.trim();
   const status=document.getElementById('cStatus').value;
+  const categoria=document.getElementById('cCategoria').value;
   const responsavel=document.getElementById('cResp').value.trim()||'Você';
   const destaque=document.getElementById('cDestaque').value.trim();
   if(clientId){
     const c=getClient(clientId);
-    Object.assign(c,{name,niche,status,responsavel,destaque});
+    Object.assign(c,{name,niche,status,categoria,responsavel,destaque});
   }else{
-    const c={id:uid(),name,niche,status,responsavel,destaque,demandas:[],tasks:[],calendar:[],agenda:[],notas:'',fullDashboardLink:null};
+    const c={id:uid(),name,niche,status,categoria,responsavel,destaque,demandas:[],subClients:[],tasks:[],calendar:[],agenda:[],notas:'',fullDashboardLink:null};
     state.clients.push(c);
     state.currentClientId=c.id;state.currentView='client';state.clientTab='resumo';
   }
