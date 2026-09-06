@@ -219,6 +219,15 @@ const PIPE_META = {
   edicao:{label:'Edição',cls:'pipe-edicao'},
   postado:{label:'Postado',cls:'pipe-postado'}
 };
+/* Lista padrão de tópicos — a mesma para todos os clientes. Ative só o que fizer sentido em cada um. */
+const MASTER_TOPICS = [
+  'Conteúdo diário','Conteúdo (posts semanais)','Stories diários','Esteira de produtos','Imersão / Evento',
+  'Tráfego','Ads','Consultoria','Acompanhamento de métricas','Acompanhamento de insights','Crescimento de perfil',
+  'Novas ideias','Roteiros','Edição','Captação','Agendamento de lives','Estratégia de campanha','Posicionamento',
+  'Estruturação de lançamento','Operacional (subir jobs de criação)','Scale','Imersões','Mentoria','Cases',
+  'Plataforma / Tecnologia','Planos','Fornecedores','Programa de pontos','Plataforma de pagamento',
+  'Identidade de marca (brand)','Campanhas','Comercial','Programa de afiliados','Reconhecimento de marca','Vídeos'
+];
 const DOW = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -229,68 +238,89 @@ function fmtBR(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return d+'/'
 function fmtBRFull(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return d+'/'+m+'/'+y;}
 function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function escapeAttr(s){return escapeHtml(s).replace(/\n/g,'&#10;');}
+/* Encoding seguro de texto livre do usuário como argumento de string dentro de onclick="..." (atributo entre aspas duplas) */
+function jsStr(s){return "'"+String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n')+"'";}
 
 function defaultClients(){
   const mk=(o)=>Object.assign({
-    id:uid(),status:'ativo',responsavel:'Você',demandas:[],tasks:[],calendar:[],agenda:[],notas:'',destaque:'',fullDashboardLink:null
+    id:uid(),status:'ativo',responsavel:'Você',demandas:[],subClients:[],tasks:[],calendar:[],agenda:[],notas:'',destaque:'',fullDashboardLink:null
   },o);
   return [
     mk({name:'Juninho Brum',niche:'Conteúdo pessoal / Infoproduto',responsavel:'Você (gestão completa)',
-      demandas:['10 conteúdos por dia','Esteira de produtos','Imersão PBE','Tráfego','Acompanhamento de métricas','Crescimento de perfil','Novas ideias','Roteiros','Edição'],
+      demandas:['Conteúdo diário','Esteira de produtos','Imersão / Evento','Tráfego','Acompanhamento de métricas','Crescimento de perfil','Novas ideias','Roteiros','Edição'],
       destaque:'🔥 Prioridade máxima — cuido de tudo dele. Precisa de ultra organização: métricas, crescimento, ideias, roteiros, edição e tráfego.',
       fullDashboardLink:'dashboard_juninho.html'}),
     mk({name:'Fábio Libório',niche:'Flow — mesa proprietária (pré-lançamento)',status:'estruturacao',
-      demandas:['Estruturação do lançamento','Tráfego'],
+      demandas:['Estruturação de lançamento','Tráfego'],
       destaque:'Em processo de estruturação para lançar nos próximos meses.'}),
     mk({name:'GM Editora',niche:'Editora',
-      demandas:['Consultoria','Acompanhamento de insights','Métricas','Tráfego']}),
+      demandas:['Consultoria','Acompanhamento de insights','Acompanhamento de métricas','Tráfego']}),
     mk({name:'Léo Corvo',niche:'Consultoria',
-      demandas:['Consultoria','Acompanhamento','Operacional — subir jobs de criação']}),
+      demandas:['Consultoria','Operacional (subir jobs de criação)']}),
     mk({name:'Norton',niche:'Infoproduto',
-      demandas:['Agendamento de lives','Conteúdo Instagram','Estratégia de campanha','Tráfego']}),
+      demandas:['Agendamento de lives','Conteúdo (posts semanais)','Estratégia de campanha','Tráfego']}),
     mk({name:'LZ',niche:'Cripto — maior comunidade do Brasil',status:'estruturacao',
-      demandas:['Estruturação do lançamento','Tráfego'],
+      demandas:['Estruturação de lançamento','Tráfego'],
       destaque:'Estruturando o lançamento.'}),
     mk({name:'Justpet',niche:'App — Pet',responsavel:'Você (estratégico) + Talline (operacional)',
-      demandas:['Conteúdo','Eventos','Edição','Captação','Tráfego'],
+      demandas:['Conteúdo diário','Imersão / Evento','Edição','Captação','Tráfego'],
       destaque:'⚠️ Cliente exigente — odeiam atraso e erro. Zero margem para falha.'}),
     mk({name:'Medjus',niche:'App — Área médica (mesmos donos do Justpet)',
-      demandas:['Conteúdo','Ads','Estratégia para baixar links/CAC','Tráfego'],
+      demandas:['Conteúdo (posts semanais)','Ads','Estratégia de campanha','Tráfego'],
       destaque:'Vão mudar de formato em breve — acompanhar.'}),
     mk({name:'V9HUB',niche:'Braço da V9 — Scale',
-      demandas:['Scale','Imersões','Consultoria','Mentoria','3 posts por dia','Tráfego']}),
+      demandas:['Scale','Imersões','Consultoria','Mentoria','Conteúdo diário','Tráfego']}),
     mk({name:'Blue',niche:'—',
-      demandas:['3 posts por semana','Estratégia','Ads','Tráfego']}),
+      demandas:['Conteúdo (posts semanais)','Ads','Tráfego']}),
     mk({name:'V9',niche:'—',
-      demandas:['3 posts por semana','Stories todos os dias','1 case por semana']}),
+      demandas:['Conteúdo (posts semanais)','Stories diários','Cases']}),
     mk({name:'Pushinpay',niche:'Fintech (novo)',status:'novo',
-      demandas:['Desenhar posicionamento','3 posts por semana','Ads','Tráfego'],
+      demandas:['Posicionamento','Conteúdo (posts semanais)','Ads','Tráfego'],
       destaque:'Cliente novo — escopo completo, do zero.'}),
     mk({name:'Reinaldo',niche:'Novo (aguardando transição de setor)',status:'novo',
-      demandas:['Posicionamento','Conteúdos','Tráfego'],
+      demandas:['Posicionamento','Conteúdo (posts semanais)','Tráfego'],
       destaque:'Ainda não veio para a carteira — está em outro setor.'}),
     mk({name:'TikTok Shop Consultoria',niche:'Consultoria',
-      demandas:['Desenhar plano de atuação por cliente']}),
+      demandas:['Consultoria'],
+      destaque:'Cadastre as contas atendidas na aba "Contas" para desenhar o plano de cada uma.'}),
     mk({name:'Multiplica',niche:'Novo — projeto completo',status:'novo',
-      demandas:['Plataforma','Planos','Fornecedores','Programa de pontos','Plataforma de pagamento','Conceito e identidade de marca (brand)','Lançamento em dezembro','Campanhas','Tráfego / Ads','Comercial','Programa de afiliados'],
+      demandas:['Plataforma / Tecnologia','Planos','Fornecedores','Programa de pontos','Plataforma de pagamento','Identidade de marca (brand)','Campanhas','Tráfego','Ads','Comercial','Programa de afiliados'],
       destaque:'🚀 Maior escopo da carteira — lançamento em dezembro.'}),
     mk({name:'Marcela Raposo',niche:'Mentoria premium (lançamento)',status:'lancamento',
-      demandas:['Lançamento de mentoria premium'],
+      demandas:['Mentoria','Estruturação de lançamento'],
       destaque:'Em processo de lançamento.'}),
     mk({name:'Viviane',niche:'Administração condominial',
-      demandas:['Estratégia de reconhecimento de marca','Novo local']}),
+      demandas:['Reconhecimento de marca']}),
     mk({name:'Essencial',niche:'Empório de alimentos',
-      demandas:['Conteúdo','3 posts por semana','Ads','Vídeos','Captação','Edição']})
+      demandas:['Conteúdo (posts semanais)','Ads','Vídeos','Captação','Edição']})
   ];
 }
 
-let state = load();
+let state = ensureShape(load());
 function load(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     if(raw) return JSON.parse(raw);
   }catch(e){}
   return {clients:defaultClients(),currentView:'overview',currentClientId:null,createdAt:Date.now()};
+}
+/* Garante que todo cliente tenha os campos esperados (compatibilidade com dados salvos antes) e monta a biblioteca de tópicos. */
+function ensureShape(st){
+  const allDemandas=[];
+  st.clients.forEach(c=>{
+    c.subClients=c.subClients||[];
+    c.demandas=c.demandas||[];
+    c.tasks=c.tasks||[];
+    c.calendar=c.calendar||[];
+    c.agenda=c.agenda||[];
+    c.notas=c.notas||'';
+    allDemandas.push(...c.demandas);
+  });
+  const lib=new Set(MASTER_TOPICS);
+  allDemandas.forEach(d=>lib.add(d));
+  (st.topicLibrary||[]).forEach(d=>lib.add(d));
+  st.topicLibrary=Array.from(lib);
+  return st;
 }
 function save(){
   localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
@@ -445,7 +475,7 @@ function viewClient(c){
   if(!c){goto('overview');return'';}
   const sm=STATUS_META[c.status]||STATUS_META.ativo;
   const tab=state.clientTab||'resumo';
-  const tabs=[['resumo','Resumo'],['demandas','Demandas'],['calendario','Calendário Editorial'],['agenda','Agenda'],['tarefas','Tarefas'],['notas','Notas']];
+  const tabs=[['resumo','Resumo'],['demandas','Demandas'],['contas','Contas'],['calendario','Calendário Editorial'],['agenda','Agenda'],['tarefas','Tarefas'],['notas','Notas']];
   return `
     <div class="header">
       <div>
@@ -468,6 +498,7 @@ function viewClient(c){
     <div id="clientTabBody">
       ${tab==='resumo'?tabResumo(c):''}
       ${tab==='demandas'?tabDemandas(c):''}
+      ${tab==='contas'?tabContas(c):''}
       ${tab==='calendario'?tabCalendario(c):''}
       ${tab==='agenda'?tabAgenda(c):''}
       ${tab==='tarefas'?tabTarefas(c):''}
@@ -506,32 +537,41 @@ function tabResumo(c){
 function truncate(s,n){return s.length>n?s.slice(0,n)+'…':s;}
 function emptyLine(msg){return `<div class="hint">${msg}</div>`;}
 
-/* --- Demandas (escopo do cliente) --- */
+/* --- Demandas (escopo do cliente) — tópicos padrão, replicados para todos, ativados por cliente --- */
 function tabDemandas(c){
+  const lib=state.topicLibrary&&state.topicLibrary.length?state.topicLibrary:MASTER_TOPICS;
   return `
     <div class="card">
-      <div class="card-title"><span>📋 Demandas / escopo deste cliente</span></div>
-      ${(c.demandas||[]).map((d,i)=>`
-        <div class="check-item">
-          <span class="check-text">${escapeHtml(d)}</span>
-          <span class="icon-btn" onclick="removeDemanda('${c.id}',${i})">✕</span>
-        </div>`).join('') || emptyLine('Nenhuma demanda ainda.')}
-      <div class="add-row">
-        <input type="text" id="newDemandaInput" placeholder="Ex: 3 posts por semana, tráfego, edição..." onkeydown="if(event.key==='Enter')addDemanda('${c.id}')">
-        <button class="btn btn-primary btn-sm" onclick="addDemanda('${c.id}')">Adicionar</button>
+      <div class="card-title"><span>📋 Tópicos que você faz para este cliente</span></div>
+      <div class="hint" style="margin-bottom:10px">A lista é a mesma para todos os clientes. Clique para ativar/desativar — o que não fizer sentido aqui, você só desativa.</div>
+      <div class="item-tags">
+        ${lib.map(topic=>{
+          const active=(c.demandas||[]).includes(topic);
+          return `<span class="tag ${active?'tag-gold':'tag-gray'}" style="cursor:pointer" onclick="toggleTopic('${c.id}',${jsStr(topic)})">${active?'✓ ':''}${escapeHtml(topic)}</span>`;
+        }).join('')}
+      </div>
+      <div class="add-row" style="margin-top:14px">
+        <input type="text" id="newTopicInput" placeholder="Novo tópico (passa a valer para todos os clientes)" onkeydown="if(event.key==='Enter')addCustomTopic('${c.id}')">
+        <button class="btn btn-primary btn-sm" onclick="addCustomTopic('${c.id}')">Adicionar</button>
       </div>
       <div class="hint">Isso é o escopo/serviço recorrente — não confunda com "Tarefas" (que são pontuais).</div>
     </div>
   `;
 }
-function addDemanda(clientId){
-  const input=document.getElementById('newDemandaInput');
-  const v=input.value.trim();if(!v)return;
-  const c=getClient(clientId);c.demandas=c.demandas||[];c.demandas.push(v);
+function toggleTopic(clientId,topic){
+  const c=getClient(clientId);c.demandas=c.demandas||[];
+  const i=c.demandas.indexOf(topic);
+  if(i>=0) c.demandas.splice(i,1); else c.demandas.push(topic);
   save();render();
 }
-function removeDemanda(clientId,idx){
-  const c=getClient(clientId);c.demandas.splice(idx,1);save();render();
+function addCustomTopic(clientId){
+  const input=document.getElementById('newTopicInput');
+  const v=input.value.trim();if(!v)return;
+  state.topicLibrary=state.topicLibrary||[];
+  if(!state.topicLibrary.includes(v)) state.topicLibrary.push(v);
+  const c=getClient(clientId);c.demandas=c.demandas||[];
+  if(!c.demandas.includes(v)) c.demandas.push(v);
+  save();render();
 }
 
 /* --- Calendário editorial --- */
@@ -879,6 +919,97 @@ function removeTask(clientId,taskId){
   const c=getClient(clientId);c.tasks=(c.tasks||[]).filter(x=>x.id!==taskId);save();render();
 }
 
+/* --- Contas (sub-clientes dentro de um cliente-guarda-chuva, ex: TikTok Shop Consultoria) --- */
+function tabContas(c){
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+      <div class="hint" style="margin:0">Contas/clientes específicos atendidos dentro deste cliente. Cada uma tem seu próprio espaço — nada se mistura entre elas.</div>
+      <button class="btn btn-primary btn-sm" onclick="openSubClientModal('${c.id}')">+ Adicionar cliente</button>
+    </div>
+    ${(c.subClients||[]).length?c.subClients.map(s=>subClientCard(c,s)).join(''):`<div class="card">${emptyLine('Nenhuma conta cadastrada ainda. Use o botão acima para adicionar.')}</div>`}
+  `;
+}
+function subClientCard(c,s){
+  return `
+    <div class="card section-gap" style="margin-bottom:14px">
+      <div class="card-title">
+        <span>👤 ${escapeHtml(s.name)}${s.niche?' · '+escapeHtml(s.niche):''}</span>
+        <div style="display:flex;gap:6px">
+          <span class="icon-btn" title="Editar" onclick="openSubClientModal('${c.id}','${s.id}')">✏️</span>
+          <span class="icon-btn" title="Excluir" onclick="deleteSubClient('${c.id}','${s.id}')">✕</span>
+        </div>
+      </div>
+      <div class="field"><label>Notas desta conta</label><textarea id="subNotas_${s.id}" onblur="saveSubNotas('${c.id}','${s.id}')" style="min-height:60px" placeholder="Posicionamento, plano de atuação, observações...">${escapeHtml(s.notas||'')}</textarea></div>
+      <div class="add-row">
+        <input type="text" id="subTaskText_${s.id}" placeholder="Nova tarefa para esta conta..." onkeydown="if(event.key==='Enter')addSubTask('${c.id}','${s.id}')">
+        <button class="btn btn-primary btn-sm" onclick="addSubTask('${c.id}','${s.id}')">+</button>
+      </div>
+      ${(s.tasks||[]).length?s.tasks.map(t=>subTaskRow(c.id,s.id,t)).join(''):emptyLine('Nenhuma tarefa ainda.')}
+    </div>
+  `;
+}
+function subTaskRow(clientId,subId,t){
+  return `
+    <div class="check-item ${t.done?'done':''}">
+      <span class="checkbox ${t.done?'on':''}" onclick="toggleSubTask('${clientId}','${subId}','${t.id}')">${t.done?'✓':''}</span>
+      <span class="check-text">${escapeHtml(t.text)}</span>
+      <span class="icon-btn" onclick="removeSubTask('${clientId}','${subId}','${t.id}')">✕</span>
+    </div>
+  `;
+}
+function openSubClientModal(clientId,subId){
+  const c=getClient(clientId);
+  const s=subId?(c.subClients||[]).find(x=>x.id===subId):null;
+  openModal(`
+    <div class="modal-header"><div class="modal-title">${s?'Editar conta':'Nova conta / cliente'}</div><div class="modal-close" onclick="closeModal()">✕</div></div>
+    <div class="field"><label>Nome</label><input type="text" id="subName" value="${s?escapeAttr(s.name):''}" placeholder="Nome do cliente/conta atendida"></div>
+    <div class="field"><label>Observação (opcional)</label><input type="text" id="subNiche" value="${s?escapeAttr(s.niche||''):''}" placeholder="Ex: nicho, plataforma, contexto..."></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSubClientModal('${clientId}','${subId||''}')">${s?'Salvar':'Adicionar'}</button>
+    </div>
+  `);
+}
+function saveSubClientModal(clientId,subId){
+  const name=document.getElementById('subName').value.trim();
+  if(!name){toast('Dê um nome.');return;}
+  const niche=document.getElementById('subNiche').value.trim();
+  const c=getClient(clientId);c.subClients=c.subClients||[];
+  if(subId){
+    const s=c.subClients.find(x=>x.id===subId);
+    Object.assign(s,{name,niche});
+  }else{
+    c.subClients.push({id:uid(),name,niche,notas:'',tasks:[]});
+  }
+  save();closeModal();render();
+}
+function deleteSubClient(clientId,subId){
+  const c=getClient(clientId);
+  const s=(c.subClients||[]).find(x=>x.id===subId);
+  if(!confirm(`Excluir "${s?s.name:'esta conta'}" e todos os dados dela? Essa ação não pode ser desfeita.`))return;
+  c.subClients=(c.subClients||[]).filter(x=>x.id!==subId);
+  save();render();toast('Conta removida.');
+}
+function saveSubNotas(clientId,subId){
+  const c=getClient(clientId);const s=(c.subClients||[]).find(x=>x.id===subId);if(!s)return;
+  s.notas=document.getElementById('subNotas_'+subId).value;save();
+}
+function addSubTask(clientId,subId){
+  const input=document.getElementById('subTaskText_'+subId);
+  const v=input.value.trim();if(!v)return;
+  const c=getClient(clientId);const s=(c.subClients||[]).find(x=>x.id===subId);if(!s)return;
+  s.tasks=s.tasks||[];s.tasks.push({id:uid(),text:v,done:false});
+  save();render();
+}
+function toggleSubTask(clientId,subId,taskId){
+  const c=getClient(clientId);const s=(c.subClients||[]).find(x=>x.id===subId);if(!s)return;
+  const t=(s.tasks||[]).find(x=>x.id===taskId);if(t){t.done=!t.done;save();render();}
+}
+function removeSubTask(clientId,subId,taskId){
+  const c=getClient(clientId);const s=(c.subClients||[]).find(x=>x.id===subId);if(!s)return;
+  s.tasks=(s.tasks||[]).filter(x=>x.id!==taskId);save();render();
+}
+
 /* --- Notas --- */
 function tabNotas(c){
   return `
@@ -1001,14 +1132,14 @@ function importBackup(evt){
     try{
       const parsed=JSON.parse(e.target.result);
       if(!parsed.clients)throw new Error('formato inválido');
-      state=parsed;save();render();toast('Backup importado com sucesso.');
+      state=ensureShape(parsed);save();render();toast('Backup importado com sucesso.');
     }catch(err){toast('Arquivo inválido.');}
   };
   reader.readAsText(file);
 }
 function resetToDefault(){
   if(!confirm('Isso vai apagar todos os dados atuais e restaurar a carteira padrão. Continuar?'))return;
-  state={clients:defaultClients(),currentView:'overview',currentClientId:null,createdAt:Date.now()};
+  state=ensureShape({clients:defaultClients(),currentView:'overview',currentClientId:null,createdAt:Date.now()});
   save();render();toast('Restaurado.');
 }
 
