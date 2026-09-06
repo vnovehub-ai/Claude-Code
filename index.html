@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Clientes · VNOVE HUB</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0d0d0d;color:#e0e0e0;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+
+/* Layout */
+.app{display:flex;min-height:100vh}
+.sidebar{width:240px;background:#111;border-right:0.5px solid #222;padding:20px 0;flex-shrink:0;position:fixed;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.main{margin-left:240px;padding:28px;flex:1;max-width:calc(100vw - 240px)}
+
+/* Sidebar */
+.logo{padding:0 20px 20px;border-bottom:0.5px solid #222;margin-bottom:16px}
+.logo-title{font-size:14px;font-weight:600;color:#B8962E;letter-spacing:0.04em}
+.logo-sub{font-size:11px;color:#444;margin-top:2px}
+.nav-section{padding:0 12px;margin-bottom:6px}
+.nav-label{font-size:10px;font-weight:500;color:#444;letter-spacing:0.1em;text-transform:uppercase;padding:0 8px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:#888;transition:all 0.15s}
+.nav-item:hover{background:#1a1a1a;color:#ccc}
+.nav-item.active{background:#1a1a1a;color:#B8962E}
+.nav-icon{font-size:14px;width:16px;text-align:center;flex-shrink:0}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.nav-item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-count{font-size:10px;color:#444;background:#1a1a1a;padding:1px 6px;border-radius:10px}
+.nav-add{font-size:11px;color:#555;cursor:pointer;padding:2px 6px;border-radius:4px}
+.nav-add:hover{color:#B8962E;background:#1a1500}
+.clients-list{max-height:38vh;overflow-y:auto}
+.sidebar-footer{margin-top:auto;padding:12px}
+
+/* Header */
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+.page-title{font-size:21px;font-weight:600;color:#fff;display:flex;align-items:center;gap:10px}
+.page-sub{font-size:13px;color:#555;margin-top:3px}
+.header-actions{display:flex;gap:8px;flex-shrink:0}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:#111;border:0.5px solid #222;border-radius:8px;padding:4px;margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:8px 14px;border-radius:6px;font-size:12.5px;font-weight:500;color:#555;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.tab:hover{color:#999}
+.tab.active{background:#1a1a1a;color:#B8962E;border:0.5px solid #2a2a2a}
+
+/* Grid / cards */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}.grid4{grid-template-columns:1fr 1fr}}
+
+.card{background:#111;border:0.5px solid #222;border-radius:10px;padding:16px}
+.card-title{font-size:11px;font-weight:500;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;display:flex;align-items:center;gap:6px;justify-content:space-between}
+.card-title span.ic{font-size:14px}
+
+.metric{background:#111;border:0.5px solid #1a1a1a;border-radius:8px;padding:14px}
+.metric-num{font-size:26px;font-weight:600;color:#B8962E}
+.metric-label{font-size:12px;color:#555;margin-top:3px}
+.metric-num.warn{color:#c06060}
+
+/* Client card */
+.client-card{background:#111;border:0.5px solid #222;border-radius:10px;padding:16px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:10px}
+.client-card:hover{border-color:#B8962E;background:#141414}
+.client-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.client-name{font-size:15px;font-weight:600;color:#fff}
+.client-niche{font-size:12px;color:#666;margin-top:2px}
+.client-meta{display:flex;gap:14px;font-size:11px;color:#555;border-top:0.5px solid #1a1a1a;padding-top:10px}
+.client-meta b{color:#B8962E;font-weight:600}
+.client-alert{font-size:11px;color:#c06060;background:#1a0d0d;border:0.5px solid #2a1414;border-radius:6px;padding:6px 8px;line-height:1.4}
+
+/* Status badges */
+.status{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.status-ativo{background:#0d1a0d;color:#4a9a4a;border:0.5px solid #1a2a1a}
+.status-estruturacao{background:#0d1525;color:#4a7aaa;border:0.5px solid #1a2535}
+.status-lancamento{background:#1a1500;color:#B8962E;border:0.5px solid #2a2000}
+.status-novo{background:#160d24;color:#a06ad0;border:0.5px solid #2a1a3a}
+
+/* Items */
+.item{padding:10px 12px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;margin-bottom:7px;transition:all 0.15s}
+.item:last-child{margin-bottom:0}
+.item:hover{border-color:#2a2a2a}
+.item-title{font-size:13px;font-weight:500;color:#ddd;line-height:1.4;margin-bottom:3px}
+.item-desc{font-size:11.5px;color:#666;line-height:1.5;white-space:pre-line}
+.item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.item-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+
+.tag{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.tag-red{background:#2a1010;color:#c06060;border:0.5px solid #3a1a1a}
+.tag-gold{background:#1a1500;color:#B8962E;border:0.5px solid #2a2000}
+.tag-green{background:#0d1a0d;color:#4a8a4a;border:0.5px solid #1a2a1a}
+.tag-blue{background:#0d1525;color:#4a7aaa;border:0.5px solid #1a2535}
+.tag-gray{background:#161616;color:#666;border:0.5px solid #222}
+.tag-purple{background:#160d24;color:#a06ad0;border:0.5px solid #2a1a3a}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid #222;background:#1a1a1a;color:#888;transition:all 0.15s}
+.btn:hover{border-color:#B8962E;color:#B8962E}
+.btn-primary{background:#B8962E;color:#0d0d0d;border-color:#B8962E}
+.btn-primary:hover{background:#caa030;color:#000}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-danger:hover{border-color:#c06060;color:#c06060}
+.icon-btn{width:26px;height:26px;border-radius:6px;background:#1a1a1a;border:0.5px solid #222;color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;flex-shrink:0}
+.icon-btn:hover{color:#fff;border-color:#444}
+
+/* Forms */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:500;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:7px;padding:9px 11px;color:#eee;font-size:13px;font-family:inherit}
+.field textarea{resize:vertical;min-height:70px;line-height:1.6}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#B8962E}
+.field-row{display:flex;gap:10px}
+.field-row>.field{flex:1}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;color:#ccc}
+
+/* Checklist (demandas / tasks) */
+.check-item{display:flex;align-items:center;gap:10px;padding:9px 10px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;margin-bottom:6px}
+.check-item.done{opacity:0.45}
+.check-item.done .check-text{text-decoration:line-through}
+.checkbox{width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:#0d0d0d}
+.checkbox.on{background:#B8962E;border-color:#B8962E}
+.check-text{flex:1;font-size:13px;color:#ddd}
+.check-due{font-size:10.5px;color:#666}
+.check-due.overdue{color:#c06060;font-weight:600}
+.add-row{display:flex;gap:8px;margin-top:8px}
+.add-row input{flex:1;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:7px;padding:8px 11px;color:#eee;font-size:13px}
+.add-row input:focus{outline:none;border-color:#B8962E}
+
+/* Calendar */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-nav{display:flex;gap:6px;align-items:center}
+.cal-month-label{font-size:14px;font-weight:600;color:#fff;min-width:150px;text-align:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-dow{font-size:10px;color:#444;text-align:center;font-weight:500;padding-bottom:4px;text-transform:uppercase}
+.cal-day{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;padding:6px;min-height:64px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:3px}
+.cal-day:hover{border-color:#B8962E}
+.cal-day.empty{background:transparent;border:none;cursor:default}
+.cal-day.today{border-color:#B8962E;background:#151208}
+.cal-daynum{font-size:11px;color:#555;font-weight:500}
+.cal-day.today .cal-daynum{color:#B8962E}
+.cal-entry-dot{font-size:9.5px;background:#1a1500;color:#B8962E;border-radius:4px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-entry-dot.more{background:transparent;color:#555}
+
+/* Pipeline tag */
+.pipe{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.pipe-ideia{background:#161616;color:#777;border:0.5px solid #222}
+.pipe-roteiro{background:#0d1525;color:#4a7aaa;border:0.5px solid #1a2535}
+.pipe-gravacao{background:#160d24;color:#a06ad0;border:0.5px solid #2a1a3a}
+.pipe-edicao{background:#1a1500;color:#B8962E;border:0.5px solid #2a2000}
+.pipe-postado{background:#0d1a0d;color:#4a9a4a;border:0.5px solid #1a2a1a}
+
+/* Paste box */
+.paste-box{background:#0a0a0a;border:0.5px dashed #2a2a2a;border-radius:8px;padding:14px}
+.paste-box textarea{width:100%;min-height:140px;background:#0d0d0d;border:0.5px solid #222;border-radius:7px;padding:10px;color:#ddd;font-size:12.5px;font-family:inherit;line-height:1.6;resize:vertical}
+.paste-box textarea:focus{outline:none;border-color:#B8962E}
+.preview-list{margin-top:12px}
+.preview-item{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:start;padding:8px 10px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:7px;margin-bottom:6px}
+.preview-item input[type=date]{background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:6px;padding:5px 6px;color:#ddd;font-size:11px;width:100%}
+
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;color:#444}
+.empty-state .ic{font-size:28px;margin-bottom:10px;opacity:0.6}
+.empty-state .msg{font-size:13px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;border:0.5px solid #B8962E;color:#eee;padding:10px 16px;border-radius:8px;font-size:13px;z-index:2000;display:none}
+.toast.show{display:block}
+
+/* Alert box */
+.alert-box{padding:12px 14px;border-radius:8px;font-size:12.5px;line-height:1.5;margin-bottom:14px}
+.alert-red{background:#1a0d0d;border:0.5px solid #2a1414;color:#d08080}
+.alert-gold{background:#1a1500;border:0.5px solid #2a2000;color:#d4b04e}
+.alert-blue{background:#0d1525;border:0.5px solid #1a2535;color:#7ba3d0}
+
+.divider{height:0.5px;background:#1a1a1a;margin:14px 0}
+.section-gap{margin-bottom:20px}
+.hint{font-size:11px;color:#555;margin-top:6px;line-height:1.5}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="main"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================= DATA ============================= */
+const STORAGE_KEY = 'vnove_dashboard_v1';
+const STATUS_META = {
+  ativo:{label:'Ativo',cls:'status-ativo'},
+  estruturacao:{label:'Em estruturação',cls:'status-estruturacao'},
+  lancamento:{label:'Em lançamento',cls:'status-lancamento'},
+  novo:{label:'Novo',cls:'status-novo'}
+};
+const PIPE_META = {
+  ideia:{label:'Ideia',cls:'pipe-ideia'},
+  roteiro:{label:'Roteiro',cls:'pipe-roteiro'},
+  gravacao:{label:'Gravação',cls:'pipe-gravacao'},
+  edicao:{label:'Edição',cls:'pipe-edicao'},
+  postado:{label:'Postado',cls:'pipe-postado'}
+};
+/* Lista padrão de tópicos — a mesma para todos os clientes. Ative só o que fizer sentido em cada um. */
+const MASTER_TOPICS = [
+  'Conteúdo diário','Conteúdo (posts semanais)','Stories diários','Esteira de produtos','Imersão / Evento',
+  'Tráfego','Ads','Consultoria','Acompanhamento de métricas','Acompanhamento de insights','Crescimento de perfil',
+  'Novas ideias','Roteiros','Edição','Captação','Agendamento de lives','Estratégia de campanha','Posicionamento',
+  'Estruturação de lançamento','Operacional (subir jobs de criação)','Scale','Imersões','Mentoria','Cases',
+  'Plataforma / Tecnologia','Planos','Fornecedores','Programa de pontos','Plataforma de pagamento',
+  'Identidade de marca (brand)','Campanhas','Comercial','Programa de afiliados','Reconhecimento de marca','Vídeos'
+];
+const DOW = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+/* Categoria/tipo de cliente — cor própria por nicho, pra identificar visualmente rápido */
+const CATEGORY_META = {
+  infoproduto:{label:'Infoproduto / Pessoal',color:'#B8962E'},
+  app:{label:'App',color:'#3a8fd0'},
+  consultoria:{label:'Consultoria',color:'#9a5fd6'},
+  cripto_fin:{label:'Cripto / Fintech',color:'#2fb08a'},
+  trading:{label:'Mesa proprietária',color:'#d69a3e'},
+  marca_varejo:{label:'Marca / Varejo',color:'#d65f5f'},
+  projeto_completo:{label:'Projeto completo',color:'#c85fa0'}
+};
+function hexToRgba(hex,alpha){
+  const h=hex.replace('#','');
+  const r=parseInt(h.substring(0,2),16),g=parseInt(h.substring(2,4),16),b=parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+function categoryChip(catKey){
+  const m=CATEGORY_META[catKey];if(!m)return'';
+  return `<span class="tag" style="background:${hexToRgba(m.color,0.14)};color:${m.color};border:0.5px solid ${hexToRgba(m.color,0.4)}">${m.label}</span>`;
+}
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function todayStr(){return fmtISO(new Date());}
+function fmtISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmtBR(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return d+'/'+m;}
+function fmtBRFull(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return d+'/'+m+'/'+y;}
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function escapeAttr(s){return escapeHtml(s).replace(/\n/g,'&#10;');}
+/* Encoding seguro de texto livre do usuário como argumento de string dentro de onclick="..." (atributo entre aspas duplas) */
+function jsStr(s){return "'"+String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n')+"'";}
+
+function defaultClients(){
+  const mk=(o)=>Object.assign({
+    id:uid(),status:'ativo',categoria:'',responsavel:'Você',demandas:[],subClients:[],tasks:[],calendar:[],agenda:[],notas:'',destaque:'',fullDashboardLink:null
+  },o);
+  return [
+    mk({name:'Juninho Brum',niche:'Conteúdo pessoal / Infoproduto',categoria:'infoproduto',responsavel:'Você (gestão completa)',
+      demandas:['Conteúdo diário','Esteira de produtos','Imersão / Evento','Tráfego','Acompanhamento de métricas','Crescimento de perfil','Novas ideias','Roteiros','Edição'],
+      destaque:'🔥 Prioridade máxima — cuido de tudo dele. Precisa de ultra organização: métricas, crescimento, ideias, roteiros, edição e tráfego.',
+      fullDashboardLink:'dashboard_juninho.html'}),
+    mk({name:'Fábio Libório',niche:'Flow — mesa proprietária (pré-lançamento)',categoria:'trading',status:'estruturacao',
+      demandas:['Estruturação de lançamento','Tráfego'],
+      destaque:'Em processo de estruturação para lançar nos próximos meses.'}),
+    mk({name:'GM Editora',niche:'Editora',categoria:'consultoria',
+      demandas:['Consultoria','Acompanhamento de insights','Acompanhamento de métricas','Tráfego']}),
+    mk({name:'Léo Corvo',niche:'Consultoria',categoria:'consultoria',
+      demandas:['Consultoria','Operacional (subir jobs de criação)']}),
+    mk({name:'Norton',niche:'Infoproduto',categoria:'infoproduto',
+      demandas:['Agendamento de lives','Conteúdo (posts semanais)','Estratégia de campanha','Tráfego']}),
+    mk({name:'LZ',niche:'Cripto — maior comunidade do Brasil',categoria:'cripto_fin',status:'estruturacao',
+      demandas:['Estruturação de lançamento','Tráfego'],
+      destaque:'Estruturando o lançamento.'}),
+    mk({name:'Justpet',niche:'App — Pet',categoria:'app',responsavel:'Você (estratégico) + Talline (operacional)',
+      demandas:['Conteúdo diário','Imersão / Evento','Edição','Captação','Tráfego'],
+      destaque:'⚠️ Cliente exigente — odeiam atraso e erro. Zero margem para falha.'}),
+    mk({name:'Medjus',niche:'App — Área médica (mesmos donos do Justpet)',categoria:'app',
+      demandas:['Conteúdo (posts semanais)','Ads','Estratégia de campanha','Tráfego'],
+      destaque:'Vão mudar de formato em breve — acompanhar.'}),
+    mk({name:'V9HUB',niche:'Braço da V9 — Scale',categoria:'consultoria',
+      demandas:['Scale','Imersões','Consultoria','Mentoria','Conteúdo diário','Tráfego']}),
+    mk({name:'Blue',niche:'—',categoria:'marca_varejo',
+      demandas:['Conteúdo (posts semanais)','Ads','Tráfego']}),
+    mk({name:'V9',niche:'—',categoria:'marca_varejo',
+      demandas:['Conteúdo (posts semanais)','Stories diários','Cases']}),
+    mk({name:'Pushinpay',niche:'Fintech (novo)',categoria:'cripto_fin',status:'novo',
+      demandas:['Posicionamento','Conteúdo (posts semanais)','Ads','Tráfego'],
+      destaque:'Cliente novo — escopo completo, do zero.'}),
+    mk({name:'Reinaldo',niche:'Novo (aguardando transição de setor)',categoria:'infoproduto',status:'novo',
+      demandas:['Posicionamento','Conteúdo (posts semanais)','Tráfego'],
+      destaque:'Ainda não veio para a carteira — está em outro setor.'}),
+    mk({name:'TikTok Shop Consultoria',niche:'Consultoria',categoria:'consultoria',
+      demandas:['Consultoria'],
+      destaque:'Cadastre as contas atendidas na aba "Contas" para desenhar o plano de cada uma.'}),
+    mk({name:'Multiplica',niche:'Novo — projeto completo',categoria:'projeto_completo',status:'novo',
+      demandas:['Plataforma / Tecnologia','Planos','Fornecedores','Programa de pontos','Plataforma de pagamento','Identidade de marca (brand)','Campanhas','Tráfego','Ads','Comercial','Programa de afiliados'],
+      destaque:'🚀 Maior escopo da carteira — lançamento em dezembro.'}),
+    mk({name:'Marcela Raposo',niche:'Mentoria premium (lançamento)',categoria:'infoproduto',status:'lancamento',
+      demandas:['Mentoria','Estruturação de lançamento'],
+      destaque:'Em processo de lançamento.'}),
+    mk({name:'Viviane',niche:'Administração condominial',categoria:'marca_varejo',
+      demandas:['Reconhecimento de marca']}),
+    mk({name:'Essencial',niche:'Empório de alimentos',categoria:'marca_varejo',
+      demandas:['Conteúdo (posts semanais)','Ads','Vídeos','Captação','Edição']})
+  ];
+}
+
+let state = ensureShape(load());
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {clients:defaultClients(),currentView:'overview',currentClientId:null,createdAt:Date.now()};
+}
+/* Garante que um cliente tenha todos os campos esperados (compatibilidade com dados salvos antes ou vindos do banco). */
+function normalizeClient(c){
+  c.subClients=c.subClients||[];
+  c.demandas=c.demandas||[];
+  c.tasks=c.tasks||[];
+  c.calendar=c.calendar||[];
+  c.agenda=(c.agenda||[]).map(a=>({done:false,...a}));
+  c.notas=c.notas||'';
+  c.categoria=c.categoria||'';
+  return c;
+}
+/* Garante que o state inteiro tenha os campos esperados e monta a biblioteca de tópicos. */
+function ensureShape(st){
+  const allDemandas=[];
+  st.clients.forEach(c=>{normalizeClient(c);allDemandas.push(...c.demandas);});
+  const lib=new Set(MASTER_TOPICS);
+  allDemandas.forEach(d=>lib.add(d));
+  (st.topicLibrary||[]).forEach(d=>lib.add(d));
+  st.topicLibrary=Array.from(lib);
+  st._pendingDeletes=st._pendingDeletes||[];
+  return st;
+}
+
+/* ============================= BANCO COMPARTILHADO (db) ============================= */
+/* Quando publicado como Artifact com a capability "db", os dados passam a viver num banco
+   compartilhado entre aparelhos — e o Claude consegue ler/consultar de fora quando você pedir.
+   Sem essa capability (arquivo local, ex: index.html aberto direto), tudo continua no localStorage. */
+let db=null;
+let dbSyncTimer=null;
+async function initApp(){
+  render(); // renderiza na hora com o que já está em cache local, sem esperar a rede
+  try{
+    if(window.claude&&window.claude.use) db=await window.claude.use('db');
+  }catch(e){db=null;}
+  if(db) await loadFromDb();
+}
+async function loadFromDb(){
+  try{
+    const snap=await db.collection('clients').get();
+    if(!snap.empty){
+      state.clients=snap.docs.map(d=>normalizeClient(Object.assign({id:d.id},d.data())));
+    }
+    const metaSnap=await db.doc('meta/app').get();
+    if(metaSnap.exists){
+      const data=metaSnap.data();
+      const lib=new Set(MASTER_TOPICS);
+      (state.topicLibrary||[]).forEach(t=>lib.add(t));
+      (data.topicLibrary||[]).forEach(t=>lib.add(t));
+      state.topicLibrary=Array.from(lib);
+    }
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    render();
+  }catch(e){
+    console.error('Não consegui carregar do banco compartilhado — usando os dados locais deste aparelho.',e);
+  }
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+  if(db){
+    clearTimeout(dbSyncTimer);
+    dbSyncTimer=setTimeout(syncToDb,500);
+  }
+}
+async function syncToDb(){
+  if(!db)return;
+  try{
+    const writes=state.clients.map(c=>db.collection('clients').doc(c.id).set(c));
+    writes.push(db.doc('meta/app').set({topicLibrary:state.topicLibrary||[]}));
+    const dels=(state._pendingDeletes||[]).map(id=>db.collection('clients').doc(id).delete());
+    state._pendingDeletes=[];
+    await Promise.allSettled([...writes,...dels]);
+  }catch(e){/* o localStorage já garantiu que nada foi perdido neste aparelho */}
+}
+function getClient(id){return state.clients.find(c=>c.id===id);}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ============================= NAVIGATION ============================= */
+function goto(view,clientId){
+  state.currentView=view;
+  state.currentClientId=clientId||null;
+  if(view==='client') state.clientTab = state.clientTab||'resumo';
+  save();render();
+}
+function setClientTab(tab){state.clientTab=tab;save();render();}
+
+/* ============================= RENDER ROOT ============================= */
+function render(){
+  renderSidebar();
+  renderMain();
+}
+
+function renderSidebar(){
+  const el=document.getElementById('sidebar');
+  const v=state.currentView;
+  el.innerHTML=`
+    <div class="logo">
+      <div class="logo-title">VNOVE HUB</div>
+      <div class="logo-sub">Painel de Clientes</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-item ${v==='overview'?'active':''}" onclick="goto('overview')"><span class="nav-icon">📊</span><span class="name">Visão Geral</span></div>
+      <div class="nav-item ${v==='overdue'?'active':''}" onclick="goto('overdue')"><span class="nav-icon">⚠️</span><span class="name">Atrasados</span>${globalOverdueTotalCount()?`<span class="nav-count">${globalOverdueTotalCount()}</span>`:''}</div>
+      <div class="nav-item ${v==='agenda'?'active':''}" onclick="goto('agenda')"><span class="nav-icon">🗓️</span><span class="name">Agenda Geral</span></div>
+      <div class="nav-item ${v==='tasks'?'active':''}" onclick="goto('tasks')"><span class="nav-icon">✅</span><span class="name">Tarefas Rápidas</span>${globalPendingTasksCount()?`<span class="nav-count">${globalPendingTasksCount()}</span>`:''}</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label"><span>Clientes (${state.clients.length})</span><span class="nav-add" onclick="event.stopPropagation();openClientEditor()" title="Adicionar cliente">+ novo</span></div>
+      <div class="clients-list">
+        ${state.clients.map(c=>`
+          <div class="nav-item ${(['client','contentEditor','dayView','agendaEditor','subClientEditor'].includes(v)&&state.currentClientId===c.id)?'active':''}" onclick="goto('client','${c.id}')">
+            <span class="dot" style="background:${(CATEGORY_META[c.categoria]||{}).color||statusColor(c.status)}" title="${c.categoria?CATEGORY_META[c.categoria].label:''}"></span>
+            <span class="name">${escapeHtml(c.name)}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="nav-item ${v==='settings'?'active':''}" onclick="goto('settings')"><span class="nav-icon">⚙️</span><span class="name">Backup / Config</span></div>
+    </div>
+  `;
+}
+function statusColor(status){
+  return {ativo:'#4a9a4a',estruturacao:'#4a7aaa',lancamento:'#B8962E',novo:'#a06ad0'}[status]||'#666';
+}
+
+function renderMain(){
+  const el=document.getElementById('main');
+  if(state.currentView==='overview') el.innerHTML=viewOverview();
+  else if(state.currentView==='client') el.innerHTML=viewClient(getClient(state.currentClientId));
+  else if(state.currentView==='overdue') el.innerHTML=viewOverdue();
+  else if(state.currentView==='agenda') el.innerHTML=viewAgendaGeral();
+  else if(state.currentView==='tasks') el.innerHTML=viewTasksGeral();
+  else if(state.currentView==='settings') el.innerHTML=viewSettings();
+  else if(state.currentView==='contentEditor') el.innerHTML=viewContentEditor();
+  else if(state.currentView==='dayView') el.innerHTML=viewDay();
+  else if(state.currentView==='agendaEditor') el.innerHTML=viewAgendaEditor();
+  else if(state.currentView==='clientEditor') el.innerHTML=viewClientEditor();
+  else if(state.currentView==='subClientEditor') el.innerHTML=viewSubClientEditor();
+  // post-render hooks
+  if(state.currentView==='client'){
+    const c=getClient(state.currentClientId);
+    if(c && state.clientTab==='calendario') renderMonthCalendar(c);
+  }
+}
+
+/* ============================= OVERVIEW ============================= */
+function globalPendingTasksCount(){
+  let n=0;
+  state.clients.forEach(c=>(c.tasks||[]).forEach(t=>{if(!t.done)n++;}));
+  return n;
+}
+function globalOverdueTasksCount(){
+  const today=todayStr();let n=0;
+  state.clients.forEach(c=>(c.tasks||[]).forEach(t=>{if(!t.done && t.due && t.due<today)n++;}));
+  return n;
+}
+/* Tudo que já passou do prazo: tarefas (do cliente e das contas), conteúdo não postado e compromissos não marcados. */
+function globalOverdueTotalCount(){
+  const today=todayStr();let n=0;
+  state.clients.forEach(c=>{
+    (c.tasks||[]).forEach(t=>{if(!t.done && t.due && t.due<today)n++;});
+    (c.calendar||[]).forEach(x=>{if(x.date<today && x.pipeline!=='postado')n++;});
+    (c.agenda||[]).forEach(a=>{if(!a.done && a.date<today)n++;});
+    (c.subClients||[]).forEach(s=>(s.tasks||[]).forEach(t=>{if(!t.done && t.due && t.due<today)n++;}));
+  });
+  return n;
+}
+function weekRange(){
+  const now=new Date();const start=new Date(now);start.setDate(now.getDate()-now.getDay());
+  const end=new Date(start);end.setDate(start.getDate()+6);
+  return [fmtISO(start),fmtISO(end)];
+}
+function contentsThisWeekCount(){
+  const [s,e]=weekRange();let n=0;
+  state.clients.forEach(c=>(c.calendar||[]).forEach(x=>{if(x.date && x.date>=s && x.date<=e)n++;}));
+  return n;
+}
+function agendaTodayCount(){
+  const today=todayStr();let n=0;
+  state.clients.forEach(c=>(c.agenda||[]).forEach(a=>{if(a.date===today)n++;}));
+  return n;
+}
+
+function viewOverview(){
+  const clients=state.clients;
+  const ativos=clients.filter(c=>c.status==='ativo').length;
+  const filter=state.overviewFilter||null;
+  const visible=filter?clients.filter(c=>c.categoria===filter):clients;
+  const catCounts={};
+  clients.forEach(c=>{if(c.categoria)catCounts[c.categoria]=(catCounts[c.categoria]||0)+1;});
+  return `
+    <div class="header">
+      <div>
+        <div class="page-title">📊 Visão Geral</div>
+        <div class="page-sub">Todos os seus clientes, num só lugar.</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="openClientEditor()">+ Novo Cliente</button>
+      </div>
+    </div>
+
+    <div class="grid4 section-gap">
+      <div class="metric"><div class="metric-num">${ativos}</div><div class="metric-label">Clientes ativos</div></div>
+      <div class="metric" style="cursor:pointer" onclick="goto('overdue')"><div class="metric-num ${globalOverdueTotalCount()?'warn':''}">${globalOverdueTotalCount()}</div><div class="metric-label">Atrasados (tudo) →</div></div>
+      <div class="metric"><div class="metric-num">${contentsThisWeekCount()}</div><div class="metric-label">Conteúdos essa semana</div></div>
+      <div class="metric"><div class="metric-num">${agendaTodayCount()}</div><div class="metric-label">Compromissos hoje</div></div>
+    </div>
+
+    <div class="tabs section-gap">
+      <div class="tab ${!filter?'active':''}" onclick="setOverviewFilter(null)">Todos (${clients.length})</div>
+      ${Object.entries(CATEGORY_META).filter(([k])=>catCounts[k]).map(([k,m])=>`
+        <div class="tab ${filter===k?'active':''}" style="${filter===k?`color:${m.color};border-color:${hexToRgba(m.color,0.5)}`:''}" onclick="setOverviewFilter('${k}')">
+          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${m.color};margin-right:5px"></span>${m.label} (${catCounts[k]})
+        </div>`).join('')}
+    </div>
+
+    <div class="clients-grid">
+      ${visible.length?visible.map(clientCard).join(''):`<div class="empty-state">${emptyLine('Nenhum cliente nessa categoria.')}</div>`}
+    </div>
+  `;
+}
+function setOverviewFilter(cat){
+  state.overviewFilter=cat;save();render();
+}
+
+function clientCard(c){
+  const pend=(c.tasks||[]).filter(t=>!t.done).length;
+  const upcoming=(c.calendar||[]).filter(x=>x.date>=todayStr()).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const sm=STATUS_META[c.status]||STATUS_META.ativo;
+  const catColor=(CATEGORY_META[c.categoria]||{}).color||'#2a2a2a';
+  return `
+    <div class="client-card" style="border-left:3px solid ${catColor}" onclick="goto('client','${c.id}')">
+      <div class="client-card-top">
+        <div>
+          <div class="client-name">${escapeHtml(c.name)}</div>
+          <div class="client-niche">${escapeHtml(c.niche||'')}</div>
+        </div>
+        <span class="status ${sm.cls}">${sm.label}</span>
+      </div>
+      ${c.categoria?categoryChip(c.categoria):''}
+      ${c.destaque?`<div class="client-alert">${escapeHtml(c.destaque)}</div>`:''}
+      <div class="client-meta">
+        <span>📌 <b>${pend}</b> tarefa${pend===1?'':'s'}</span>
+        <span>🗓️ ${upcoming?fmtBR(upcoming.date):'sem conteúdo agendado'}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================= ATRASADOS (tudo junto) ============================= */
+function viewOverdue(){
+  const today=todayStr();
+  let tasks=[],contents=[],agendas=[];
+  state.clients.forEach(c=>{
+    (c.tasks||[]).forEach(t=>{if(!t.done&&t.due&&t.due<today)tasks.push({...t,clientName:c.name,clientId:c.id,subId:null});});
+    (c.subClients||[]).forEach(s=>(s.tasks||[]).forEach(t=>{if(!t.done&&t.due&&t.due<today)tasks.push({...t,clientName:c.name+' · '+s.name,clientId:c.id,subId:s.id});}));
+    (c.calendar||[]).forEach(x=>{if(x.date<today&&x.pipeline!=='postado')contents.push({...x,clientName:c.name,clientId:c.id});});
+    (c.agenda||[]).forEach(a=>{if(!a.done&&a.date<today)agendas.push({...a,clientName:c.name,clientId:c.id});});
+  });
+  tasks.sort((a,b)=>a.due.localeCompare(b.due));
+  contents.sort((a,b)=>a.date.localeCompare(b.date));
+  agendas.sort((a,b)=>a.date.localeCompare(b.date));
+  const total=tasks.length+contents.length+agendas.length;
+  return `
+    <div class="header">
+      <div><div class="page-title">⚠️ Atrasados</div><div class="page-sub">Tarefa, conteúdo e compromisso vencidos, de todos os clientes — ${total} item${total===1?'':'s'}.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>✅ Tarefas atrasadas (${tasks.length})</span></div>
+      ${tasks.length?tasks.map(t=>overdueTaskRow(t)).join(''):emptyLine('Nenhuma tarefa atrasada. 🎉')}
+    </div>
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>🎬 Conteúdo atrasado (${contents.length})</span></div>
+      ${contents.length?contents.map(x=>overdueContentRow(x)).join(''):emptyLine('Nenhum conteúdo atrasado. 🎉')}
+    </div>
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>📅 Compromissos perdidos (${agendas.length})</span></div>
+      ${agendas.length?agendas.map(a=>overdueAgendaRow(a)).join(''):emptyLine('Nenhum compromisso perdido. 🎉')}
+    </div>
+  `;
+}
+function overdueTaskRow(t){
+  const toggle=t.subId?`toggleSubTask('${t.clientId}','${t.subId}','${t.id}')`:`toggleTask('${t.clientId}','${t.id}')`;
+  return `
+    <div class="check-item">
+      <span class="checkbox" onclick="${toggle}"></span>
+      <span class="check-text">${escapeHtml(t.text)}</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="goto('client','${t.clientId}')">${escapeHtml(t.clientName)}</span>
+      <span class="check-due overdue">⚠ ${fmtBR(t.due)}</span>
+    </div>
+  `;
+}
+function overdueContentRow(x){
+  return `
+    <div class="item" style="cursor:pointer" onclick="goto('client','${x.clientId}');setClientTab('calendario');openContentEditor('${x.id}')">
+      <div class="item-title">${fmtBR(x.date)} — ${escapeHtml(x.title)} <span class="tag tag-gray">${escapeHtml(x.clientName)}</span></div>
+      <div class="item-tags"><span class="pipe ${PIPE_META[x.pipeline||'ideia'].cls}">${PIPE_META[x.pipeline||'ideia'].label}</span></div>
+    </div>
+  `;
+}
+function overdueAgendaRow(a){
+  return `
+    <div class="check-item">
+      <span class="checkbox" onclick="toggleAgendaDone('${a.clientId}','${a.id}')"></span>
+      <span class="check-text">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="goto('client','${a.clientId}')">${escapeHtml(a.clientName)}</span>
+    </div>
+  `;
+}
+
+/* ============================= CLIENT VIEW ============================= */
+function viewClient(c){
+  if(!c){goto('overview');return'';}
+  const sm=STATUS_META[c.status]||STATUS_META.ativo;
+  const tab=state.clientTab||'resumo';
+  const tabs=[['resumo','Resumo'],['demandas','Demandas'],['contas','Contas'],['calendario','Calendário Editorial'],['agenda','Agenda'],['tarefas','Tarefas'],['notas','Notas']];
+  return `
+    <div class="header">
+      <div>
+        <div class="page-title">${escapeHtml(c.name)} <span class="status ${sm.cls}">${sm.label}</span> ${c.categoria?categoryChip(c.categoria):''}</div>
+        <div class="page-sub">${escapeHtml(c.niche||'')} · Responsável: ${escapeHtml(c.responsavel||'Você')}</div>
+      </div>
+      <div class="header-actions">
+        ${c.fullDashboardLink?`<a class="btn" href="${escapeAttr(c.fullDashboardLink)}" target="_blank">📂 Banco de conteúdo completo</a>`:''}
+        <button class="btn" onclick="openClientEditor('${c.id}')">✏️ Editar</button>
+        <button class="btn btn-danger" onclick="deleteClient('${c.id}')">🗑</button>
+      </div>
+    </div>
+
+    ${c.destaque?`<div class="alert-box alert-gold">${escapeHtml(c.destaque)}</div>`:''}
+
+    <div class="tabs">
+      ${tabs.map(([k,label])=>`<div class="tab ${tab===k?'active':''}" onclick="setClientTab('${k}')">${label}</div>`).join('')}
+    </div>
+
+    <div id="clientTabBody">
+      ${tab==='resumo'?tabResumo(c):''}
+      ${tab==='demandas'?tabDemandas(c):''}
+      ${tab==='contas'?tabContas(c):''}
+      ${tab==='calendario'?tabCalendario(c):''}
+      ${tab==='agenda'?tabAgenda(c):''}
+      ${tab==='tarefas'?tabTarefas(c):''}
+      ${tab==='notas'?tabNotas(c):''}
+    </div>
+  `;
+}
+
+function tabResumo(c){
+  const pend=(c.tasks||[]).filter(t=>!t.done);
+  const overdue=pend.filter(t=>t.due && t.due<todayStr());
+  const nextContents=(c.calendar||[]).filter(x=>x.date>=todayStr()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
+  const nextAgenda=(c.agenda||[]).filter(a=>a.date>=todayStr()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
+  return `
+    <div class="grid3 section-gap">
+      <div class="metric"><div class="metric-num">${pend.length}</div><div class="metric-label">Tarefas pendentes</div></div>
+      <div class="metric"><div class="metric-num ${overdue.length?'warn':''}">${overdue.length}</div><div class="metric-label">Tarefas atrasadas</div></div>
+      <div class="metric"><div class="metric-num">${(c.calendar||[]).length}</div><div class="metric-label">Conteúdos no calendário</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span>📋 Demandas ativas</span></div>
+        ${(c.demandas||[]).length?`<div class="item-tags">${c.demandas.map(d=>`<span class="tag tag-gold">${escapeHtml(d)}</span>`).join('')}</div>`:emptyLine('Nenhuma demanda cadastrada.')}
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🗓️ Próximos conteúdos</span></div>
+        ${nextContents.length?nextContents.map(x=>`<div class="item"><div class="item-title">${fmtBR(x.date)} — ${escapeHtml(x.title)}</div>${x.desc?`<div class="item-desc">${escapeHtml(truncate(x.desc,90))}</div>`:''}</div>`).join(''):emptyLine('Nada agendado ainda. Vá em "Calendário Editorial".')}
+      </div>
+    </div>
+    ${nextAgenda.length?`<div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>📅 Próximos compromissos</span></div>
+      ${nextAgenda.map(a=>`<div class="item"><div class="item-title">${fmtBR(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</div></div>`).join('')}
+    </div>`:''}
+  `;
+}
+function truncate(s,n){return s.length>n?s.slice(0,n)+'…':s;}
+function emptyLine(msg){return `<div class="hint">${msg}</div>`;}
+
+/* --- Demandas (escopo do cliente) — tópicos padrão, replicados para todos, ativados por cliente --- */
+function tabDemandas(c){
+  const lib=state.topicLibrary&&state.topicLibrary.length?state.topicLibrary:MASTER_TOPICS;
+  return `
+    <div class="card">
+      <div class="card-title"><span>📋 Tópicos que você faz para este cliente</span></div>
+      <div class="hint" style="margin-bottom:10px">A lista é a mesma para todos os clientes. Clique para ativar/desativar — o que não fizer sentido aqui, você só desativa.</div>
+      <div class="item-tags">
+        ${lib.map(topic=>{
+          const active=(c.demandas||[]).includes(topic);
+          return `<span class="tag ${active?'tag-gold':'tag-gray'}" style="cursor:pointer" onclick="toggleTopic('${c.id}',${jsStr(topic)})">${active?'✓ ':''}${escapeHtml(topic)}</span>`;
+        }).join('')}
+      </div>
+      <div class="add-row" style="margin-top:14px">
+        <input type="text" id="newTopicInput" placeholder="Novo tópico (passa a valer para todos os clientes)" onkeydown="if(event.key==='Enter')addCustomTopic('${c.id}')">
+        <button class="btn btn-primary btn-sm" onclick="addCustomTopic('${c.id}')">Adicionar</button>
+      </div>
+      <div class="hint">Isso é o escopo/serviço recorrente — não confunda com "Tarefas" (que são pontuais).</div>
+    </div>
+  `;
+}
+function toggleTopic(clientId,topic){
+  const c=getClient(clientId);c.demandas=c.demandas||[];
+  const i=c.demandas.indexOf(topic);
+  if(i>=0) c.demandas.splice(i,1); else c.demandas.push(topic);
+  save();render();
+}
+function addCustomTopic(clientId){
+  const input=document.getElementById('newTopicInput');
+  const v=input.value.trim();if(!v)return;
+  state.topicLibrary=state.topicLibrary||[];
+  if(!state.topicLibrary.includes(v)) state.topicLibrary.push(v);
+  const c=getClient(clientId);c.demandas=c.demandas||[];
+  if(!c.demandas.includes(v)) c.demandas.push(v);
+  save();render();
+}
+
+/* --- Calendário editorial --- */
+function tabCalendario(c){
+  const cal=(c.calendar||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  return `
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span>📥 Colar calendário do Claude</span></div>
+        <div class="paste-box">
+          <textarea id="pasteArea" placeholder="Cole aqui o calendário editorial que você criou no Claude.ai. Ex:&#10;&#10;Segunda 08/09 - Reels: 3 erros que travam seu crescimento&#10;Descrição do conteúdo aqui...&#10;&#10;Terça 09/09 - Carrossel: como estruturar oferta&#10;..."></textarea>
+          <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="parsePaste('${c.id}')">✨ Organizar automaticamente</button>
+          <div class="hint">O sistema identifica as datas e separa os conteúdos. Você confere e confirma antes de adicionar.</div>
+        </div>
+        <div id="previewArea"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>➕ Adicionar conteúdo</span></div>
+        <div class="hint" style="margin-bottom:12px">Abre uma página só para esse conteúdo, com espaço para escrever o roteiro inteiro e gerar com o Claude.</div>
+        <button class="btn btn-primary" onclick="openContentEditor(null, todayStr())">+ Novo conteúdo</button>
+      </div>
+    </div>
+
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title">
+        <span>🗓️ ${MONTHS[(state.calMonth!=null?state.calMonth:new Date().getMonth())]} ${state.calYear||new Date().getFullYear()}</span>
+        <div class="cal-nav">
+          <span class="icon-btn" onclick="shiftCalMonth(-1)">‹</span>
+          <span class="icon-btn" onclick="shiftCalMonth(1)">›</span>
+        </div>
+      </div>
+      <div id="monthCalendar"></div>
+    </div>
+
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>📃 Lista completa</span></div>
+      ${cal.length?cal.map(x=>calendarEntryRow(c,x)).join(''):emptyLine('Nenhum conteúdo cadastrado ainda.')}
+    </div>
+  `;
+}
+function calendarEntryRow(c,x){
+  return `
+    <div class="item">
+      <div class="item-row">
+        <div style="flex:1;cursor:pointer" onclick="openContentEditor('${x.id}')">
+          <div class="item-title">${fmtBRFull(x.date)} — ${escapeHtml(x.title)}</div>
+          ${x.desc?`<div class="item-desc">${escapeHtml(truncate(x.desc,140))}</div>`:''}
+          <div class="item-tags">
+            <span class="pipe ${PIPE_META[x.pipeline||'ideia'].cls}">${PIPE_META[x.pipeline||'ideia'].label}</span>
+            ${x.date<todayStr()&&x.pipeline!=='postado'?'<span class="tag tag-red">⚠ atrasado</span>':''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <span class="icon-btn" title="Editar" onclick="openContentEditor('${x.id}')">✏️</span>
+          <span class="icon-btn" title="Excluir" onclick="removeCalendarEntry('${c.id}','${x.id}')">✕</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function removeCalendarEntry(clientId,entryId){
+  const c=getClient(clientId);c.calendar=(c.calendar||[]).filter(x=>x.id!==entryId);save();render();
+}
+
+/* Parser: cola texto do Claude e extrai datas + conteúdo */
+function parsePaste(clientId){
+  const text=document.getElementById('pasteArea').value;
+  if(!text.trim()){toast('Cole o calendário primeiro.');return;}
+  const lines=text.split('\n');
+  const dateRe=/(\d{1,2})[\/\.\-](\d{1,2})(?:[\/\.\-](\d{2,4}))?/;
+  const dowRe=/(segunda|terça|terca|quarta|quinta|sexta|s[áa]bado|domingo)(?:[\s\-–,]*feira)?/i;
+  const now=new Date();
+  const entries=[];
+  let current=null;
+  function pushCurrent(){
+    if(current && current.title){
+      current.desc=current.descLines.join('\n').trim();
+      delete current.descLines;
+      entries.push(current);
+    }
+    current=null;
+  }
+  for(let raw of lines){
+    const line=raw.trim();
+    if(!line){continue;}
+    const m=line.match(dateRe);
+    if(m){
+      pushCurrent();
+      let day=parseInt(m[1],10),month=parseInt(m[2],10),year=m[3]?parseInt(m[3].length===2?('20'+m[3]):m[3],10):now.getFullYear();
+      let d=new Date(year,month-1,day);
+      if(!m[3]){
+        const diffDays=(d-now)/86400000;
+        if(diffDays<-60){d=new Date(year+1,month-1,day);}
+      }
+      let rest=line.replace(dateRe,'').replace(dowRe,'').replace(/^[\s\-–:,.]+|[\s\-–:,.]+$/g,'');
+      current={id:uid(),date:fmtISO(d),title:rest||'',descLines:[],pipeline:'ideia'};
+    } else if(current){
+      if(!current.title){current.title=line;}
+      else{current.descLines.push(line);}
+    }
+  }
+  pushCurrent();
+  if(!entries.length){toast('Não encontrei datas no texto. Adicione manualmente.');return;}
+  state._pendingPreview={clientId,entries};
+  renderPreview();
+}
+function renderPreview(){
+  const p=state._pendingPreview;
+  const el=document.getElementById('previewArea');
+  if(!p){el.innerHTML='';return;}
+  el.innerHTML=`
+    <div class="preview-list">
+      <div class="hint" style="margin-bottom:8px">Encontrei ${p.entries.length} conteúdo(s). Confira as datas e confirme.</div>
+      ${p.entries.map((e,i)=>`
+        <div class="preview-item">
+          <input type="date" value="${e.date}" onchange="updatePreviewDate(${i},this.value)">
+          <div>
+            <div class="item-title" style="margin-bottom:0">${escapeHtml(e.title||'(sem título)')}</div>
+            ${e.desc?`<div class="item-desc">${escapeHtml(truncate(e.desc,80))}</div>`:''}
+          </div>
+          <span class="icon-btn" onclick="removePreviewItem(${i})">✕</span>
+        </div>
+      `).join('')}
+      <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="confirmPreview()">✅ Confirmar e adicionar ${p.entries.length} ao calendário</button>
+      <button class="btn btn-sm" style="margin-top:8px" onclick="cancelPreview()">Cancelar</button>
+    </div>
+  `;
+}
+function updatePreviewDate(i,val){state._pendingPreview.entries[i].date=val;}
+function removePreviewItem(i){state._pendingPreview.entries.splice(i,1);renderPreview();}
+function cancelPreview(){state._pendingPreview=null;renderPreview();}
+function confirmPreview(){
+  const p=state._pendingPreview;if(!p)return;
+  const c=getClient(p.clientId);c.calendar=c.calendar||[];
+  p.entries.forEach(e=>c.calendar.push({id:e.id,date:e.date,title:e.title,desc:e.desc,pipeline:'ideia'}));
+  state._pendingPreview=null;
+  save();render();
+  toast(`${p.entries.length} conteúdo(s) organizados no calendário.`);
+}
+
+/* Month grid */
+function shiftCalMonth(delta){
+  const now=new Date();
+  let m=state.calMonth!=null?state.calMonth:now.getMonth();
+  let y=state.calYear||now.getFullYear();
+  m+=delta;
+  if(m<0){m=11;y--;} if(m>11){m=0;y++;}
+  state.calMonth=m;state.calYear=y;save();
+  renderMonthCalendar(getClient(state.currentClientId));
+}
+function renderMonthCalendar(c){
+  const el=document.getElementById('monthCalendar');
+  if(!el||!c)return;
+  const now=new Date();
+  const month=state.calMonth!=null?state.calMonth:now.getMonth();
+  const year=state.calYear||now.getFullYear();
+  state.calMonth=month;state.calYear=year;
+  const first=new Date(year,month,1);
+  const startDow=first.getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const byDate={};
+  (c.calendar||[]).forEach(x=>{(byDate[x.date]=byDate[x.date]||[]).push(x);});
+  let cells='';
+  for(let i=0;i<startDow;i++) cells+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const iso=fmtISO(new Date(year,month,d));
+    const items=byDate[iso]||[];
+    const isToday=iso===todayStr();
+    cells+=`<div class="cal-day ${isToday?'today':''}" onclick="openDayView('${iso}')">
+      <div class="cal-daynum">${d}</div>
+      ${items.slice(0,2).map(x=>`<div class="cal-entry-dot">${escapeHtml(truncate(x.title,14))}</div>`).join('')}
+      ${items.length>2?`<div class="cal-entry-dot more">+${items.length-2}</div>`:''}
+    </div>`;
+  }
+  el.innerHTML=`
+    <div class="cal-grid" style="margin-bottom:6px">${DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>
+  `;
+}
+function openDayView(iso){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='dayView';
+  state.dayViewDate=iso;
+  save();render();
+}
+function viewDay(){
+  const c=getClient(state.currentClientId);
+  const iso=state.dayViewDate;
+  const items=(c.calendar||[]).filter(x=>x.date===iso);
+  return `
+    <div class="header">
+      <div><div class="page-title">🗓️ ${fmtBRFull(iso)}</div><div class="page-sub">${escapeHtml(c.name)} · Calendário editorial</div></div>
+      <div class="header-actions">
+        <button class="btn" onclick="closeEditor()">← Voltar</button>
+        <button class="btn btn-primary" onclick="openContentEditor(null, '${iso}')">+ Novo conteúdo nesse dia</button>
+      </div>
+    </div>
+    <div class="card">
+      ${items.length?items.map(x=>calendarEntryRow(c,x)).join(''):emptyLine('Nada agendado neste dia.')}
+    </div>
+  `;
+}
+
+/* --- Página: novo/editar conteúdo, com roteiro via Claude junto --- */
+function openContentEditor(entryId,prefillDate){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='contentEditor';
+  state.editorTargetId=entryId||null;
+  state.editorPrefillDate=prefillDate||null;
+  save();render();
+}
+function buildRoteiroPrompt(c,title,desc){
+  return `Crie um roteiro completo para o seguinte conteúdo do cliente "${c.name}" (nicho: ${c.niche||'-'}).\n\nTítulo/tema: ${title||'(defina o tema)'}\n${desc?'Contexto/observações: '+desc+'\n':''}\nFormato: defina o melhor formato (reels, carrossel, story) e entregue: hook (gancho inicial), desenvolvimento, e CTA final. Escreva em tom direto e natural, pronto para gravar/publicar.`;
+}
+function viewContentEditor(){
+  const c=getClient(state.currentClientId);
+  const e=state.editorTargetId?(c.calendar||[]).find(x=>x.id===state.editorTargetId):null;
+  const date=e?e.date:(state.editorPrefillDate||todayStr());
+  return `
+    <div class="header">
+      <div><div class="page-title">${e?'✏️ Editar conteúdo':'➕ Novo conteúdo'}</div><div class="page-sub">${escapeHtml(c.name)} · Calendário editorial</div></div>
+      <div class="header-actions">
+        <button class="btn" onclick="closeEditor()">← Voltar</button>
+        ${e?`<button class="btn btn-danger" onclick="removeCalendarEntry('${c.id}','${e.id}');closeEditor()">🗑 Excluir</button>`:''}
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span>📝 Detalhes</span></div>
+        <div class="field-row">
+          <div class="field"><label>Data</label><input type="date" id="ceDate" value="${date}"></div>
+          <div class="field"><label>Status</label>
+            <select id="cePipeline">${Object.entries(PIPE_META).map(([k,m])=>`<option value="${k}" ${(e?e.pipeline:'ideia')===k?'selected':''}>${m.label}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="field"><label>Título</label><input type="text" id="ceTitle" value="${e?escapeAttr(e.title):''}" placeholder="Ex: Reels — bastidores do lançamento"></div>
+        <div class="field"><label>Descrição / roteiro</label><textarea id="ceDesc" style="min-height:320px">${e?escapeHtml(e.desc||''):''}</textarea></div>
+        <button class="btn btn-primary" onclick="saveContentEditor()">${e?'Salvar':'Adicionar ao calendário'}</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🧠 Roteiro com Claude</span></div>
+        <div class="hint" style="margin-bottom:8px">Gere o prompt com os dados atuais, copie, cole no Claude.ai, e depois cole o resultado no campo de descrição ao lado.</div>
+        <button class="btn btn-sm" onclick="refreshRoteiroPrompt()">🔄 Gerar prompt com os campos atuais</button>
+        <textarea id="cePrompt" style="min-height:220px;margin-top:10px" readonly>${escapeHtml(buildRoteiroPrompt(c,e?e.title:'',e?e.desc:''))}</textarea>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-sm" onclick="copyToClipboard('cePrompt')">📋 Copiar prompt</button>
+          <a class="btn btn-sm" href="https://claude.ai/new" target="_blank">Abrir Claude.ai ↗</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function refreshRoteiroPrompt(){
+  const c=getClient(state.currentClientId);
+  const title=document.getElementById('ceTitle').value.trim();
+  const desc=document.getElementById('ceDesc').value.trim();
+  document.getElementById('cePrompt').value=buildRoteiroPrompt(c,title,desc);
+}
+function saveContentEditor(){
+  const c=getClient(state.currentClientId);
+  const date=document.getElementById('ceDate').value;
+  const title=document.getElementById('ceTitle').value.trim();
+  const desc=document.getElementById('ceDesc').value.trim();
+  const pipeline=document.getElementById('cePipeline').value;
+  if(!date||!title){toast('Preencha data e título.');return;}
+  c.calendar=c.calendar||[];
+  if(state.editorTargetId){
+    const e=c.calendar.find(x=>x.id===state.editorTargetId);
+    Object.assign(e,{date,title,desc,pipeline});
+  }else{
+    c.calendar.push({id:uid(),date,title,desc,pipeline});
+  }
+  save();toast('Conteúdo salvo.');closeEditor();
+}
+function copyToClipboard(id){
+  const el=document.getElementById(id);
+  el.select();
+  try{
+    navigator.clipboard.writeText(el.value);
+    toast('Copiado!');
+  }catch(e){
+    document.execCommand('copy');toast('Copiado!');
+  }
+}
+
+/* --- Agenda por cliente --- */
+function tabAgenda(c){
+  const items=(c.agenda||[]).slice().sort((a,b)=>(a.date+((a.time)||'')).localeCompare(b.date+((b.time)||'')));
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+      <div class="hint" style="margin:0">Compromissos, lives, gravações e reuniões deste cliente.</div>
+      <button class="btn btn-primary btn-sm" onclick="openAgendaEditor(null)">+ Novo compromisso</button>
+    </div>
+    <div class="card">
+      ${items.length?items.map(a=>agendaRow(c,a)).join(''):emptyLine('Nenhum compromisso cadastrado.')}
+    </div>
+  `;
+}
+function agendaRow(c,a){
+  const overdue=!a.done&&a.date<todayStr();
+  return `
+    <div class="check-item ${a.done?'done':''}">
+      <span class="checkbox ${a.done?'on':''}" onclick="toggleAgendaDone('${c.id}','${a.id}')">${a.done?'✓':''}</span>
+      <span class="check-text">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</span>
+      ${overdue?'<span class="check-due overdue">⚠ atrasado</span>':''}
+      <span class="icon-btn" onclick="openAgendaEditor('${a.id}')">✏️</span>
+      <span class="icon-btn" onclick="removeAgenda('${c.id}','${a.id}')">✕</span>
+    </div>
+  `;
+}
+function toggleAgendaDone(clientId,id){
+  const c=getClient(clientId);const a=(c.agenda||[]).find(x=>x.id===id);
+  if(a){a.done=!a.done;save();render();}
+}
+function removeAgenda(clientId,id){
+  const c=getClient(clientId);c.agenda=(c.agenda||[]).filter(a=>a.id!==id);save();render();
+}
+
+/* --- Página: novo/editar compromisso --- */
+function openAgendaEditor(agendaId){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='agendaEditor';
+  state.editorTargetId=agendaId||null;
+  save();render();
+}
+function viewAgendaEditor(){
+  const c=getClient(state.currentClientId);
+  const a=state.editorTargetId?(c.agenda||[]).find(x=>x.id===state.editorTargetId):null;
+  return `
+    <div class="header">
+      <div><div class="page-title">${a?'✏️ Editar compromisso':'➕ Novo compromisso'}</div><div class="page-sub">${escapeHtml(c.name)} · Agenda</div></div>
+      <div class="header-actions">
+        <button class="btn" onclick="closeEditor()">← Voltar</button>
+        ${a?`<button class="btn btn-danger" onclick="removeAgenda('${c.id}','${a.id}');closeEditor()">🗑 Excluir</button>`:''}
+      </div>
+    </div>
+    <div class="card" style="max-width:480px">
+      <div class="field-row">
+        <div class="field"><label>Data</label><input type="date" id="agEditDate" value="${a?a.date:todayStr()}"></div>
+        <div class="field"><label>Hora (opcional)</label><input type="time" id="agEditTime" value="${a&&a.time?a.time:''}"></div>
+      </div>
+      <div class="field"><label>Compromisso</label><input type="text" id="agEditTitle" value="${a?escapeAttr(a.title):''}" placeholder="Ex: Live semanal, gravação, reunião..."></div>
+      <label class="checkbox-row"><input type="checkbox" id="agEditDone" ${a&&a.done?'checked':''}> Já aconteceu / concluído</label>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="saveAgendaEditor()">${a?'Salvar':'Adicionar à agenda'}</button>
+    </div>
+  `;
+}
+function saveAgendaEditor(){
+  const c=getClient(state.currentClientId);
+  const date=document.getElementById('agEditDate').value;
+  const time=document.getElementById('agEditTime').value;
+  const title=document.getElementById('agEditTitle').value.trim();
+  const done=document.getElementById('agEditDone').checked;
+  if(!date||!title){toast('Preencha data e o compromisso.');return;}
+  c.agenda=c.agenda||[];
+  if(state.editorTargetId){
+    const a=c.agenda.find(x=>x.id===state.editorTargetId);
+    Object.assign(a,{date,time,title,done});
+  }else{
+    c.agenda.push({id:uid(),date,time,title,done});
+  }
+  save();toast('Compromisso salvo.');closeEditor();
+}
+
+/* --- Tarefas por cliente --- */
+function tabTarefas(c){
+  const pend=(c.tasks||[]).filter(t=>!t.done).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
+  const done=(c.tasks||[]).filter(t=>t.done);
+  return `
+    <div class="card">
+      <div class="card-title"><span>✅ Tarefas rápidas</span></div>
+      <div class="field-row">
+        <div class="field" style="flex:2"><label>Tarefa</label><input type="text" id="taskText" placeholder="Ex: revisar edição do reels de terça"></div>
+        <div class="field"><label>Prazo (opcional)</label><input type="date" id="taskDue"></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addTask('${c.id}')">Adicionar tarefa</button>
+    </div>
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>Pendentes (${pend.length})</span></div>
+      ${pend.length?pend.map(t=>taskRow(c,t)).join(''):emptyLine('Nenhuma tarefa pendente. 🎉')}
+    </div>
+    ${done.length?`<div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>Concluídas (${done.length})</span></div>
+      ${done.map(t=>taskRow(c,t)).join('')}
+    </div>`:''}
+  `;
+}
+function taskRow(c,t){
+  const overdue=t.due && !t.done && t.due<todayStr();
+  return `
+    <div class="check-item ${t.done?'done':''}">
+      <span class="checkbox ${t.done?'on':''}" onclick="toggleTask('${c.id}','${t.id}')">${t.done?'✓':''}</span>
+      <span class="check-text">${escapeHtml(t.text)}</span>
+      ${t.due?`<span class="check-due ${overdue?'overdue':''}">${overdue?'⚠ ':''}${fmtBR(t.due)}</span>`:''}
+      <span class="icon-btn" onclick="removeTask('${c.id}','${t.id}')">✕</span>
+    </div>
+  `;
+}
+function addTask(clientId){
+  const text=document.getElementById('taskText').value.trim();
+  const due=document.getElementById('taskDue').value;
+  if(!text){toast('Escreva a tarefa.');return;}
+  const c=getClient(clientId);c.tasks=c.tasks||[];c.tasks.push({id:uid(),text,due,done:false});
+  save();render();
+}
+function toggleTask(clientId,taskId){
+  const c=getClient(clientId);const t=(c.tasks||[]).find(x=>x.id===taskId);if(t){t.done=!t.done;save();render();}
+}
+function removeTask(clientId,taskId){
+  const c=getClient(clientId);c.tasks=(c.tasks||[]).filter(x=>x.id!==taskId);save();render();
+}
+
+/* --- Contas (sub-clientes dentro de um cliente-guarda-chuva, ex: TikTok Shop Consultoria) --- */
+function tabContas(c){
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+      <div class="hint" style="margin:0">Contas/clientes específicos atendidos dentro deste cliente. Cada uma tem seu próprio espaço — nada se mistura entre elas.</div>
+      <button class="btn btn-primary btn-sm" onclick="openSubClientEditor(null)">+ Adicionar cliente</button>
+    </div>
+    ${(c.subClients||[]).length?c.subClients.map(s=>subClientCard(c,s)).join(''):`<div class="card">${emptyLine('Nenhuma conta cadastrada ainda. Use o botão acima para adicionar.')}</div>`}
+  `;
+}
+function subClientCard(c,s){
+  return `
+    <div class="card section-gap" style="margin-bottom:14px">
+      <div class="card-title">
+        <span>👤 ${escapeHtml(s.name)}${s.niche?' · '+escapeHtml(s.niche):''}</span>
+        <div style="display:flex;gap:6px">
+          <span class="icon-btn" title="Editar" onclick="openSubClientEditor('${s.id}')">✏️</span>
+          <span class="icon-btn" title="Excluir" onclick="deleteSubClient('${c.id}','${s.id}')">✕</span>
+        </div>
+      </div>
+      <div class="field"><label>Notas desta conta</label><textarea id="subNotas_${s.id}" onblur="saveSubNotas('${c.id}','${s.id}')" style="min-height:60px" placeholder="Posicionamento, plano de atuação, observações...">${escapeHtml(s.notas||'')}</textarea></div>
+      <div class="add-row">
+        <input type="text" id="subTaskText_${s.id}" placeholder="Nova tarefa para esta conta..." onkeydown="if(event.key==='Enter')addSubTask('${c.id}','${s.id}')">
+        <button class="btn btn-primary btn-sm" onclick="addSubTask('${c.id}','${s.id}')">+</button>
+      </div>
+      ${(s.tasks||[]).length?s.tasks.map(t=>subTaskRow(c.id,s.id,t)).join(''):emptyLine('Nenhuma tarefa ainda.')}
+    </div>
+  `;
+}
+function subTaskRow(clientId,subId,t){
+  return `
+    <div class="check-item ${t.done?'done':''}">
+      <span class="checkbox ${t.done?'on':''}" onclick="toggleSubTask('${clientId}','${subId}','${t.id}')">${t.done?'✓':''}</span>
+      <span class="check-text">${escapeHtml(t.text)}</span>
+      <span class="icon-btn" onclick="removeSubTask('${clientId}','${subId}','${t.id}')">✕</span>
+    </div>
+  `;
+}
+
+/* --- Página: nova/editar conta --- */
+function openSubClientEditor(subId){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='subClientEditor';
+  state.editorTargetId=subId||null;
+  save();render();
+}
+function viewSubClientEditor(){
+  const c=getClient(state.currentClientId);
+  const s=state.editorTargetId?(c.subClients||[]).find(x=>x.id===state.editorTargetId):null;
+  return `
+    <div class="header">
+      <div><div class="page-title">${s?'✏️ Editar conta':'➕ Nova conta'}</div><div class="page-sub">${escapeHtml(c.name)} · Contas</div></div>
+      <div class="header-actions">
+        <button class="btn" onclick="closeEditor()">← Voltar</button>
+        ${s?`<button class="btn btn-danger" onclick="deleteSubClient('${c.id}','${s.id}');closeEditor()">🗑 Excluir</button>`:''}
+      </div>
+    </div>
+    <div class="card" style="max-width:560px">
+      <div class="field"><label>Nome</label><input type="text" id="subName" value="${s?escapeAttr(s.name):''}" placeholder="Nome do cliente/conta atendida"></div>
+      <div class="field"><label>Observação (opcional)</label><input type="text" id="subNiche" value="${s?escapeAttr(s.niche||''):''}" placeholder="Ex: nicho, plataforma, contexto..."></div>
+      <button class="btn btn-primary" onclick="saveSubClientEditor()">${s?'Salvar':'Adicionar'}</button>
+    </div>
+    ${s?`
+    <div class="card section-gap" style="margin-top:14px;max-width:560px">
+      <div class="card-title"><span>📝 Notas</span></div>
+      <textarea id="subNotas_${s.id}" onblur="saveSubNotas('${c.id}','${s.id}')" style="min-height:140px" placeholder="Posicionamento, plano de atuação, observações...">${escapeHtml(s.notas||'')}</textarea>
+    </div>
+    <div class="card section-gap" style="margin-top:14px;max-width:560px">
+      <div class="card-title"><span>✅ Tarefas</span></div>
+      <div class="add-row">
+        <input type="text" id="subTaskText_${s.id}" placeholder="Nova tarefa para esta conta..." onkeydown="if(event.key==='Enter')addSubTask('${c.id}','${s.id}')">
+        <button class="btn btn-primary btn-sm" onclick="addSubTask('${c.id}','${s.id}')">+</button>
+      </div>
+      ${(s.tasks||[]).length?s.tasks.map(t=>subTaskRow(c.id,s.id,t)).join(''):emptyLine('Nenhuma tarefa ainda.')}
+    </div>`:''}
+  `;
+}
+function saveSubClientEditor(){
+  const name=document.getElementById('subName').value.trim();
+  if(!name){toast('Dê um nome.');return;}
+  const niche=document.getElementById('subNiche').value.trim();
+  const c=getClient(state.currentClientId);c.subClients=c.subClients||[];
+  if(state.editorTargetId){
+    const s=c.subClients.find(x=>x.id===state.editorTargetId);
+    Object.assign(s,{name,niche});
+    save();toast('Conta salva.');render();
+  }else{
+    const s={id:uid(),name,niche,notas:'',tasks:[]};
+    c.subClients.push(s);
+    state.editorTargetId=s.id;
+    save();toast('Conta criada.');render();
+  }
+}
+function deleteSubClient(clientId,subId){
+  const c=getClient(clientId);
+  const s=(c.subClients||[]).find(x=>x.id===subId);
+  if(!confirm(`Excluir "${s?s.name:'esta conta'}" e todos os dados dela? Essa ação não pode ser desfeita.`))return;
+  c.subClients=(c.subClients||[]).filter(x=>x.id!==subId);
+  save();render();toast('Conta removida.');
+}
+function saveSubNotas(clientId,subId){
+  const c=getClient(clientId);const s=(c.subClients||[]).find(x=>x.id===subId);if(!s)return;
+  s.notas=document.getElementById('subNotas_'+subId).value;save();
+}
+function addSubTask(clientId,subId){
+  const input=document.getElementById('subTaskText_'+subId);
+  const v=input.value.trim();if(!v)return;
+  const c=getClient(clientId);const s=(c.subClients||[]).find(x=>x.id===subId);if(!s)return;
+  s.tasks=s.tasks||[];s.tasks.push({id:uid(),text:v,done:false});
+  save();render();
+}
+function toggleSubTask(clientId,subId,taskId){
+  const c=getClient(clientId);const s=(c.subClients||[]).find(x=>x.id===subId);if(!s)return;
+  const t=(s.tasks||[]).find(x=>x.id===taskId);if(t){t.done=!t.done;save();render();}
+}
+function removeSubTask(clientId,subId,taskId){
+  const c=getClient(clientId);const s=(c.subClients||[]).find(x=>x.id===subId);if(!s)return;
+  s.tasks=(s.tasks||[]).filter(x=>x.id!==taskId);save();render();
+}
+
+/* --- Notas --- */
+function tabNotas(c){
+  return `
+    <div class="card">
+      <div class="card-title"><span>📝 Notas gerais</span></div>
+      <textarea id="notasArea" style="min-height:280px;width:100%;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:7px;padding:12px;color:#eee;font-size:13px;font-family:inherit;line-height:1.7" placeholder="Anotações livres sobre este cliente: ideias, combinados, histórico de conversa, links de referência...">${escapeHtml(c.notas||'')}</textarea>
+      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveNotas('${c.id}')">Salvar notas</button>
+    </div>
+  `;
+}
+function saveNotas(clientId){
+  const c=getClient(clientId);c.notas=document.getElementById('notasArea').value;save();toast('Notas salvas.');
+}
+
+/* ============================= AGENDA GERAL ============================= */
+function viewAgendaGeral(){
+  let all=[];
+  state.clients.forEach(c=>(c.agenda||[]).forEach(a=>all.push({...a,clientName:c.name,clientId:c.id})));
+  all.sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
+  const today=todayStr();
+  const past=all.filter(a=>a.date<today);
+  const upcoming=all.filter(a=>a.date>=today);
+  return `
+    <div class="header">
+      <div><div class="page-title">🗓️ Agenda Geral</div><div class="page-sub">Todos os compromissos de todos os clientes, em ordem.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>Próximos compromissos</span></div>
+      ${upcoming.length?upcoming.map(a=>globalAgendaRow(a)).join(''):emptyLine('Nenhum compromisso futuro cadastrado.')}
+    </div>
+    ${past.length?`<div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>Compromissos passados</span></div>
+      ${past.slice(-15).reverse().map(a=>globalAgendaRow(a)).join('')}
+    </div>`:''}
+  `;
+}
+function globalAgendaRow(a){
+  const overdue=!a.done&&a.date<todayStr();
+  return `
+    <div class="check-item ${a.done?'done':''}">
+      <span class="checkbox ${a.done?'on':''}" onclick="toggleAgendaDone('${a.clientId}','${a.id}')">${a.done?'✓':''}</span>
+      <span class="check-text">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="goto('client','${a.clientId}')">${escapeHtml(a.clientName)}</span>
+      ${overdue?'<span class="check-due overdue">⚠ atrasado</span>':''}
+      <span class="icon-btn" onclick="goto('client','${a.clientId}');openAgendaEditor('${a.id}')">✏️</span>
+      <span class="icon-btn" onclick="removeAgenda('${a.clientId}','${a.id}')">✕</span>
+    </div>
+  `;
+}
+
+/* ============================= TAREFAS GERAL ============================= */
+function viewTasksGeral(){
+  let all=[];
+  state.clients.forEach(c=>(c.tasks||[]).forEach(t=>all.push({...t,clientName:c.name,clientId:c.id})));
+  const today=todayStr();
+  const overdue=all.filter(t=>!t.done && t.due && t.due<today).sort((a,b)=>a.due.localeCompare(b.due));
+  const pend=all.filter(t=>!t.done && !(t.due && t.due<today)).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
+  const done=all.filter(t=>t.done);
+  return `
+    <div class="header">
+      <div><div class="page-title">✅ Tarefas Rápidas</div><div class="page-sub">Todas as tarefas de todos os clientes reunidas aqui — nada escapa.</div></div>
+    </div>
+    ${overdue.length?`<div class="card" style="border-color:#3a1a1a">
+      <div class="card-title"><span style="color:#c06060">⚠ Atrasadas (${overdue.length})</span></div>
+      ${overdue.map(t=>globalTaskRow(t)).join('')}
+    </div>`:''}
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>Pendentes (${pend.length})</span></div>
+      ${pend.length?pend.map(t=>globalTaskRow(t)).join(''):emptyLine('Tudo em dia. 🎉')}
+    </div>
+    ${done.length?`<div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>Concluídas recentemente</span></div>
+      ${done.slice(-15).reverse().map(t=>globalTaskRow(t)).join('')}
+    </div>`:''}
+  `;
+}
+function globalTaskRow(t){
+  const overdue=t.due && !t.done && t.due<todayStr();
+  return `
+    <div class="check-item ${t.done?'done':''}">
+      <span class="checkbox ${t.done?'on':''}" onclick="toggleTask('${t.clientId}','${t.id}')">${t.done?'✓':''}</span>
+      <span class="check-text">${escapeHtml(t.text)}</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="goto('client','${t.clientId}')">${escapeHtml(t.clientName)}</span>
+      ${t.due?`<span class="check-due ${overdue?'overdue':''}">${overdue?'⚠ ':''}${fmtBR(t.due)}</span>`:''}
+      <span class="icon-btn" onclick="removeTask('${t.clientId}','${t.id}')">✕</span>
+    </div>
+  `;
+}
+
+/* ============================= SETTINGS / BACKUP ============================= */
+function viewSettings(){
+  return `
+    <div class="header"><div><div class="page-title">⚙️ Backup / Configurações</div><div class="page-sub">Este painel salva tudo no navegador (localStorage) — não sincroniza entre dispositivos sozinho.</div></div></div>
+    <div class="card">
+      <div class="card-title"><span>💾 Exportar backup</span></div>
+      <div class="hint" style="margin-bottom:10px">Baixe um arquivo .json com todos os clientes, calendários, tarefas e agendas. Guarde esse arquivo — ele é sua cópia de segurança e também serve para levar os dados para outro computador.</div>
+      <button class="btn btn-primary btn-sm" onclick="exportBackup()">Baixar backup (.json)</button>
+    </div>
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>📤 Importar backup</span></div>
+      <div class="hint" style="margin-bottom:10px">Isso substitui todos os dados atuais pelos do arquivo importado.</div>
+      <input type="file" id="importFile" accept=".json" onchange="importBackup(event)">
+    </div>
+    <div class="card section-gap" style="margin-top:14px; border-color:#3a1414">
+      <div class="card-title"><span style="color:#c06060">⚠ Restaurar carteira padrão</span></div>
+      <div class="hint" style="margin-bottom:10px">Apaga tudo e recarrega a lista original de clientes descrita na configuração inicial.</div>
+      <button class="btn btn-danger btn-sm" onclick="resetToDefault()">Restaurar padrão</button>
+    </div>
+  `;
+}
+async function exportBackup(){
+  const json=JSON.stringify(state,null,2);
+  const filename='vnove-dashboard-backup-'+todayStr()+'.json';
+  try{
+    if(window.claude&&window.claude.use){
+      const downloads=await window.claude.use('downloads');
+      if(downloads){
+        await downloads.save({filename,data:json});
+        toast('Backup baixado.');
+        return;
+      }
+    }
+  }catch(e){/* segue pro fallback abaixo */}
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Backup baixado.');
+}
+function importBackup(evt){
+  const file=evt.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const parsed=JSON.parse(e.target.result);
+      if(!parsed.clients)throw new Error('formato inválido');
+      const oldIds=state.clients.map(c=>c.id);
+      const newIds=new Set((parsed.clients||[]).map(c=>c.id));
+      state=ensureShape(parsed);
+      state._pendingDeletes=oldIds.filter(id=>!newIds.has(id));
+      save();render();toast('Backup importado com sucesso.');
+    }catch(err){toast('Arquivo inválido.');}
+  };
+  reader.readAsText(file);
+}
+function resetToDefault(){
+  if(!confirm('Isso vai apagar todos os dados atuais e restaurar a carteira padrão. Continuar?'))return;
+  const oldIds=state.clients.map(c=>c.id);
+  state=ensureShape({clients:defaultClients(),currentView:'overview',currentClientId:null,createdAt:Date.now()});
+  state._pendingDeletes=oldIds;
+  save();render();toast('Restaurado.');
+}
+
+/* ============================= PÁGINA: NOVO/EDITAR CLIENTE ============================= */
+function openClientEditor(clientId){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='clientEditor';
+  state.editorTargetId=clientId||null;
+  save();render();
+}
+function viewClientEditor(){
+  const c=state.editorTargetId?getClient(state.editorTargetId):null;
+  return `
+    <div class="header">
+      <div><div class="page-title">${c?'✏️ Editar cliente':'➕ Novo cliente'}</div></div>
+      <div class="header-actions"><button class="btn" onclick="closeEditor()">← Voltar</button></div>
+    </div>
+    <div class="card" style="max-width:560px">
+      <div class="field"><label>Nome do cliente</label><input type="text" id="cName" value="${c?escapeAttr(c.name):''}" placeholder="Ex: Nome do Cliente"></div>
+      <div class="field"><label>Nicho / o que é</label><input type="text" id="cNiche" value="${c?escapeAttr(c.niche||''):''}" placeholder="Ex: Infoproduto, app, e-commerce..."></div>
+      <div class="field-row">
+        <div class="field"><label>Status</label>
+          <select id="cStatus">
+            ${Object.entries(STATUS_META).map(([k,m])=>`<option value="${k}" ${c&&c.status===k?'selected':''}>${m.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Categoria / tipo de cliente</label>
+          <select id="cCategoria">
+            <option value="">Sem categoria</option>
+            ${Object.entries(CATEGORY_META).map(([k,m])=>`<option value="${k}" ${c&&c.categoria===k?'selected':''}>${m.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Responsável</label><input type="text" id="cResp" value="${c?escapeAttr(c.responsavel||'Você'):'Você'}"></div>
+      <div class="field"><label>Alerta / observação de destaque (opcional)</label><input type="text" id="cDestaque" value="${c?escapeAttr(c.destaque||''):''}" placeholder="Ex: cliente exigente, sem margem para erro..."></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="saveClientEditor()">${c?'Salvar':'Criar cliente'}</button>
+        ${c?`<button class="btn btn-danger" onclick="deleteClient('${c.id}')">🗑 Excluir cliente</button>`:''}
+      </div>
+    </div>
+  `;
+}
+function saveClientEditor(){
+  const name=document.getElementById('cName').value.trim();
+  if(!name){toast('Dê um nome ao cliente.');return;}
+  const niche=document.getElementById('cNiche').value.trim();
+  const status=document.getElementById('cStatus').value;
+  const categoria=document.getElementById('cCategoria').value;
+  const responsavel=document.getElementById('cResp').value.trim()||'Você';
+  const destaque=document.getElementById('cDestaque').value.trim();
+  if(state.editorTargetId){
+    const c=getClient(state.editorTargetId);
+    Object.assign(c,{name,niche,status,categoria,responsavel,destaque});
+    save();toast('Cliente salvo.');closeEditor();
+  }else{
+    const c={id:uid(),name,niche,status,categoria,responsavel,destaque,demandas:[],subClients:[],tasks:[],calendar:[],agenda:[],notas:'',fullDashboardLink:null};
+    state.clients.push(c);
+    state.currentClientId=c.id;state.currentView='client';state.clientTab='resumo';
+    save();render();toast('Cliente criado.');
+  }
+}
+function deleteClient(clientId){
+  const c=getClient(clientId);
+  if(!confirm(`Excluir "${c.name}" e todos os dados dele (tarefas, calendário, agenda)? Essa ação não pode ser desfeita.`))return;
+  state.clients=state.clients.filter(x=>x.id!==clientId);
+  state._pendingDeletes=state._pendingDeletes||[];
+  state._pendingDeletes.push(clientId);
+  state.currentView='overview';state.currentClientId=null;
+  save();render();toast('Cliente removido.');
+}
+
+/* ============================= NAVEGAÇÃO ENTRE PÁGINAS DE EDIÇÃO ============================= */
+function closeEditor(){
+  const r=state.editorReturn||{view:'overview'};
+  state.currentView=r.view;
+  state.currentClientId=r.clientId||null;
+  state.clientTab=r.tab;
+  save();render();
+}
+
+/* ============================= INIT ============================= */
+initApp();
+</script>
+</body>
+</html>
