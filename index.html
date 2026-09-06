@@ -164,16 +164,6 @@ button{font-family:inherit}
 .empty-state .ic{font-size:28px;margin-bottom:10px;opacity:0.6}
 .empty-state .msg{font-size:13px}
 
-/* Modal */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 16px}
-.modal-overlay.show{display:flex}
-.modal{background:#111;border:0.5px solid #2a2a2a;border-radius:12px;width:560px;max-width:100%;padding:22px}
-.modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
-.modal-title{font-size:15px;font-weight:600;color:#fff}
-.modal-close{width:26px;height:26px;border:0.5px solid #333;border-radius:50%;background:#1a1a1a;color:#666;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.modal-close:hover{color:#fff;border-color:#555}
-.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-
 /* Toast */
 .toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;border:0.5px solid #B8962E;color:#eee;padding:10px 16px;border-radius:8px;font-size:13px;z-index:2000;display:none}
 .toast.show{display:block}
@@ -197,9 +187,6 @@ button{font-family:inherit}
 <div class="app">
   <div class="sidebar" id="sidebar"></div>
   <div class="main" id="main"></div>
-</div>
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modalBody"></div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -323,27 +310,78 @@ function load(){
   }catch(e){}
   return {clients:defaultClients(),currentView:'overview',currentClientId:null,createdAt:Date.now()};
 }
-/* Garante que todo cliente tenha os campos esperados (compatibilidade com dados salvos antes) e monta a biblioteca de tópicos. */
+/* Garante que um cliente tenha todos os campos esperados (compatibilidade com dados salvos antes ou vindos do banco). */
+function normalizeClient(c){
+  c.subClients=c.subClients||[];
+  c.demandas=c.demandas||[];
+  c.tasks=c.tasks||[];
+  c.calendar=c.calendar||[];
+  c.agenda=(c.agenda||[]).map(a=>({done:false,...a}));
+  c.notas=c.notas||'';
+  c.categoria=c.categoria||'';
+  return c;
+}
+/* Garante que o state inteiro tenha os campos esperados e monta a biblioteca de tópicos. */
 function ensureShape(st){
   const allDemandas=[];
-  st.clients.forEach(c=>{
-    c.subClients=c.subClients||[];
-    c.demandas=c.demandas||[];
-    c.tasks=c.tasks||[];
-    c.calendar=c.calendar||[];
-    c.agenda=c.agenda||[];
-    c.notas=c.notas||'';
-    c.categoria=c.categoria||'';
-    allDemandas.push(...c.demandas);
-  });
+  st.clients.forEach(c=>{normalizeClient(c);allDemandas.push(...c.demandas);});
   const lib=new Set(MASTER_TOPICS);
   allDemandas.forEach(d=>lib.add(d));
   (st.topicLibrary||[]).forEach(d=>lib.add(d));
   st.topicLibrary=Array.from(lib);
+  st._pendingDeletes=st._pendingDeletes||[];
   return st;
+}
+
+/* ============================= BANCO COMPARTILHADO (db) ============================= */
+/* Quando publicado como Artifact com a capability "db", os dados passam a viver num banco
+   compartilhado entre aparelhos — e o Claude consegue ler/consultar de fora quando você pedir.
+   Sem essa capability (arquivo local, ex: index.html aberto direto), tudo continua no localStorage. */
+let db=null;
+let dbSyncTimer=null;
+async function initApp(){
+  render(); // renderiza na hora com o que já está em cache local, sem esperar a rede
+  try{
+    if(window.claude&&window.claude.use) db=await window.claude.use('db');
+  }catch(e){db=null;}
+  if(db) await loadFromDb();
+}
+async function loadFromDb(){
+  try{
+    const snap=await db.collection('clients').get();
+    if(!snap.empty){
+      state.clients=snap.docs.map(d=>normalizeClient(Object.assign({id:d.id},d.data())));
+    }
+    const metaSnap=await db.doc('meta/app').get();
+    if(metaSnap.exists){
+      const data=metaSnap.data();
+      const lib=new Set(MASTER_TOPICS);
+      (state.topicLibrary||[]).forEach(t=>lib.add(t));
+      (data.topicLibrary||[]).forEach(t=>lib.add(t));
+      state.topicLibrary=Array.from(lib);
+    }
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    render();
+  }catch(e){
+    console.error('Não consegui carregar do banco compartilhado — usando os dados locais deste aparelho.',e);
+  }
 }
 function save(){
   localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+  if(db){
+    clearTimeout(dbSyncTimer);
+    dbSyncTimer=setTimeout(syncToDb,500);
+  }
+}
+async function syncToDb(){
+  if(!db)return;
+  try{
+    const writes=state.clients.map(c=>db.collection('clients').doc(c.id).set(c));
+    writes.push(db.doc('meta/app').set({topicLibrary:state.topicLibrary||[]}));
+    const dels=(state._pendingDeletes||[]).map(id=>db.collection('clients').doc(id).delete());
+    state._pendingDeletes=[];
+    await Promise.allSettled([...writes,...dels]);
+  }catch(e){/* o localStorage já garantiu que nada foi perdido neste aparelho */}
 }
 function getClient(id){return state.clients.find(c=>c.id===id);}
 function toast(msg){
@@ -378,14 +416,15 @@ function renderSidebar(){
     </div>
     <div class="nav-section">
       <div class="nav-item ${v==='overview'?'active':''}" onclick="goto('overview')"><span class="nav-icon">📊</span><span class="name">Visão Geral</span></div>
+      <div class="nav-item ${v==='overdue'?'active':''}" onclick="goto('overdue')"><span class="nav-icon">⚠️</span><span class="name">Atrasados</span>${globalOverdueTotalCount()?`<span class="nav-count">${globalOverdueTotalCount()}</span>`:''}</div>
       <div class="nav-item ${v==='agenda'?'active':''}" onclick="goto('agenda')"><span class="nav-icon">🗓️</span><span class="name">Agenda Geral</span></div>
       <div class="nav-item ${v==='tasks'?'active':''}" onclick="goto('tasks')"><span class="nav-icon">✅</span><span class="name">Tarefas Rápidas</span>${globalPendingTasksCount()?`<span class="nav-count">${globalPendingTasksCount()}</span>`:''}</div>
     </div>
     <div class="nav-section">
-      <div class="nav-label"><span>Clientes (${state.clients.length})</span><span class="nav-add" onclick="event.stopPropagation();openClientModal()" title="Adicionar cliente">+ novo</span></div>
+      <div class="nav-label"><span>Clientes (${state.clients.length})</span><span class="nav-add" onclick="event.stopPropagation();openClientEditor()" title="Adicionar cliente">+ novo</span></div>
       <div class="clients-list">
         ${state.clients.map(c=>`
-          <div class="nav-item ${v==='client'&&state.currentClientId===c.id?'active':''}" onclick="goto('client','${c.id}')">
+          <div class="nav-item ${(['client','contentEditor','dayView','agendaEditor','subClientEditor'].includes(v)&&state.currentClientId===c.id)?'active':''}" onclick="goto('client','${c.id}')">
             <span class="dot" style="background:${(CATEGORY_META[c.categoria]||{}).color||statusColor(c.status)}" title="${c.categoria?CATEGORY_META[c.categoria].label:''}"></span>
             <span class="name">${escapeHtml(c.name)}</span>
           </div>`).join('')}
@@ -404,9 +443,15 @@ function renderMain(){
   const el=document.getElementById('main');
   if(state.currentView==='overview') el.innerHTML=viewOverview();
   else if(state.currentView==='client') el.innerHTML=viewClient(getClient(state.currentClientId));
+  else if(state.currentView==='overdue') el.innerHTML=viewOverdue();
   else if(state.currentView==='agenda') el.innerHTML=viewAgendaGeral();
   else if(state.currentView==='tasks') el.innerHTML=viewTasksGeral();
   else if(state.currentView==='settings') el.innerHTML=viewSettings();
+  else if(state.currentView==='contentEditor') el.innerHTML=viewContentEditor();
+  else if(state.currentView==='dayView') el.innerHTML=viewDay();
+  else if(state.currentView==='agendaEditor') el.innerHTML=viewAgendaEditor();
+  else if(state.currentView==='clientEditor') el.innerHTML=viewClientEditor();
+  else if(state.currentView==='subClientEditor') el.innerHTML=viewSubClientEditor();
   // post-render hooks
   if(state.currentView==='client'){
     const c=getClient(state.currentClientId);
@@ -423,6 +468,17 @@ function globalPendingTasksCount(){
 function globalOverdueTasksCount(){
   const today=todayStr();let n=0;
   state.clients.forEach(c=>(c.tasks||[]).forEach(t=>{if(!t.done && t.due && t.due<today)n++;}));
+  return n;
+}
+/* Tudo que já passou do prazo: tarefas (do cliente e das contas), conteúdo não postado e compromissos não marcados. */
+function globalOverdueTotalCount(){
+  const today=todayStr();let n=0;
+  state.clients.forEach(c=>{
+    (c.tasks||[]).forEach(t=>{if(!t.done && t.due && t.due<today)n++;});
+    (c.calendar||[]).forEach(x=>{if(x.date<today && x.pipeline!=='postado')n++;});
+    (c.agenda||[]).forEach(a=>{if(!a.done && a.date<today)n++;});
+    (c.subClients||[]).forEach(s=>(s.tasks||[]).forEach(t=>{if(!t.done && t.due && t.due<today)n++;}));
+  });
   return n;
 }
 function weekRange(){
@@ -455,13 +511,13 @@ function viewOverview(){
         <div class="page-sub">Todos os seus clientes, num só lugar.</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" onclick="openClientModal()">+ Novo Cliente</button>
+        <button class="btn btn-primary" onclick="openClientEditor()">+ Novo Cliente</button>
       </div>
     </div>
 
     <div class="grid4 section-gap">
       <div class="metric"><div class="metric-num">${ativos}</div><div class="metric-label">Clientes ativos</div></div>
-      <div class="metric"><div class="metric-num ${globalOverdueTasksCount()?'warn':''}">${globalOverdueTasksCount()}</div><div class="metric-label">Tarefas atrasadas</div></div>
+      <div class="metric" style="cursor:pointer" onclick="goto('overdue')"><div class="metric-num ${globalOverdueTotalCount()?'warn':''}">${globalOverdueTotalCount()}</div><div class="metric-label">Atrasados (tudo) →</div></div>
       <div class="metric"><div class="metric-num">${contentsThisWeekCount()}</div><div class="metric-label">Conteúdos essa semana</div></div>
       <div class="metric"><div class="metric-num">${agendaTodayCount()}</div><div class="metric-label">Compromissos hoje</div></div>
     </div>
@@ -507,6 +563,67 @@ function clientCard(c){
   `;
 }
 
+/* ============================= ATRASADOS (tudo junto) ============================= */
+function viewOverdue(){
+  const today=todayStr();
+  let tasks=[],contents=[],agendas=[];
+  state.clients.forEach(c=>{
+    (c.tasks||[]).forEach(t=>{if(!t.done&&t.due&&t.due<today)tasks.push({...t,clientName:c.name,clientId:c.id,subId:null});});
+    (c.subClients||[]).forEach(s=>(s.tasks||[]).forEach(t=>{if(!t.done&&t.due&&t.due<today)tasks.push({...t,clientName:c.name+' · '+s.name,clientId:c.id,subId:s.id});}));
+    (c.calendar||[]).forEach(x=>{if(x.date<today&&x.pipeline!=='postado')contents.push({...x,clientName:c.name,clientId:c.id});});
+    (c.agenda||[]).forEach(a=>{if(!a.done&&a.date<today)agendas.push({...a,clientName:c.name,clientId:c.id});});
+  });
+  tasks.sort((a,b)=>a.due.localeCompare(b.due));
+  contents.sort((a,b)=>a.date.localeCompare(b.date));
+  agendas.sort((a,b)=>a.date.localeCompare(b.date));
+  const total=tasks.length+contents.length+agendas.length;
+  return `
+    <div class="header">
+      <div><div class="page-title">⚠️ Atrasados</div><div class="page-sub">Tarefa, conteúdo e compromisso vencidos, de todos os clientes — ${total} item${total===1?'':'s'}.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>✅ Tarefas atrasadas (${tasks.length})</span></div>
+      ${tasks.length?tasks.map(t=>overdueTaskRow(t)).join(''):emptyLine('Nenhuma tarefa atrasada. 🎉')}
+    </div>
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>🎬 Conteúdo atrasado (${contents.length})</span></div>
+      ${contents.length?contents.map(x=>overdueContentRow(x)).join(''):emptyLine('Nenhum conteúdo atrasado. 🎉')}
+    </div>
+    <div class="card section-gap" style="margin-top:14px">
+      <div class="card-title"><span>📅 Compromissos perdidos (${agendas.length})</span></div>
+      ${agendas.length?agendas.map(a=>overdueAgendaRow(a)).join(''):emptyLine('Nenhum compromisso perdido. 🎉')}
+    </div>
+  `;
+}
+function overdueTaskRow(t){
+  const toggle=t.subId?`toggleSubTask('${t.clientId}','${t.subId}','${t.id}')`:`toggleTask('${t.clientId}','${t.id}')`;
+  return `
+    <div class="check-item">
+      <span class="checkbox" onclick="${toggle}"></span>
+      <span class="check-text">${escapeHtml(t.text)}</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="goto('client','${t.clientId}')">${escapeHtml(t.clientName)}</span>
+      <span class="check-due overdue">⚠ ${fmtBR(t.due)}</span>
+    </div>
+  `;
+}
+function overdueContentRow(x){
+  return `
+    <div class="item" style="cursor:pointer" onclick="goto('client','${x.clientId}');setClientTab('calendario');openContentEditor('${x.id}')">
+      <div class="item-title">${fmtBR(x.date)} — ${escapeHtml(x.title)} <span class="tag tag-gray">${escapeHtml(x.clientName)}</span></div>
+      <div class="item-tags"><span class="pipe ${PIPE_META[x.pipeline||'ideia'].cls}">${PIPE_META[x.pipeline||'ideia'].label}</span></div>
+    </div>
+  `;
+}
+function overdueAgendaRow(a){
+  return `
+    <div class="check-item">
+      <span class="checkbox" onclick="toggleAgendaDone('${a.clientId}','${a.id}')"></span>
+      <span class="check-text">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="goto('client','${a.clientId}')">${escapeHtml(a.clientName)}</span>
+    </div>
+  `;
+}
+
 /* ============================= CLIENT VIEW ============================= */
 function viewClient(c){
   if(!c){goto('overview');return'';}
@@ -521,7 +638,7 @@ function viewClient(c){
       </div>
       <div class="header-actions">
         ${c.fullDashboardLink?`<a class="btn" href="${escapeAttr(c.fullDashboardLink)}" target="_blank">📂 Banco de conteúdo completo</a>`:''}
-        <button class="btn" onclick="openClientModal('${c.id}')">✏️ Editar</button>
+        <button class="btn" onclick="openClientEditor('${c.id}')">✏️ Editar</button>
         <button class="btn btn-danger" onclick="deleteClient('${c.id}')">🗑</button>
       </div>
     </div>
@@ -626,11 +743,9 @@ function tabCalendario(c){
         <div id="previewArea"></div>
       </div>
       <div class="card">
-        <div class="card-title"><span>➕ Adicionar manualmente</span></div>
-        <div class="field"><label>Data</label><input type="date" id="manCalDate"></div>
-        <div class="field"><label>Título</label><input type="text" id="manCalTitle" placeholder="Ex: Reels — bastidores do lançamento"></div>
-        <div class="field"><label>Descrição / roteiro</label><textarea id="manCalDesc" placeholder="Detalhes, roteiro, observações..."></textarea></div>
-        <button class="btn btn-primary btn-sm" onclick="addCalendarManual('${c.id}')">Adicionar ao calendário</button>
+        <div class="card-title"><span>➕ Adicionar conteúdo</span></div>
+        <div class="hint" style="margin-bottom:12px">Abre uma página só para esse conteúdo, com espaço para escrever o roteiro inteiro e gerar com o Claude.</div>
+        <button class="btn btn-primary" onclick="openContentEditor(null, todayStr())">+ Novo conteúdo</button>
       </div>
     </div>
 
@@ -652,40 +767,24 @@ function tabCalendario(c){
   `;
 }
 function calendarEntryRow(c,x){
-  const pm=PIPE_META[x.pipeline||'ideia'];
   return `
     <div class="item">
       <div class="item-row">
-        <div style="flex:1">
+        <div style="flex:1;cursor:pointer" onclick="openContentEditor('${x.id}')">
           <div class="item-title">${fmtBRFull(x.date)} — ${escapeHtml(x.title)}</div>
-          ${x.desc?`<div class="item-desc">${escapeHtml(x.desc)}</div>`:''}
+          ${x.desc?`<div class="item-desc">${escapeHtml(truncate(x.desc,140))}</div>`:''}
           <div class="item-tags">
-            <select onchange="setPipeline('${c.id}','${x.id}',this.value)" style="background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:20px;color:#B8962E;font-size:10px;padding:2px 6px">
-              ${Object.entries(PIPE_META).map(([k,m])=>`<option value="${k}" ${x.pipeline===k?'selected':''}>${m.label}</option>`).join('')}
-            </select>
+            <span class="pipe ${PIPE_META[x.pipeline||'ideia'].cls}">${PIPE_META[x.pipeline||'ideia'].label}</span>
+            ${x.date<todayStr()&&x.pipeline!=='postado'?'<span class="tag tag-red">⚠ atrasado</span>':''}
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          <span class="icon-btn" title="Criar roteiro com IA" onclick="openRoteiroModal('${c.id}','${x.id}')">🧠</span>
-          <span class="icon-btn" title="Editar" onclick="openCalendarEditModal('${c.id}','${x.id}')">✏️</span>
+          <span class="icon-btn" title="Editar" onclick="openContentEditor('${x.id}')">✏️</span>
           <span class="icon-btn" title="Excluir" onclick="removeCalendarEntry('${c.id}','${x.id}')">✕</span>
         </div>
       </div>
     </div>
   `;
-}
-function setPipeline(clientId,entryId,val){
-  const c=getClient(clientId);const e=(c.calendar||[]).find(x=>x.id===entryId);
-  if(e){e.pipeline=val;save();}
-}
-function addCalendarManual(clientId){
-  const date=document.getElementById('manCalDate').value;
-  const title=document.getElementById('manCalTitle').value.trim();
-  const desc=document.getElementById('manCalDesc').value.trim();
-  if(!date||!title){toast('Preencha data e título.');return;}
-  const c=getClient(clientId);c.calendar=c.calendar||[];
-  c.calendar.push({id:uid(),date,title,desc,pipeline:'ideia'});
-  save();render();toast('Conteúdo adicionado ao calendário.');
 }
 function removeCalendarEntry(clientId,entryId){
   const c=getClient(clientId);c.calendar=(c.calendar||[]).filter(x=>x.id!==entryId);save();render();
@@ -795,7 +894,7 @@ function renderMonthCalendar(c){
     const iso=fmtISO(new Date(year,month,d));
     const items=byDate[iso]||[];
     const isToday=iso===todayStr();
-    cells+=`<div class="cal-day ${isToday?'today':''}" onclick="openCalendarDayModal('${c.id}','${iso}')">
+    cells+=`<div class="cal-day ${isToday?'today':''}" onclick="openDayView('${iso}')">
       <div class="cal-daynum">${d}</div>
       ${items.slice(0,2).map(x=>`<div class="cal-entry-dot">${escapeHtml(truncate(x.title,14))}</div>`).join('')}
       ${items.length>2?`<div class="cal-entry-dot more">+${items.length-2}</div>`:''}
@@ -806,53 +905,100 @@ function renderMonthCalendar(c){
     <div class="cal-grid">${cells}</div>
   `;
 }
-function openCalendarDayModal(clientId,iso){
-  const c=getClient(clientId);
+function openDayView(iso){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='dayView';
+  state.dayViewDate=iso;
+  save();render();
+}
+function viewDay(){
+  const c=getClient(state.currentClientId);
+  const iso=state.dayViewDate;
   const items=(c.calendar||[]).filter(x=>x.date===iso);
-  openModal(`
-    <div class="modal-header"><div class="modal-title">${fmtBRFull(iso)}</div><div class="modal-close" onclick="closeModal()">✕</div></div>
-    ${items.length?items.map(x=>calendarEntryRow(c,x)).join(''):emptyLine('Nada agendado neste dia.')}
-    <div class="modal-footer">
-      <button class="btn btn-primary btn-sm" onclick="closeModal();document.getElementById('manCalDate') && (document.getElementById('manCalDate').value='${iso}')">Fechar</button>
+  return `
+    <div class="header">
+      <div><div class="page-title">🗓️ ${fmtBRFull(iso)}</div><div class="page-sub">${escapeHtml(c.name)} · Calendário editorial</div></div>
+      <div class="header-actions">
+        <button class="btn" onclick="closeEditor()">← Voltar</button>
+        <button class="btn btn-primary" onclick="openContentEditor(null, '${iso}')">+ Novo conteúdo nesse dia</button>
+      </div>
     </div>
-  `);
-}
-function openCalendarEditModal(clientId,entryId){
-  const c=getClient(clientId);const e=(c.calendar||[]).find(x=>x.id===entryId);if(!e)return;
-  openModal(`
-    <div class="modal-header"><div class="modal-title">Editar conteúdo</div><div class="modal-close" onclick="closeModal()">✕</div></div>
-    <div class="field"><label>Data</label><input type="date" id="editCalDate" value="${e.date}"></div>
-    <div class="field"><label>Título</label><input type="text" id="editCalTitle" value="${escapeAttr(e.title)}"></div>
-    <div class="field"><label>Descrição / roteiro</label><textarea id="editCalDesc" style="min-height:140px">${escapeHtml(e.desc||'')}</textarea></div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveCalendarEdit('${clientId}','${entryId}')">Salvar</button>
+    <div class="card">
+      ${items.length?items.map(x=>calendarEntryRow(c,x)).join(''):emptyLine('Nada agendado neste dia.')}
     </div>
-  `);
-}
-function saveCalendarEdit(clientId,entryId){
-  const c=getClient(clientId);const e=(c.calendar||[]).find(x=>x.id===entryId);if(!e)return;
-  e.date=document.getElementById('editCalDate').value;
-  e.title=document.getElementById('editCalTitle').value.trim();
-  e.desc=document.getElementById('editCalDesc').value.trim();
-  save();closeModal();render();
+  `;
 }
 
-/* Roteiro via Claude — copia prompt pronto + abre claude.ai */
-function openRoteiroModal(clientId,entryId){
-  const c=getClient(clientId);const e=(c.calendar||[]).find(x=>x.id===entryId);if(!e)return;
-  const prompt=`Crie um roteiro completo para o seguinte conteúdo do cliente "${c.name}" (nicho: ${c.niche||'-'}).\n\nTítulo/tema: ${e.title}\n${e.desc?'Contexto/observações: '+e.desc+'\n':''}\nFormato: defina o melhor formato (reels, carrossel, story) e entregue: hook (gancho inicial), desenvolvimento, e CTA final. Escreva em tom direto e natural, pronto para gravar/publicar.`;
-  openModal(`
-    <div class="modal-header"><div class="modal-title">🧠 Criar roteiro no Claude</div><div class="modal-close" onclick="closeModal()">✕</div></div>
-    <div class="field"><label>Prompt sugerido (copie e cole no Claude.ai)</label><textarea id="roteiroPrompt" style="min-height:140px">${escapeHtml(prompt)}</textarea></div>
-    <div class="hint">Depois que o Claude gerar o roteiro, cole o resultado final abaixo para guardar junto deste conteúdo.</div>
-    <div class="field" style="margin-top:14px"><label>Roteiro final (colar aqui depois de gerar)</label><textarea id="roteiroResult" style="min-height:120px">${escapeHtml(e.desc||'')}</textarea></div>
-    <div class="modal-footer">
-      <button class="btn" onclick="copyToClipboard('roteiroPrompt')">📋 Copiar prompt</button>
-      <a class="btn" href="https://claude.ai/new" target="_blank">Abrir Claude.ai ↗</a>
-      <button class="btn btn-primary" onclick="saveRoteiroResult('${clientId}','${entryId}')">Salvar roteiro</button>
+/* --- Página: novo/editar conteúdo, com roteiro via Claude junto --- */
+function openContentEditor(entryId,prefillDate){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='contentEditor';
+  state.editorTargetId=entryId||null;
+  state.editorPrefillDate=prefillDate||null;
+  save();render();
+}
+function buildRoteiroPrompt(c,title,desc){
+  return `Crie um roteiro completo para o seguinte conteúdo do cliente "${c.name}" (nicho: ${c.niche||'-'}).\n\nTítulo/tema: ${title||'(defina o tema)'}\n${desc?'Contexto/observações: '+desc+'\n':''}\nFormato: defina o melhor formato (reels, carrossel, story) e entregue: hook (gancho inicial), desenvolvimento, e CTA final. Escreva em tom direto e natural, pronto para gravar/publicar.`;
+}
+function viewContentEditor(){
+  const c=getClient(state.currentClientId);
+  const e=state.editorTargetId?(c.calendar||[]).find(x=>x.id===state.editorTargetId):null;
+  const date=e?e.date:(state.editorPrefillDate||todayStr());
+  return `
+    <div class="header">
+      <div><div class="page-title">${e?'✏️ Editar conteúdo':'➕ Novo conteúdo'}</div><div class="page-sub">${escapeHtml(c.name)} · Calendário editorial</div></div>
+      <div class="header-actions">
+        <button class="btn" onclick="closeEditor()">← Voltar</button>
+        ${e?`<button class="btn btn-danger" onclick="removeCalendarEntry('${c.id}','${e.id}');closeEditor()">🗑 Excluir</button>`:''}
+      </div>
     </div>
-  `);
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span>📝 Detalhes</span></div>
+        <div class="field-row">
+          <div class="field"><label>Data</label><input type="date" id="ceDate" value="${date}"></div>
+          <div class="field"><label>Status</label>
+            <select id="cePipeline">${Object.entries(PIPE_META).map(([k,m])=>`<option value="${k}" ${(e?e.pipeline:'ideia')===k?'selected':''}>${m.label}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="field"><label>Título</label><input type="text" id="ceTitle" value="${e?escapeAttr(e.title):''}" placeholder="Ex: Reels — bastidores do lançamento"></div>
+        <div class="field"><label>Descrição / roteiro</label><textarea id="ceDesc" style="min-height:320px">${e?escapeHtml(e.desc||''):''}</textarea></div>
+        <button class="btn btn-primary" onclick="saveContentEditor()">${e?'Salvar':'Adicionar ao calendário'}</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🧠 Roteiro com Claude</span></div>
+        <div class="hint" style="margin-bottom:8px">Gere o prompt com os dados atuais, copie, cole no Claude.ai, e depois cole o resultado no campo de descrição ao lado.</div>
+        <button class="btn btn-sm" onclick="refreshRoteiroPrompt()">🔄 Gerar prompt com os campos atuais</button>
+        <textarea id="cePrompt" style="min-height:220px;margin-top:10px" readonly>${escapeHtml(buildRoteiroPrompt(c,e?e.title:'',e?e.desc:''))}</textarea>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-sm" onclick="copyToClipboard('cePrompt')">📋 Copiar prompt</button>
+          <a class="btn btn-sm" href="https://claude.ai/new" target="_blank">Abrir Claude.ai ↗</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function refreshRoteiroPrompt(){
+  const c=getClient(state.currentClientId);
+  const title=document.getElementById('ceTitle').value.trim();
+  const desc=document.getElementById('ceDesc').value.trim();
+  document.getElementById('cePrompt').value=buildRoteiroPrompt(c,title,desc);
+}
+function saveContentEditor(){
+  const c=getClient(state.currentClientId);
+  const date=document.getElementById('ceDate').value;
+  const title=document.getElementById('ceTitle').value.trim();
+  const desc=document.getElementById('ceDesc').value.trim();
+  const pipeline=document.getElementById('cePipeline').value;
+  if(!date||!title){toast('Preencha data e título.');return;}
+  c.calendar=c.calendar||[];
+  if(state.editorTargetId){
+    const e=c.calendar.find(x=>x.id===state.editorTargetId);
+    Object.assign(e,{date,title,desc,pipeline});
+  }else{
+    c.calendar.push({id:uid(),date,title,desc,pipeline});
+  }
+  save();toast('Conteúdo salvo.');closeEditor();
 }
 function copyToClipboard(id){
   const el=document.getElementById(id);
@@ -864,48 +1010,84 @@ function copyToClipboard(id){
     document.execCommand('copy');toast('Copiado!');
   }
 }
-function saveRoteiroResult(clientId,entryId){
-  const c=getClient(clientId);const e=(c.calendar||[]).find(x=>x.id===entryId);if(!e)return;
-  e.desc=document.getElementById('roteiroResult').value.trim();
-  e.pipeline='roteiro';
-  save();closeModal();render();toast('Roteiro salvo neste conteúdo.');
-}
 
 /* --- Agenda por cliente --- */
 function tabAgenda(c){
   const items=(c.agenda||[]).slice().sort((a,b)=>(a.date+((a.time)||'')).localeCompare(b.date+((b.time)||'')));
   return `
-    <div class="card">
-      <div class="card-title"><span>📅 Compromissos / agenda</span></div>
-      <div class="field-row">
-        <div class="field"><label>Data</label><input type="date" id="agDate"></div>
-        <div class="field"><label>Hora</label><input type="time" id="agTime"></div>
-      </div>
-      <div class="field"><label>Compromisso</label><input type="text" id="agTitle" placeholder="Ex: Live semanal, gravação, reunião de alinhamento..."></div>
-      <button class="btn btn-primary btn-sm" onclick="addAgenda('${c.id}')">Adicionar à agenda</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+      <div class="hint" style="margin:0">Compromissos, lives, gravações e reuniões deste cliente.</div>
+      <button class="btn btn-primary btn-sm" onclick="openAgendaEditor(null)">+ Novo compromisso</button>
     </div>
-    <div class="card section-gap" style="margin-top:14px">
-      <div class="card-title"><span>Próximos compromissos</span></div>
-      ${items.length?items.map(a=>`
-        <div class="item">
-          <div class="item-row">
-            <div class="item-title">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</div>
-            <span class="icon-btn" onclick="removeAgenda('${c.id}','${a.id}')">✕</span>
-          </div>
-        </div>`).join(''):emptyLine('Nenhum compromisso cadastrado.')}
+    <div class="card">
+      ${items.length?items.map(a=>agendaRow(c,a)).join(''):emptyLine('Nenhum compromisso cadastrado.')}
     </div>
   `;
 }
-function addAgenda(clientId){
-  const date=document.getElementById('agDate').value;
-  const time=document.getElementById('agTime').value;
-  const title=document.getElementById('agTitle').value.trim();
-  if(!date||!title){toast('Preencha data e o compromisso.');return;}
-  const c=getClient(clientId);c.agenda=c.agenda||[];c.agenda.push({id:uid(),date,time,title});
-  save();render();toast('Adicionado à agenda.');
+function agendaRow(c,a){
+  const overdue=!a.done&&a.date<todayStr();
+  return `
+    <div class="check-item ${a.done?'done':''}">
+      <span class="checkbox ${a.done?'on':''}" onclick="toggleAgendaDone('${c.id}','${a.id}')">${a.done?'✓':''}</span>
+      <span class="check-text">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</span>
+      ${overdue?'<span class="check-due overdue">⚠ atrasado</span>':''}
+      <span class="icon-btn" onclick="openAgendaEditor('${a.id}')">✏️</span>
+      <span class="icon-btn" onclick="removeAgenda('${c.id}','${a.id}')">✕</span>
+    </div>
+  `;
+}
+function toggleAgendaDone(clientId,id){
+  const c=getClient(clientId);const a=(c.agenda||[]).find(x=>x.id===id);
+  if(a){a.done=!a.done;save();render();}
 }
 function removeAgenda(clientId,id){
   const c=getClient(clientId);c.agenda=(c.agenda||[]).filter(a=>a.id!==id);save();render();
+}
+
+/* --- Página: novo/editar compromisso --- */
+function openAgendaEditor(agendaId){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='agendaEditor';
+  state.editorTargetId=agendaId||null;
+  save();render();
+}
+function viewAgendaEditor(){
+  const c=getClient(state.currentClientId);
+  const a=state.editorTargetId?(c.agenda||[]).find(x=>x.id===state.editorTargetId):null;
+  return `
+    <div class="header">
+      <div><div class="page-title">${a?'✏️ Editar compromisso':'➕ Novo compromisso'}</div><div class="page-sub">${escapeHtml(c.name)} · Agenda</div></div>
+      <div class="header-actions">
+        <button class="btn" onclick="closeEditor()">← Voltar</button>
+        ${a?`<button class="btn btn-danger" onclick="removeAgenda('${c.id}','${a.id}');closeEditor()">🗑 Excluir</button>`:''}
+      </div>
+    </div>
+    <div class="card" style="max-width:480px">
+      <div class="field-row">
+        <div class="field"><label>Data</label><input type="date" id="agEditDate" value="${a?a.date:todayStr()}"></div>
+        <div class="field"><label>Hora (opcional)</label><input type="time" id="agEditTime" value="${a&&a.time?a.time:''}"></div>
+      </div>
+      <div class="field"><label>Compromisso</label><input type="text" id="agEditTitle" value="${a?escapeAttr(a.title):''}" placeholder="Ex: Live semanal, gravação, reunião..."></div>
+      <label class="checkbox-row"><input type="checkbox" id="agEditDone" ${a&&a.done?'checked':''}> Já aconteceu / concluído</label>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="saveAgendaEditor()">${a?'Salvar':'Adicionar à agenda'}</button>
+    </div>
+  `;
+}
+function saveAgendaEditor(){
+  const c=getClient(state.currentClientId);
+  const date=document.getElementById('agEditDate').value;
+  const time=document.getElementById('agEditTime').value;
+  const title=document.getElementById('agEditTitle').value.trim();
+  const done=document.getElementById('agEditDone').checked;
+  if(!date||!title){toast('Preencha data e o compromisso.');return;}
+  c.agenda=c.agenda||[];
+  if(state.editorTargetId){
+    const a=c.agenda.find(x=>x.id===state.editorTargetId);
+    Object.assign(a,{date,time,title,done});
+  }else{
+    c.agenda.push({id:uid(),date,time,title,done});
+  }
+  save();toast('Compromisso salvo.');closeEditor();
 }
 
 /* --- Tarefas por cliente --- */
@@ -961,7 +1143,7 @@ function tabContas(c){
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
       <div class="hint" style="margin:0">Contas/clientes específicos atendidos dentro deste cliente. Cada uma tem seu próprio espaço — nada se mistura entre elas.</div>
-      <button class="btn btn-primary btn-sm" onclick="openSubClientModal('${c.id}')">+ Adicionar cliente</button>
+      <button class="btn btn-primary btn-sm" onclick="openSubClientEditor(null)">+ Adicionar cliente</button>
     </div>
     ${(c.subClients||[]).length?c.subClients.map(s=>subClientCard(c,s)).join(''):`<div class="card">${emptyLine('Nenhuma conta cadastrada ainda. Use o botão acima para adicionar.')}</div>`}
   `;
@@ -972,7 +1154,7 @@ function subClientCard(c,s){
       <div class="card-title">
         <span>👤 ${escapeHtml(s.name)}${s.niche?' · '+escapeHtml(s.niche):''}</span>
         <div style="display:flex;gap:6px">
-          <span class="icon-btn" title="Editar" onclick="openSubClientModal('${c.id}','${s.id}')">✏️</span>
+          <span class="icon-btn" title="Editar" onclick="openSubClientEditor('${s.id}')">✏️</span>
           <span class="icon-btn" title="Excluir" onclick="deleteSubClient('${c.id}','${s.id}')">✕</span>
         </div>
       </div>
@@ -994,31 +1176,60 @@ function subTaskRow(clientId,subId,t){
     </div>
   `;
 }
-function openSubClientModal(clientId,subId){
-  const c=getClient(clientId);
-  const s=subId?(c.subClients||[]).find(x=>x.id===subId):null;
-  openModal(`
-    <div class="modal-header"><div class="modal-title">${s?'Editar conta':'Nova conta / cliente'}</div><div class="modal-close" onclick="closeModal()">✕</div></div>
-    <div class="field"><label>Nome</label><input type="text" id="subName" value="${s?escapeAttr(s.name):''}" placeholder="Nome do cliente/conta atendida"></div>
-    <div class="field"><label>Observação (opcional)</label><input type="text" id="subNiche" value="${s?escapeAttr(s.niche||''):''}" placeholder="Ex: nicho, plataforma, contexto..."></div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveSubClientModal('${clientId}','${subId||''}')">${s?'Salvar':'Adicionar'}</button>
-    </div>
-  `);
+
+/* --- Página: nova/editar conta --- */
+function openSubClientEditor(subId){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='subClientEditor';
+  state.editorTargetId=subId||null;
+  save();render();
 }
-function saveSubClientModal(clientId,subId){
+function viewSubClientEditor(){
+  const c=getClient(state.currentClientId);
+  const s=state.editorTargetId?(c.subClients||[]).find(x=>x.id===state.editorTargetId):null;
+  return `
+    <div class="header">
+      <div><div class="page-title">${s?'✏️ Editar conta':'➕ Nova conta'}</div><div class="page-sub">${escapeHtml(c.name)} · Contas</div></div>
+      <div class="header-actions">
+        <button class="btn" onclick="closeEditor()">← Voltar</button>
+        ${s?`<button class="btn btn-danger" onclick="deleteSubClient('${c.id}','${s.id}');closeEditor()">🗑 Excluir</button>`:''}
+      </div>
+    </div>
+    <div class="card" style="max-width:560px">
+      <div class="field"><label>Nome</label><input type="text" id="subName" value="${s?escapeAttr(s.name):''}" placeholder="Nome do cliente/conta atendida"></div>
+      <div class="field"><label>Observação (opcional)</label><input type="text" id="subNiche" value="${s?escapeAttr(s.niche||''):''}" placeholder="Ex: nicho, plataforma, contexto..."></div>
+      <button class="btn btn-primary" onclick="saveSubClientEditor()">${s?'Salvar':'Adicionar'}</button>
+    </div>
+    ${s?`
+    <div class="card section-gap" style="margin-top:14px;max-width:560px">
+      <div class="card-title"><span>📝 Notas</span></div>
+      <textarea id="subNotas_${s.id}" onblur="saveSubNotas('${c.id}','${s.id}')" style="min-height:140px" placeholder="Posicionamento, plano de atuação, observações...">${escapeHtml(s.notas||'')}</textarea>
+    </div>
+    <div class="card section-gap" style="margin-top:14px;max-width:560px">
+      <div class="card-title"><span>✅ Tarefas</span></div>
+      <div class="add-row">
+        <input type="text" id="subTaskText_${s.id}" placeholder="Nova tarefa para esta conta..." onkeydown="if(event.key==='Enter')addSubTask('${c.id}','${s.id}')">
+        <button class="btn btn-primary btn-sm" onclick="addSubTask('${c.id}','${s.id}')">+</button>
+      </div>
+      ${(s.tasks||[]).length?s.tasks.map(t=>subTaskRow(c.id,s.id,t)).join(''):emptyLine('Nenhuma tarefa ainda.')}
+    </div>`:''}
+  `;
+}
+function saveSubClientEditor(){
   const name=document.getElementById('subName').value.trim();
   if(!name){toast('Dê um nome.');return;}
   const niche=document.getElementById('subNiche').value.trim();
-  const c=getClient(clientId);c.subClients=c.subClients||[];
-  if(subId){
-    const s=c.subClients.find(x=>x.id===subId);
+  const c=getClient(state.currentClientId);c.subClients=c.subClients||[];
+  if(state.editorTargetId){
+    const s=c.subClients.find(x=>x.id===state.editorTargetId);
     Object.assign(s,{name,niche});
+    save();toast('Conta salva.');render();
   }else{
-    c.subClients.push({id:uid(),name,niche,notas:'',tasks:[]});
+    const s={id:uid(),name,niche,notas:'',tasks:[]};
+    c.subClients.push(s);
+    state.editorTargetId=s.id;
+    save();toast('Conta criada.');render();
   }
-  save();closeModal();render();
 }
 function deleteSubClient(clientId,subId){
   const c=getClient(clientId);
@@ -1075,21 +1286,25 @@ function viewAgendaGeral(){
     </div>
     <div class="card">
       <div class="card-title"><span>Próximos compromissos</span></div>
-      ${upcoming.length?upcoming.map(a=>`
-        <div class="item">
-          <div class="item-row">
-            <div>
-              <div class="item-title">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</div>
-              <div class="item-tags"><span class="tag tag-blue" style="cursor:pointer" onclick="goto('client','${a.clientId}')">${escapeHtml(a.clientName)}</span></div>
-            </div>
-            <span class="icon-btn" onclick="removeAgenda('${a.clientId}','${a.id}')">✕</span>
-          </div>
-        </div>`).join(''):emptyLine('Nenhum compromisso futuro cadastrado.')}
+      ${upcoming.length?upcoming.map(a=>globalAgendaRow(a)).join(''):emptyLine('Nenhum compromisso futuro cadastrado.')}
     </div>
     ${past.length?`<div class="card section-gap" style="margin-top:14px">
       <div class="card-title"><span>Compromissos passados</span></div>
-      ${past.slice(-10).reverse().map(a=>`<div class="item"><div class="item-title" style="opacity:0.5">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)} <span class="tag tag-gray">${escapeHtml(a.clientName)}</span></div></div>`).join('')}
+      ${past.slice(-15).reverse().map(a=>globalAgendaRow(a)).join('')}
     </div>`:''}
+  `;
+}
+function globalAgendaRow(a){
+  const overdue=!a.done&&a.date<todayStr();
+  return `
+    <div class="check-item ${a.done?'done':''}">
+      <span class="checkbox ${a.done?'on':''}" onclick="toggleAgendaDone('${a.clientId}','${a.id}')">${a.done?'✓':''}</span>
+      <span class="check-text">${fmtBRFull(a.date)}${a.time?' · '+a.time:''} — ${escapeHtml(a.title)}</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="goto('client','${a.clientId}')">${escapeHtml(a.clientName)}</span>
+      ${overdue?'<span class="check-due overdue">⚠ atrasado</span>':''}
+      <span class="icon-btn" onclick="goto('client','${a.clientId}');openAgendaEditor('${a.id}')">✏️</span>
+      <span class="icon-btn" onclick="removeAgenda('${a.clientId}','${a.id}')">✕</span>
+    </div>
   `;
 }
 
@@ -1181,46 +1396,63 @@ function importBackup(evt){
     try{
       const parsed=JSON.parse(e.target.result);
       if(!parsed.clients)throw new Error('formato inválido');
-      state=ensureShape(parsed);save();render();toast('Backup importado com sucesso.');
+      const oldIds=state.clients.map(c=>c.id);
+      const newIds=new Set((parsed.clients||[]).map(c=>c.id));
+      state=ensureShape(parsed);
+      state._pendingDeletes=oldIds.filter(id=>!newIds.has(id));
+      save();render();toast('Backup importado com sucesso.');
     }catch(err){toast('Arquivo inválido.');}
   };
   reader.readAsText(file);
 }
 function resetToDefault(){
   if(!confirm('Isso vai apagar todos os dados atuais e restaurar a carteira padrão. Continuar?'))return;
+  const oldIds=state.clients.map(c=>c.id);
   state=ensureShape({clients:defaultClients(),currentView:'overview',currentClientId:null,createdAt:Date.now()});
+  state._pendingDeletes=oldIds;
   save();render();toast('Restaurado.');
 }
 
-/* ============================= MODAL: ADD/EDIT CLIENT ============================= */
-function openClientModal(clientId){
-  const c=clientId?getClient(clientId):null;
-  openModal(`
-    <div class="modal-header"><div class="modal-title">${c?'Editar cliente':'Novo cliente'}</div><div class="modal-close" onclick="closeModal()">✕</div></div>
-    <div class="field"><label>Nome do cliente</label><input type="text" id="cName" value="${c?escapeAttr(c.name):''}" placeholder="Ex: Nome do Cliente"></div>
-    <div class="field"><label>Nicho / o que é</label><input type="text" id="cNiche" value="${c?escapeAttr(c.niche||''):''}" placeholder="Ex: Infoproduto, app, e-commerce..."></div>
-    <div class="field-row">
-      <div class="field"><label>Status</label>
-        <select id="cStatus">
-          ${Object.entries(STATUS_META).map(([k,m])=>`<option value="${k}" ${c&&c.status===k?'selected':''}>${m.label}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>Categoria / tipo de cliente</label>
-        <select id="cCategoria">
-          <option value="">Sem categoria</option>
-          ${Object.entries(CATEGORY_META).map(([k,m])=>`<option value="${k}" ${c&&c.categoria===k?'selected':''}>${m.label}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-    <div class="field"><label>Responsável</label><input type="text" id="cResp" value="${c?escapeAttr(c.responsavel||'Você'):'Você'}"></div>
-    <div class="field"><label>Alerta / observação de destaque (opcional)</label><input type="text" id="cDestaque" value="${c?escapeAttr(c.destaque||''):''}" placeholder="Ex: cliente exigente, sem margem para erro..."></div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveClientModal('${c?c.id:''}')">${c?'Salvar':'Criar cliente'}</button>
-    </div>
-  `);
+/* ============================= PÁGINA: NOVO/EDITAR CLIENTE ============================= */
+function openClientEditor(clientId){
+  state.editorReturn={view:state.currentView,clientId:state.currentClientId,tab:state.clientTab};
+  state.currentView='clientEditor';
+  state.editorTargetId=clientId||null;
+  save();render();
 }
-function saveClientModal(clientId){
+function viewClientEditor(){
+  const c=state.editorTargetId?getClient(state.editorTargetId):null;
+  return `
+    <div class="header">
+      <div><div class="page-title">${c?'✏️ Editar cliente':'➕ Novo cliente'}</div></div>
+      <div class="header-actions"><button class="btn" onclick="closeEditor()">← Voltar</button></div>
+    </div>
+    <div class="card" style="max-width:560px">
+      <div class="field"><label>Nome do cliente</label><input type="text" id="cName" value="${c?escapeAttr(c.name):''}" placeholder="Ex: Nome do Cliente"></div>
+      <div class="field"><label>Nicho / o que é</label><input type="text" id="cNiche" value="${c?escapeAttr(c.niche||''):''}" placeholder="Ex: Infoproduto, app, e-commerce..."></div>
+      <div class="field-row">
+        <div class="field"><label>Status</label>
+          <select id="cStatus">
+            ${Object.entries(STATUS_META).map(([k,m])=>`<option value="${k}" ${c&&c.status===k?'selected':''}>${m.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Categoria / tipo de cliente</label>
+          <select id="cCategoria">
+            <option value="">Sem categoria</option>
+            ${Object.entries(CATEGORY_META).map(([k,m])=>`<option value="${k}" ${c&&c.categoria===k?'selected':''}>${m.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Responsável</label><input type="text" id="cResp" value="${c?escapeAttr(c.responsavel||'Você'):'Você'}"></div>
+      <div class="field"><label>Alerta / observação de destaque (opcional)</label><input type="text" id="cDestaque" value="${c?escapeAttr(c.destaque||''):''}" placeholder="Ex: cliente exigente, sem margem para erro..."></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="saveClientEditor()">${c?'Salvar':'Criar cliente'}</button>
+        ${c?`<button class="btn btn-danger" onclick="deleteClient('${c.id}')">🗑 Excluir cliente</button>`:''}
+      </div>
+    </div>
+  `;
+}
+function saveClientEditor(){
   const name=document.getElementById('cName').value.trim();
   if(!name){toast('Dê um nome ao cliente.');return;}
   const niche=document.getElementById('cNiche').value.trim();
@@ -1228,36 +1460,38 @@ function saveClientModal(clientId){
   const categoria=document.getElementById('cCategoria').value;
   const responsavel=document.getElementById('cResp').value.trim()||'Você';
   const destaque=document.getElementById('cDestaque').value.trim();
-  if(clientId){
-    const c=getClient(clientId);
+  if(state.editorTargetId){
+    const c=getClient(state.editorTargetId);
     Object.assign(c,{name,niche,status,categoria,responsavel,destaque});
+    save();toast('Cliente salvo.');closeEditor();
   }else{
     const c={id:uid(),name,niche,status,categoria,responsavel,destaque,demandas:[],subClients:[],tasks:[],calendar:[],agenda:[],notas:'',fullDashboardLink:null};
     state.clients.push(c);
     state.currentClientId=c.id;state.currentView='client';state.clientTab='resumo';
+    save();render();toast('Cliente criado.');
   }
-  save();closeModal();render();toast('Cliente salvo.');
 }
 function deleteClient(clientId){
   const c=getClient(clientId);
   if(!confirm(`Excluir "${c.name}" e todos os dados dele (tarefas, calendário, agenda)? Essa ação não pode ser desfeita.`))return;
   state.clients=state.clients.filter(x=>x.id!==clientId);
+  state._pendingDeletes=state._pendingDeletes||[];
+  state._pendingDeletes.push(clientId);
   state.currentView='overview';state.currentClientId=null;
   save();render();toast('Cliente removido.');
 }
 
-/* ============================= MODAL HELPERS ============================= */
-function openModal(html){
-  document.getElementById('modalBody').innerHTML=html;
-  document.getElementById('modalOverlay').classList.add('show');
+/* ============================= NAVEGAÇÃO ENTRE PÁGINAS DE EDIÇÃO ============================= */
+function closeEditor(){
+  const r=state.editorReturn||{view:'overview'};
+  state.currentView=r.view;
+  state.currentClientId=r.clientId||null;
+  state.clientTab=r.tab;
+  save();render();
 }
-function closeModal(){
-  document.getElementById('modalOverlay').classList.remove('show');
-}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 /* ============================= INIT ============================= */
-render();
+initApp();
 </script>
 </body>
 </html>
