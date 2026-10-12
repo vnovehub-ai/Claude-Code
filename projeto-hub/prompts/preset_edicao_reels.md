@@ -28,7 +28,7 @@ A cada corte, alterna o enquadramento entre 100% e zoom de 115% centralizado (di
 ## 5. TÍTULOS ATRÁS DA PESSOA
 - Recorta a pessoa do fundo frame a frame usando segmentação de pessoas do Vision da Apple (VNGeneratePersonSegmentationRequest, qualidade accurate, via Swift). Se o swiftc der erro "redefinition of module SwiftBridging", contorna com -vfsoverlay escondendo /Library/Developer/…/swift/module.modulemap
 - Compõe em camadas: fundo → título → pessoa (o texto fica atrás da cabeça e do corpo)
-- Cerca de 1 título a cada 6–8 segundos, nos momentos de maior impacto: 1 ou 2 linhas, em MAIÚSCULAS, curtas (~14 caracteres por linha), fiéis à fala. Usa "≠" em contrastes do tipo "X não é Y"
+- Títulos APENAS nos momentos de maior impacto — frases que param, provocam ou surpreendem. Não segue intervalo fixo. Se passar 20s sem uma frase forte, fica sem título mesmo. 1 ou 2 linhas, em MAIÚSCULAS, curtas (~14 caracteres por linha), fiéis à fala. Usa "≠" em contrastes do tipo "X não é Y"
 - Fonte Futura Condensed ExtraBold (~/Library/Fonts/ ou /System/Library/Fonts/Supplemental/Futura.ttc, index 4), gigante (largura máx. 92% da tela). Linha principal em branco, linha de destaque em bege claro #E9DCC9. Fundo desfocado
 - Animação de entrada de ~0,3s: título sobe de trás do corpo (deslocamento de 22% da altura da tela) de 0% a 100%. A 2ª linha entra 2 frames depois da 1ª
 - Enquanto o título está na tela, escurece só o fundo em 32% (a pessoa não escurece)
